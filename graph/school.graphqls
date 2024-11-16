@@ -4,11 +4,11 @@
 
 #school data model, only includes properties that cannot be shared
 
-type School @SQL{
- 	id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
-	createdAt: Time!
-	updatedAt: Time!
-	deletedAt: SoftDelete #activate softdelete
+type School @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
   name: String!
   phone_number: String!
   password: String!
@@ -17,11 +17,11 @@ type School @SQL{
 }
 
 # Unverified school data model, used to store data for newly registered schools that have not verified their phone numbers
-type UnverifiedSchool @SQL{
- 	id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
-	createdAt: Time!
-	updatedAt: Time!
-	deletedAt: SoftDelete #activate softdelete
+type UnverifiedSchool @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
   name: String!
   phone_number: String!
   password: String!
@@ -36,11 +36,24 @@ type PhoneNumberExists {
 }
 
 #returns the status of sending an OTP code to a specific number
-type SendCodeStatus{
-    phone_number: String!
-    success: Boolean!
+type SendCodeStatus {
+  phone_number: String!
+  success: Boolean!
 }
-
+#returns the a school's profile data
+type SchoolProfile {
+  createdAt: Time!
+  updatedAt: Time!
+  name: String!
+  phone_number: String!
+  badge: String
+  Website: String
+}
+#fields required by a school to log into the system
+input SchoolLogin {
+  phone_number: String!
+  password: String!
+}
 #fields required during a school signup process(mandatory and non-mandatory)
 input NewSchool {
   name: String!
@@ -55,15 +68,22 @@ input verificationinfo {
   otp: String!
 }
 
-type Query {
-  schoolPhoneNumberExists(phone_number: String!): PhoneNumberExists!
+input RefreshTokenInput {
+  Token: String!
 }
 
+type Query {
+  schoolPhoneNumberExists(phone_number: String!): PhoneNumberExists!
+  getSchoolProfile: SchoolProfile
+}
 
 type Mutation {
   createSchool(input: NewSchool!): UnverifiedSchool
   verifySchool(input: verificationinfo!): School
   sendCode(phone_number: String!): SendCodeStatus
+  schoolLogin(input: SchoolLogin!): String
+  forgotSchoolPassword(phone_number: String!): SendCodeStatus
+  requestSchoolPasswordReset(input: verificationinfo): String
+  resetSchoolPassword(new_password: String!): School
+  refreshToken(input: RefreshTokenInput): String
 }
-
-
