@@ -4,12 +4,14 @@ go 1.22.7
 
 require (
 	github.com/99designs/gqlgen v0.17.55
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fasibio/autogql v0.5.8
 	github.com/huandu/xstrings v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/twilio/twilio-go v1.23.5
 	github.com/vektah/gqlparser/v2 v2.5.17
+	golang.org/x/crypto v0.24.0
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.12
 )
@@ -36,7 +38,6 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	golang.org/x/crypto v0.24.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/text v0.18.0 // indirect
