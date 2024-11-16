@@ -7,9 +7,12 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/graph"
 	"github.com/GigaDesk/eardrum-server/graph/db"
 	"github.com/GigaDesk/eardrum-server/phoneutils"
+	"github.com/GigaDesk/eardrum-server/pkg/jwt"
+	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -24,6 +27,7 @@ func main() {
 	}
     
 	go phoneutils.InitializeTwilio()
+	go jwt.InitializeJwtSecretKey()
 
 	defaultPort := os.Getenv("DEFAULT_PORT")
 	host := os.Getenv("POSTGRES_CLOUD_SQL_ACCOUNT_HOST")
@@ -43,13 +47,15 @@ func main() {
 	dborm.Init()
 
 	port := defaultPort
+	router := chi.NewRouter()
+	router.Use(auth.Middleware())
 
 	//srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Sql: &dborm}})) //.... <- here set dborm to resolver
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Sql: &dborm}}))
+	server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Sql: &dborm}}))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", server)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
