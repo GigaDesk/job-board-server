@@ -129,6 +129,10 @@ type PhoneNumberExists struct {
 type Query struct {
 }
 
+type RefreshTokenInput struct {
+	Token string `json:"Token"`
+}
+
 type School struct {
 	ID          int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
 	CreatedAt   time.Time                 `json:"createdAt"`
@@ -166,6 +170,11 @@ type SchoolInput struct {
 	Website     *string `json:"Website,omitempty"`
 }
 
+type SchoolLogin struct {
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
+}
+
 // Order School by asc or desc
 type SchoolOrder struct {
 	Asc  *SchoolOrderable `json:"asc,omitempty"`
@@ -179,6 +188,15 @@ type SchoolPatch struct {
 	Password    *string `json:"password,omitempty"`
 	Badge       *string `json:"badge,omitempty"`
 	Website     *string `json:"Website,omitempty"`
+}
+
+type SchoolProfile struct {
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	Name        string    `json:"name"`
+	PhoneNumber string    `json:"phone_number"`
+	Badge       *string   `json:"badge,omitempty"`
+	Website     *string   `json:"Website,omitempty"`
 }
 
 // School result
