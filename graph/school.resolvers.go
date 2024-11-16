@@ -7,28 +7,34 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"strconv"
 
+	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
 	"github.com/GigaDesk/eardrum-server/phoneutils"
+	"github.com/GigaDesk/eardrum-server/pkg/jwt"
 )
 
 // CreateSchool is the resolver for the createSchool field, signs up a school to the system
 func (r *mutationResolver) CreateSchool(ctx context.Context, input model.NewSchool) (*model.UnverifiedSchool, error) {
 	//check if the phone number exists in the database
 	phoneexists, err := phoneutils.CheckSchoolPhoneNumber(r.Sql.Db, input.PhoneNumber)
-	//return an error if phone number exists in the database
-	if phoneexists.Verified == true || phoneexists.Unverified == true {
-		return nil, errors.New("phone number already exists")
-	}
+
 	//return any error that might be associated with checking the phone number's existence in the database
 	if err != nil {
 		return nil, err
 	}
+	//return an error if phone number exists in the database
+	if phoneexists.Verified == true || phoneexists.Unverified == true {
+		return nil, errors.New("phone number already exists")
+	}
+
 	//encrypt input password
 	encryptedpassword, err := encrypt.HashPassword(input.Password)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 	//create an unverified school data
@@ -103,6 +109,147 @@ func (r *mutationResolver) SendCode(ctx context.Context, phoneNumber string) (*m
 	return sendcodestatus, nil
 }
 
+// SchoolLogin is the resolver for the schoolLogin field.
+func (r *mutationResolver) SchoolLogin(ctx context.Context, input model.SchoolLogin) (*string, error) {
+	//declare a school variable
+	var school *model.School
+
+	// Find the first school that matches the input phone number from the school table
+
+	if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&school).Error; err != nil {
+		log.Println("Error finding school:", err)
+		return nil, errors.New("phone number does not exist")
+	}
+	//check if the password of the school matches the input password
+	if err := encrypt.CheckPassword(school.Password, input.Password); err != nil {
+		return nil, errors.New("Invalid phone number or password")
+	}
+
+	credentials := jwt.TokenCredentials{
+		Id:   strconv.Itoa(school.ID),
+		Role: "school",
+	}
+	token, err := jwt.GenerateToken(credentials)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("error generating accessToken")
+	}
+	return &token, nil
+}
+
+// ForgotSchoolPassword is the resolver for the forgotSchoolPassword field.
+func (r *mutationResolver) ForgotSchoolPassword(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error) {
+	//check if the phone number exists in the database
+	phoneexists, err := phoneutils.CheckSchoolPhoneNumber(r.Sql.Db, phoneNumber)
+
+	//return any error that might be associated with checking the phone number's existence in the database
+	if err != nil {
+		return nil, err
+	}
+	//return an error if phone number exists in the unverified school table
+	if phoneexists.Verified != true && phoneexists.Unverified == true {
+		return nil, errors.New("phone number has been registered but is yet to be verified")
+	}
+	//return an error if phone number is neither registered nor verified
+	if phoneexists.Verified != true && phoneexists.Unverified != true {
+		return nil, errors.New("phone number does not exist")
+	}
+	//send an OTP code to the phone number provided, return error if there is any
+	if err := phoneutils.SendOtp(phoneNumber); err != nil {
+		return nil, err
+	}
+	//return status on success
+	sendcodestatus := &model.SendCodeStatus{
+		PhoneNumber: phoneNumber,
+		Success:     true,
+	}
+	return sendcodestatus, nil
+}
+
+// RequestSchoolPasswordReset is the resolver for the requestSchoolPasswordReset field.
+func (r *mutationResolver) RequestSchoolPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error) {
+	//Check the validity of an OTP code
+	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
+		return nil, err
+	}
+	//declare a school variable
+	var school *model.School
+
+	// Find the first school that matches the input phone number from the school table
+
+	if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&school).Error; err != nil {
+		log.Println("Error finding school:", err)
+		return nil, errors.New("phone number does not exist")
+	}
+
+	credentials := jwt.TokenCredentials{
+		Id:   strconv.Itoa(school.ID),
+		Role: "school",
+	}
+	token, err := jwt.GenerateToken(credentials)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.New("error generating accessToken")
+	}
+	return &token, nil
+}
+
+// ResetSchoolPassword is the resolver for the ResetSchoolPassword field.
+func (r *mutationResolver) ResetSchoolPassword(ctx context.Context, newPassword string) (*model.School, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("access to ResetSchoolPassword denied!")
+	}
+	role := user.GetRole()
+	if role != "school" {
+		return nil, errors.New("access to ResetSchoolPassword denied. Only available for registered and logged in schools. To fix check access token!")
+	}
+	id, err := user.GetID()
+
+	if err != nil {
+		log.Println(err)
+		errors.New("could not access school's id!")
+	}
+
+	log.Println("resetting school password for school id: ", id, "of role: ", role)
+
+	var school *model.School
+	//fetch the record to be updated from the database
+	if err := r.Sql.Db.First(&school, id).Error; err != nil {
+		return nil, err
+	}
+	//encrypt input password
+	encryptedpassword, err := encrypt.HashPassword(newPassword)
+	if err != nil {
+		return nil, err
+	}
+	// Update the records' attributes with `map`
+	if err := r.Sql.Db.Model(&school).Updates(map[string]interface{}{"password": encryptedpassword}).Error; err != nil {
+		return nil, err
+	}
+
+	//fetch the record again from the database, this time the updated version
+	if err := r.Sql.Db.First(&school, id).Error; err != nil {
+		return nil, err
+	}
+
+	//return the updated record
+	return school, nil
+}
+
+// RefreshToken is the resolver for the refreshToken field.
+func (r *mutationResolver) RefreshToken(ctx context.Context, input *model.RefreshTokenInput) (*string, error) {
+	credentials, err := jwt.ParseToken(input.Token)
+	if err != nil {
+		return nil, fmt.Errorf("access denied")
+	}
+	token, error := jwt.GenerateToken(*credentials)
+	if error != nil {
+		return nil, error
+	}
+	return &token, nil
+}
+
 // SchoolPhoneNumberExists is the resolver for the schoolPhoneNumberExists field, checks if an school's phone number already exists in both the unverified_schools and schools tables
 func (r *queryResolver) SchoolPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error) {
 	phoneexists, err := phoneutils.CheckSchoolPhoneNumber(r.Sql.Db, phoneNumber)
@@ -112,6 +259,41 @@ func (r *queryResolver) SchoolPhoneNumberExists(ctx context.Context, phoneNumber
 	}
 
 	return phoneexists, nil
+}
+
+// GetSchoolProfile is the resolver for the getSchoolProfile field.
+func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProfile, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("access to getSchool profile denied!")
+	}
+	role := user.GetRole()
+	if role != "school" {
+		return nil, errors.New("access to getSchool profile denied. Only available for registered and logged in schools. To fix check access token!")
+	}
+	id, err := user.GetID()
+
+	if err != nil {
+		log.Println(err)
+		errors.New("could not access schools id!")
+	}
+
+	log.Println("getting school profile for school id: ", id, "of role: ", role)
+
+	var school *model.School
+	if err := r.Sql.Db.First(&school, id).Error; err != nil {
+		log.Println(err)
+		return nil, errors.New("could not access schools profile!")
+	}
+	schoolprofile := &model.SchoolProfile{
+		CreatedAt:   school.CreatedAt,
+		UpdatedAt:   school.UpdatedAt,
+		Name:        school.Name,
+		PhoneNumber: school.PhoneNumber,
+		Badge:       school.Badge,
+		Website:     school.Website,
+	}
+	return schoolprofile, nil
 }
 
 // Mutation returns MutationResolver implementation.
