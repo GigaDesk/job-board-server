@@ -11,6 +11,7 @@ This project is a school management system that allows multiple schools to host 
 * [Frameworks and Libraries](#frameworks-and-libraries)
 * [Third-party Services](#third-party-services)
 * [Architecture](#architecture)
+* [Deployment Guide](#deployment-guide)
 * [Database Design](#database-design)
 * [Testing and Quality Assurance](#testing-and-quality-assurance)
 * [Security Considerations](#security-considerations)
@@ -35,7 +36,25 @@ This project is a school management system that allows multiple schools to host 
 
 ## Architecture
 ![GigaDeskERD](https://github.com/user-attachments/assets/fe97da0c-7f0b-4c0d-96e8-047413dd2d42)         
-
+## Deployment Guide
+* Install [gcloud CLI](https://cloud.google.com/sdk/docs/install)
+* `gcloud init` to link up your gcloud CLI with your google cloud project
+* Ensure you have installed Docker engine on your local computer. If you haven't install [here](https://docs.docker.com/engine/install/)
+* Clone the eardrum-server repo into your local machine
+* Build a docker-image off your preffered eardrum-server version or release
+* Setup an Artifact Registry Docker repository in Google Cloud. Follow this [guide](https://www.youtube.com/watch?v=b-rg71O3ZwU&t=9s)
+* `gcloud auth configure-docker` to configure authentication to Artifact Registry for Docker. For more information [here](https://cloud.google.com/artifact-registry/docs/docker/authentication)
+* Tag the local image that you build using this commands
+```
+docker tag [IMAGE_NAME] \
+gcr.io/[PROJECT_ID]/[REPO_NAME]/[IMAGE_NAME]:[TAG]
+```
+* Next, push the tagged image to Artifact Registry by running:
+```
+docker push gcr.io/[PROJECT_ID]/[REPO_NAME]/[IMAGE_NAME]:[TAG]
+```
+If it fails for some reason run `gcloud auth configure-docker` and then push it again
+* Now go to Google Cloud Run console > Navigate to "DEPLOY CONTAINER" > pick "Service" option > select where it says "Container image URL" > Select Artifact Registry > Select your repository and image and deploy.
 ## Database Design     
 The database is designed to support the eardum server application managing data for verified and unverified schools.      
 ### Data Model

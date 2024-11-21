@@ -30,15 +30,9 @@ func main() {
 	go jwt.InitializeJwtSecretKey()
 
 	defaultPort := os.Getenv("DEFAULT_PORT")
-	host := os.Getenv("POSTGRES_CLOUD_SQL_ACCOUNT_HOST")
-	user := os.Getenv("POSTGRES_CLOUD_SQL_ACCOUNT_USER")
-	password := os.Getenv("POSTGRES_CLOUD_SQL_ACCOUNT_PASSWORD")
-	dbname := os.Getenv("POSTGRES_CLOUD_SQL_ACCOUNT_DBNAME")
-	dbport := os.Getenv("POSTGRES_CLOUD_SQL_ACCOUNT_PORT")
-	sslmode := os.Getenv("POSTGRES_CLOUD_SQL_ACCOUNT_SSLMODE")
-	TimeZone := os.Getenv("POSTGRES_CLOUD_SQL_ACCOUNT_TIMEZONE")
+	
 
-	dbUrl := "host=" + host + " " + "user=" + user + " " + "password=" + password + " " + "dbname=" + dbname + " " + "port=" + dbport + " " + "sslmode=" + sslmode + " " + "TimeZone=" + TimeZone
+	dbUrl := os.Getenv("POSTGRES_DBURL")
 	dbInstance, dbError := gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
 	if dbError != nil {
 		panic(dbError)
