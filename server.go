@@ -8,16 +8,15 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/GigaDesk/eardrum-server/auth"
+	"github.com/GigaDesk/eardrum-server/database/postgreutils"
 	"github.com/GigaDesk/eardrum-server/graph"
-	"github.com/GigaDesk/eardrum-server/graph/db"
 	"github.com/GigaDesk/eardrum-server/phoneutils"
 	"github.com/GigaDesk/eardrum-server/pkg/jwt"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
+var postgresInstance postgreutils.PostgresInstance
 
 func main() {
 	// Find .env file
@@ -25,27 +24,20 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file: %s", err)
 	}
-    
+
 	go phoneutils.InitializeTwilio()
 	go jwt.InitializeJwtSecretKey()
 
 	defaultPort := os.Getenv("DEFAULT_PORT")
-	
 
-	dbUrl := os.Getenv("POSTGRES_DBURL")
-	dbInstance, dbError := gorm.Open(postgres.Open(dbUrl), &gorm.Config{})
-	if dbError != nil {
-		panic(dbError)
-	}
-	dborm := db.NewAutoGqlDB(dbInstance)
-	dborm.Init()
+	postgresInstance.Init(os.Getenv("POSTGRES_DBURL"))
 
 	port := defaultPort
 	router := chi.NewRouter()
 	router.Use(auth.Middleware())
 
 	//srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Sql: &dborm}})) //.... <- here set dborm to resolver
-	server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Sql: &dborm}}))
+	server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Sql: &postgresInstance.Dborm}}))
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", server)
