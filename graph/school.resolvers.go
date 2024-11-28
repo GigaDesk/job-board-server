@@ -11,11 +11,13 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/GigaDesk/eardrum-graph/neo4jschool"
 	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
 	"github.com/GigaDesk/eardrum-server/phoneutils"
 	"github.com/GigaDesk/eardrum-server/pkg/jwt"
+	"github.com/GigaDesk/eardrum-server/wrappers"
 )
 
 // CreateSchool is the resolver for the createSchool field, signs up a school to the system
@@ -88,11 +90,26 @@ func (r *mutationResolver) VerifySchool(ctx context.Context, input model.Verific
 		return nil, errors.New("a critical error occurred while verifying the school account. our servers will be down for some time, sorry for the inconvenience")
 	}
 
+	s := wrappers.Neo4jSchoolWrapper{
+		School: school,
+	}
+
+	if err := neo4jschool.CreateSchool(r.Neo4j, s); err != nil {
+		log.Println(err)
+		// delete the school from the unverified school table
+		if err := r.Sql.Db.Delete(school).Error; err != nil {
+			log.Println(err)
+			return nil, errors.New("a serious synchronization error occurred while verifying the school account. please try again later or contact support")
+		}
+		return nil, errors.New("a synchronization error occurred while verifying the school account. please try again later or contact support")
+	}
+
 	// delete the unverified school from the unverified school table
 	if err := r.Sql.Db.Delete(unverifiedschool).Error; err != nil {
 		log.Println(err)
 		return nil, errors.New("an unexpected error occurred while verifying the school account. please try again later or contact support")
 	}
+
 	log.Println("Finished unverified school to school data transaction")
 	return school, nil
 }
