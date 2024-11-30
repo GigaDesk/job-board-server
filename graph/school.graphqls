@@ -72,12 +72,12 @@ input RefreshTokenInput {
   Token: String!
 }
 
-type Query {
+extend type Query {
   schoolPhoneNumberExists(phone_number: String!): PhoneNumberExists!
   getSchoolProfile: SchoolProfile
 }
 
-type Mutation {
+extend type Mutation {
   createSchool(input: NewSchool!): UnverifiedSchool
   verifySchool(input: verificationinfo!): School
   sendCode(phone_number: String!): SendCodeStatus

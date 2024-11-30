@@ -1,0 +1,27 @@
+type Student @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  registration_number: String!
+  name: String!
+  phone_number: String!
+  password: String!
+  date_of_admission: Time
+  date_of_birth: Time
+  profile_picture: String
+}
+
+input NewStudent {
+  registration_number: String!
+  name: String!
+  phone_number: String!
+  password: String!
+  date_of_admission: Time
+  date_of_birth: Time
+  profile_picture: String
+}
+
+extend type Mutation {
+  AddStudents(students: [NewStudent!]!): [Student!]
+}

@@ -4,6 +4,7 @@ package model
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
 )
@@ -31,6 +32,8 @@ func GetInputStruct(name string, obj map[string]interface{}) (interface{}, error
 	switch name {
 	case "SchoolInput":
 		return SchoolInputFromMap(obj)
+	case "StudentInput":
+		return StudentInputFromMap(obj)
 	case "UnverifiedSchoolInput":
 		return UnverifiedSchoolInputFromMap(obj)
 	}
@@ -90,6 +93,77 @@ func (d *SchoolInput) MergeToType() School {
 		Password:    tmpPassword,
 		Badge:       tmpBadge,
 		Website:     tmpWebsite,
+	}
+}
+
+// StudentInputFromMap return a StudentInput from data map
+// use github.com/mitchellh/mapstructure with reflaction
+func StudentInputFromMap(data map[string]interface{}) (StudentInput, error) {
+	model := StudentInput{}
+	err := mapstructure.Decode(data, &model)
+	return model, err
+}
+
+// MergeToType returns a map with all values set to StudentPatch
+func (d *StudentPatch) MergeToType() map[string]interface{} {
+	res := make(map[string]interface{})
+	if d.RegistrationNumber != nil {
+		res["registration_number"] = *d.RegistrationNumber
+	}
+	if d.Name != nil {
+		res["name"] = *d.Name
+	}
+	if d.PhoneNumber != nil {
+		res["phone_number"] = *d.PhoneNumber
+	}
+	if d.Password != nil {
+		res["password"] = *d.Password
+	}
+	if d.DateOfAdmission != nil {
+		res["date_of_admission"] = d.DateOfAdmission
+	}
+	if d.DateOfBirth != nil {
+		res["date_of_birth"] = d.DateOfBirth
+	}
+	if d.ProfilePicture != nil {
+		res["profile_picture"] = d.ProfilePicture
+	}
+	return res
+}
+
+// MergeToType retuns a Student filled from StudentInput
+func (d *StudentInput) MergeToType() Student {
+
+	tmpRegistrationNumber := d.RegistrationNumber
+
+	tmpName := d.Name
+
+	tmpPhoneNumber := d.PhoneNumber
+
+	tmpPassword := d.Password
+
+	var tmpDateOfAdmission *time.Time
+	if d.DateOfAdmission != nil {
+		tmpDateOfAdmission = d.DateOfAdmission
+	}
+
+	var tmpDateOfBirth *time.Time
+	if d.DateOfBirth != nil {
+		tmpDateOfBirth = d.DateOfBirth
+	}
+
+	var tmpProfilePicture *string
+	if d.ProfilePicture != nil {
+		tmpProfilePicture = d.ProfilePicture
+	}
+	return Student{
+		RegistrationNumber: tmpRegistrationNumber,
+		Name:               tmpName,
+		PhoneNumber:        tmpPhoneNumber,
+		Password:           tmpPassword,
+		DateOfAdmission:    tmpDateOfAdmission,
+		DateOfBirth:        tmpDateOfBirth,
+		ProfilePicture:     tmpProfilePicture,
 	}
 }
 

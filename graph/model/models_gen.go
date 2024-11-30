@@ -17,6 +17,12 @@ type AddSchoolPayload struct {
 	Affected []*School          `json:"affected"`
 }
 
+// AddStudent result with filterable data and affected rows
+type AddStudentPayload struct {
+	Student  *StudentQueryResult `json:"student"`
+	Affected []*Student          `json:"affected"`
+}
+
 // AddUnverifiedSchool result with filterable data and affected rows
 type AddUnverifiedSchoolPayload struct {
 	UnverifiedSchool *UnverifiedSchoolQueryResult `json:"unverifiedSchool"`
@@ -41,12 +47,25 @@ type DeleteSchoolPayload struct {
 	Msg   *string `json:"msg,omitempty"`
 }
 
+// DeleteStudent result with filterable data and count of affected entries
+type DeleteStudentPayload struct {
+	Student *StudentQueryResult `json:"student"`
+	// Count of deleted Student entities
+	Count int     `json:"count"`
+	Msg   *string `json:"msg,omitempty"`
+}
+
 // DeleteUnverifiedSchool result with filterable data and count of affected entries
 type DeleteUnverifiedSchoolPayload struct {
 	UnverifiedSchool *UnverifiedSchoolQueryResult `json:"unverifiedSchool"`
 	// Count of deleted UnverifiedSchool entities
 	Count int     `json:"count"`
 	Msg   *string `json:"msg,omitempty"`
+}
+
+type Dummy struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 // Filter between start and end (start > value < end)
@@ -119,6 +138,16 @@ type NewSchool struct {
 	Password    string  `json:"password"`
 	Badge       *string `json:"badge,omitempty"`
 	Website     *string `json:"Website,omitempty"`
+}
+
+type NewStudent struct {
+	RegistrationNumber string     `json:"registration_number"`
+	Name               string     `json:"name"`
+	PhoneNumber        string     `json:"phone_number"`
+	Password           string     `json:"password"`
+	DateOfAdmission    *time.Time `json:"date_of_admission,omitempty"`
+	DateOfBirth        *time.Time `json:"date_of_birth,omitempty"`
+	ProfilePicture     *string    `json:"profile_picture,omitempty"`
 }
 
 type PhoneNumberExists struct {
@@ -267,6 +296,73 @@ type StringFilterInput struct {
 	NotIn        []*string          `json:"notIn,omitempty"`
 }
 
+type Student struct {
+	ID                 int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
+	CreatedAt          time.Time                 `json:"createdAt"`
+	UpdatedAt          time.Time                 `json:"updatedAt"`
+	DeletedAt          *runtimehelper.SoftDelete `json:"deletedAt,omitempty" gorm:"index;"`
+	RegistrationNumber string                    `json:"registration_number"`
+	Name               string                    `json:"name"`
+	PhoneNumber        string                    `json:"phone_number"`
+	Password           string                    `json:"password"`
+	DateOfAdmission    *time.Time                `json:"date_of_admission,omitempty"`
+	DateOfBirth        *time.Time                `json:"date_of_birth,omitempty"`
+	ProfilePicture     *string                   `json:"profile_picture,omitempty"`
+}
+
+// Filter input selection for Student
+// Can be used f.e.: by queryStudent
+type StudentFiltersInput struct {
+	ID                 *IntFilterInput        `json:"id,omitempty"`
+	CreatedAt          *TimeFilterInput       `json:"createdAt,omitempty"`
+	UpdatedAt          *TimeFilterInput       `json:"updatedAt,omitempty"`
+	RegistrationNumber *StringFilterInput     `json:"registration_number,omitempty"`
+	Name               *StringFilterInput     `json:"name,omitempty"`
+	PhoneNumber        *StringFilterInput     `json:"phone_number,omitempty"`
+	Password           *StringFilterInput     `json:"password,omitempty"`
+	DateOfAdmission    *TimeFilterInput       `json:"date_of_admission,omitempty"`
+	DateOfBirth        *TimeFilterInput       `json:"date_of_birth,omitempty"`
+	ProfilePicture     *StringFilterInput     `json:"profile_picture,omitempty"`
+	And                []*StudentFiltersInput `json:"and,omitempty"`
+	Or                 []*StudentFiltersInput `json:"or,omitempty"`
+	Not                *StudentFiltersInput   `json:"not,omitempty"`
+}
+
+// Student Input value to add new Student
+type StudentInput struct {
+	RegistrationNumber string     `json:"registration_number"`
+	Name               string     `json:"name"`
+	PhoneNumber        string     `json:"phone_number"`
+	Password           string     `json:"password"`
+	DateOfAdmission    *time.Time `json:"date_of_admission,omitempty"`
+	DateOfBirth        *time.Time `json:"date_of_birth,omitempty"`
+	ProfilePicture     *string    `json:"profile_picture,omitempty"`
+}
+
+// Order Student by asc or desc
+type StudentOrder struct {
+	Asc  *StudentOrderable `json:"asc,omitempty"`
+	Desc *StudentOrderable `json:"desc,omitempty"`
+}
+
+// Student Patch value all values are optional to update Student entities
+type StudentPatch struct {
+	RegistrationNumber *string    `json:"registration_number,omitempty"`
+	Name               *string    `json:"name,omitempty"`
+	PhoneNumber        *string    `json:"phone_number,omitempty"`
+	Password           *string    `json:"password,omitempty"`
+	DateOfAdmission    *time.Time `json:"date_of_admission,omitempty"`
+	DateOfBirth        *time.Time `json:"date_of_birth,omitempty"`
+	ProfilePicture     *string    `json:"profile_picture,omitempty"`
+}
+
+// Student result
+type StudentQueryResult struct {
+	Data       []*Student `json:"data"`
+	Count      int        `json:"count"`
+	TotalCount int        `json:"totalCount"`
+}
+
 // Filter between start and end (start > value < end)
 type TimeFilterBetween struct {
 	Start time.Time `json:"start"`
@@ -362,6 +458,20 @@ type UpdateSchoolPayload struct {
 	// Count of affected updates
 	Count    int       `json:"count"`
 	Affected []*School `json:"affected"`
+}
+
+// Update rules for Student multiupdates simple possible by global filtervalue
+type UpdateStudentInput struct {
+	Filter *StudentFiltersInput `json:"filter"`
+	Set    *StudentPatch        `json:"set"`
+}
+
+// UpdateStudent result with filterable data and affected rows
+type UpdateStudentPayload struct {
+	Student *StudentQueryResult `json:"student"`
+	// Count of affected updates
+	Count    int        `json:"count"`
+	Affected []*Student `json:"affected"`
 }
 
 // Update rules for UnverifiedSchool multiupdates simple possible by global filtervalue
@@ -486,6 +596,116 @@ func (e *SchoolOrderable) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SchoolOrderable) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Groupable data for  Student
+// Can be used f.e.: by queryStudent
+type StudentGroup string
+
+const (
+	StudentGroupID                 StudentGroup = "id"
+	StudentGroupCreatedAt          StudentGroup = "createdAt"
+	StudentGroupUpdatedAt          StudentGroup = "updatedAt"
+	StudentGroupRegistrationNumber StudentGroup = "registration_number"
+	StudentGroupName               StudentGroup = "name"
+	StudentGroupPhoneNumber        StudentGroup = "phone_number"
+	StudentGroupPassword           StudentGroup = "password"
+	StudentGroupDateOfAdmission    StudentGroup = "date_of_admission"
+	StudentGroupDateOfBirth        StudentGroup = "date_of_birth"
+	StudentGroupProfilePicture     StudentGroup = "profile_picture"
+)
+
+var AllStudentGroup = []StudentGroup{
+	StudentGroupID,
+	StudentGroupCreatedAt,
+	StudentGroupUpdatedAt,
+	StudentGroupRegistrationNumber,
+	StudentGroupName,
+	StudentGroupPhoneNumber,
+	StudentGroupPassword,
+	StudentGroupDateOfAdmission,
+	StudentGroupDateOfBirth,
+	StudentGroupProfilePicture,
+}
+
+func (e StudentGroup) IsValid() bool {
+	switch e {
+	case StudentGroupID, StudentGroupCreatedAt, StudentGroupUpdatedAt, StudentGroupRegistrationNumber, StudentGroupName, StudentGroupPhoneNumber, StudentGroupPassword, StudentGroupDateOfAdmission, StudentGroupDateOfBirth, StudentGroupProfilePicture:
+		return true
+	}
+	return false
+}
+
+func (e StudentGroup) String() string {
+	return string(e)
+}
+
+func (e *StudentGroup) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = StudentGroup(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid StudentGroup", str)
+	}
+	return nil
+}
+
+func (e StudentGroup) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// for Student a enum of all orderable entities
+// can be used f.e.: queryStudent
+type StudentOrderable string
+
+const (
+	StudentOrderableID                 StudentOrderable = "id"
+	StudentOrderableRegistrationNumber StudentOrderable = "registration_number"
+	StudentOrderableName               StudentOrderable = "name"
+	StudentOrderablePhoneNumber        StudentOrderable = "phone_number"
+	StudentOrderablePassword           StudentOrderable = "password"
+	StudentOrderableProfilePicture     StudentOrderable = "profile_picture"
+)
+
+var AllStudentOrderable = []StudentOrderable{
+	StudentOrderableID,
+	StudentOrderableRegistrationNumber,
+	StudentOrderableName,
+	StudentOrderablePhoneNumber,
+	StudentOrderablePassword,
+	StudentOrderableProfilePicture,
+}
+
+func (e StudentOrderable) IsValid() bool {
+	switch e {
+	case StudentOrderableID, StudentOrderableRegistrationNumber, StudentOrderableName, StudentOrderablePhoneNumber, StudentOrderablePassword, StudentOrderableProfilePicture:
+		return true
+	}
+	return false
+}
+
+func (e StudentOrderable) String() string {
+	return string(e)
+}
+
+func (e *StudentOrderable) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = StudentOrderable(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid StudentOrderable", str)
+	}
+	return nil
+}
+
+func (e StudentOrderable) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
