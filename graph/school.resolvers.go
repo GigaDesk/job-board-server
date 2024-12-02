@@ -18,16 +18,22 @@ import (
 	"github.com/GigaDesk/eardrum-server/phoneutils"
 	"github.com/GigaDesk/eardrum-server/pkg/jwt"
 	"github.com/GigaDesk/eardrum-server/wrappers"
+	"github.com/GigaDesk/eardrum-server/shutdown"
 )
 
 // CreateSchool is the resolver for the createSchool field, signs up a school to the system
 func (r *mutationResolver) CreateSchool(ctx context.Context, input model.NewSchool) (*model.UnverifiedSchool, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
 	//check if the phone number exists in the database
 	phoneexists, err := phoneutils.CheckSchoolPhoneNumber(r.Sql.Db, input.PhoneNumber)
 
 	//return any error that might be associated with checking the phone number's existence in the database
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return nil, errors.New("error checking phone number's existence")
 	}
 	//return an error if phone number exists in the database
 	if phoneexists.Verified == true || phoneexists.Unverified == true {
@@ -53,7 +59,6 @@ func (r *mutationResolver) CreateSchool(ctx context.Context, input model.NewScho
 	}
 	//create an unverified school record in the database and return if operation succeeds
 	if err := r.Sql.Db.Create(unverifiedschool).Error; err != nil {
-		log.Println(err)
 		return nil, errors.New("an unexpected error occurred while creating the school account. please try again later or contact support")
 	}
 
@@ -62,6 +67,11 @@ func (r *mutationResolver) CreateSchool(ctx context.Context, input model.NewScho
 
 // VerifySchool is the resolver for the verifySchool field. it checks the validity of an OTP code in relation to the phonenumber, if valid it transfers a school's data from the unverified_schools table to the school table
 func (r *mutationResolver) VerifySchool(ctx context.Context, input model.Verificationinfo) (*model.School, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	
 	//Check the validity of an OTP code
 	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
 		return nil, err
@@ -72,8 +82,8 @@ func (r *mutationResolver) VerifySchool(ctx context.Context, input model.Verific
 	// Find the first unverified school that matches the input phone number from the unverified school table
 
 	if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&unverifiedschool).Error; err != nil {
-		log.Println("Error finding user:", err)
-		return nil, errors.New("phone number was already verified or was never signed up")
+		log.Println("Error finding user: ", err)
+		return nil, errors.New("error finding unverified school with phone number: " + input.PhoneNumber)
 	}
 
 	// transform the unverified school model into school model and copy it
@@ -87,27 +97,21 @@ func (r *mutationResolver) VerifySchool(ctx context.Context, input model.Verific
 
 	// take the newly transformed and copied school data and transfer it into the official verified school table
 	if err := r.Sql.Db.Create(school).Error; err != nil {
-		return nil, errors.New("a critical error occurred while verifying the school account. our servers will be down for some time, sorry for the inconvenience")
+		return nil, errors.New("Failed to verify school account. please try again later or contact support")
 	}
 
 	s := wrappers.Neo4jSchoolWrapper{
 		School: school,
 	}
-
+    //create the verified school record in Neo4j
 	if err := neo4jschool.CreateSchool(r.Neo4j, s); err != nil {
-		log.Println(err)
-		// delete the school from the unverified school table
-		if err := r.Sql.Db.Delete(school).Error; err != nil {
-			log.Println(err)
-			return nil, errors.New("a serious synchronization error occurred while verifying the school account. please try again later or contact support")
-		}
-		return nil, errors.New("a synchronization error occurred while verifying the school account. please try again later or contact support")
+		go shutdown.InitiateShutdown(err)
+		return nil, errors.New("a serious synchronization error occurred while verifying the school account. please try again later or contact support")
 	}
-
 	// delete the unverified school from the unverified school table
 	if err := r.Sql.Db.Delete(unverifiedschool).Error; err != nil {
 		log.Println(err)
-		return nil, errors.New("an unexpected error occurred while verifying the school account. please try again later or contact support")
+		return nil, errors.New("Failed to complete school account verification. please try again later or contact support")
 	}
 
 	log.Println("Finished unverified school to school data transaction")
@@ -116,6 +120,10 @@ func (r *mutationResolver) VerifySchool(ctx context.Context, input model.Verific
 
 // SendCode is the resolver for the sendCode field, it send an otp code to the provided phone number
 func (r *mutationResolver) SendCode(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
 	if err := phoneutils.SendOtp(phoneNumber); err != nil {
 		return nil, err
 	}
@@ -128,6 +136,10 @@ func (r *mutationResolver) SendCode(ctx context.Context, phoneNumber string) (*m
 
 // SchoolLogin is the resolver for the schoolLogin field.
 func (r *mutationResolver) SchoolLogin(ctx context.Context, input model.SchoolLogin) (*string, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
 	//declare a school variable
 	var school *model.School
 
@@ -139,6 +151,7 @@ func (r *mutationResolver) SchoolLogin(ctx context.Context, input model.SchoolLo
 	}
 	//check if the password of the school matches the input password
 	if err := encrypt.CheckPassword(school.Password, input.Password); err != nil {
+		log.Println(err)
 		return nil, errors.New("Invalid phone number or password")
 	}
 
@@ -156,6 +169,10 @@ func (r *mutationResolver) SchoolLogin(ctx context.Context, input model.SchoolLo
 
 // ForgotSchoolPassword is the resolver for the forgotSchoolPassword field.
 func (r *mutationResolver) ForgotSchoolPassword(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
 	//check if the phone number exists in the database
 	phoneexists, err := phoneutils.CheckSchoolPhoneNumber(r.Sql.Db, phoneNumber)
 
@@ -185,6 +202,10 @@ func (r *mutationResolver) ForgotSchoolPassword(ctx context.Context, phoneNumber
 
 // RequestSchoolPasswordReset is the resolver for the requestSchoolPasswordReset field.
 func (r *mutationResolver) RequestSchoolPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
 	//Check the validity of an OTP code
 	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
 		return nil, err
@@ -213,6 +234,10 @@ func (r *mutationResolver) RequestSchoolPasswordReset(ctx context.Context, input
 
 // ResetSchoolPassword is the resolver for the ResetSchoolPassword field.
 func (r *mutationResolver) ResetSchoolPassword(ctx context.Context, newPassword string) (*model.School, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("access to ResetSchoolPassword denied!")
@@ -256,6 +281,10 @@ func (r *mutationResolver) ResetSchoolPassword(ctx context.Context, newPassword 
 
 // RefreshToken is the resolver for the refreshToken field.
 func (r *mutationResolver) RefreshToken(ctx context.Context, input *model.RefreshTokenInput) (*string, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}	
 	credentials, err := jwt.ParseToken(input.Token)
 	if err != nil {
 		return nil, fmt.Errorf("access denied")
@@ -269,6 +298,10 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input *model.Refres
 
 // SchoolPhoneNumberExists is the resolver for the schoolPhoneNumberExists field, checks if an school's phone number already exists in both the unverified_schools and schools tables
 func (r *queryResolver) SchoolPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
 	phoneexists, err := phoneutils.CheckSchoolPhoneNumber(r.Sql.Db, phoneNumber)
 
 	if err != nil {
@@ -280,6 +313,10 @@ func (r *queryResolver) SchoolPhoneNumberExists(ctx context.Context, phoneNumber
 
 // GetSchoolProfile is the resolver for the getSchoolProfile field.
 func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProfile, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}	
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("access to getSchool profile denied!")

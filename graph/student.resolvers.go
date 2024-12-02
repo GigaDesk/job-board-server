@@ -8,17 +8,23 @@ import (
 	"context"
 	"errors"
 	"log"
+	"strconv"
 
 	"github.com/GigaDesk/eardrum-graph/neo4jschool"
 	"github.com/GigaDesk/eardrum-graph/neo4jstudent"
 	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
+	"github.com/GigaDesk/eardrum-server/shutdown"
 	"github.com/GigaDesk/eardrum-server/wrappers"
 )
 
 // AddStudents is the resolver for the AddStudents field.
 func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.NewStudent) ([]*model.Student, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}	
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("access to add students denied!")
@@ -63,11 +69,11 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 	//Create records in neo4j
 	result, err := neo4jschool.CheckSchool(r.Neo4j, id)
 	if err != nil {
-		log.Println(err)
+		go shutdown.InitiateShutdown(err)
 		return nil, errors.New("a serious error occurred while adding students. please try again later or contact support")
 	}
 	if result == false {
-		log.Println(err)
+		go shutdown.InitiateShutdown(errors.New("school of id: "+ strconv.Itoa(id) + "not found in Neo4j"))
 		return nil, errors.New("a serious synchronization error occurred while adding students. please try again later or contact support")
 	}
 	for _, student := range s {
@@ -76,7 +82,7 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 		}
 
 		if err := neo4jstudent.CreateStudent(r.Neo4j, n, id); err != nil {
-			log.Fatal(err)
+			go shutdown.InitiateShutdown(err)
 			return nil, errors.New("a serious synchronization error occurred while adding: " + student.Name)
 		}
 
