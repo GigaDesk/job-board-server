@@ -7,12 +7,13 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-graph/neo4jutils"
+	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/database/postgreutils"
 	"github.com/GigaDesk/eardrum-server/graph"
 	"github.com/GigaDesk/eardrum-server/phoneutils"
 	"github.com/GigaDesk/eardrum-server/pkg/jwt"
+	"github.com/GigaDesk/eardrum-server/shutdown"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
 )
@@ -32,6 +33,10 @@ func main() {
 
 	go phoneutils.InitializeTwilio()
 	go jwt.InitializeJwtSecretKey()
+
+	//set IsShutdown to false
+    s:= false
+	shutdown.IsShutdown = &s
 
 	defaultPort := os.Getenv("DEFAULT_PORT")
 
