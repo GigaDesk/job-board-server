@@ -2,7 +2,9 @@ package phoneutils
 
 import (
 	"errors"
-	"log"
+	"fmt"
+
+	"github.com/rs/zerolog/log"
 
 	openapi "github.com/twilio/twilio-go/rest/verify/v2"
 )
@@ -16,10 +18,10 @@ func SendOtp(phone_number string) error {
 	resp, err := TwilioInstance.Client.VerifyV2.CreateVerification(TwilioInstance.VerifyServiceSid, params)
 
 	if err != nil {
-		log.Println(err.Error())
-		return errors.New("error sending verification code to: " + phone_number + " please verify format")
+		log.Error().Str("phone_number", phone_number).Msg(err.Error())
+		return errors.New("error sending verification code. Please verify format")
 	} else {
-		log.Printf("Sent verification '%s'\n", *resp.Sid)
+		log.Info().Str("phone_number", phone_number).Str("verification_resource", *resp.Sid).Msg(fmt.Sprintf("Sent verification code"))
 	}
 	return nil
 }
@@ -34,12 +36,12 @@ func CheckOtp(phone_number string, code string) error {
 	resp, err := TwilioInstance.Client.VerifyV2.CreateVerificationCheck(TwilioInstance.VerifyServiceSid, params)
 
 	if err != nil {
-		log.Println(err.Error())
+		log.Error().Str("phone_number", phone_number).Str("code", code).Msg(err.Error())
 		return errors.New("error vefifying code")
 	} else if *resp.Status == "approved" {
-		log.Println("Entered Correct Code!")
+		log.Info().Str("phone_number", phone_number).Str("code", code).Msg("Entered correct verification code!")
 	} else {
-		log.Println("Entered Incorrect Code!")
+		log.Info().Str("phone_number", phone_number).Str("code", code).Msg("Entered incorrect verification code!")
 		return errors.New("entered incorrect code")
 	}
 	return nil

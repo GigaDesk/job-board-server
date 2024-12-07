@@ -7,18 +7,23 @@ package graph
 import (
 	"context"
 	"errors"
-	"log"
 
 	"github.com/GigaDesk/eardrum-graph/neo4jschool"
 	"github.com/GigaDesk/eardrum-graph/neo4jstudent"
 	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
+	"github.com/GigaDesk/eardrum-server/shutdown"
 	"github.com/GigaDesk/eardrum-server/wrappers"
+	"github.com/rs/zerolog/log"
 )
 
 // AddStudents is the resolver for the AddStudents field.
 func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.NewStudent) ([]*model.Student, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("access to add students denied!")
@@ -31,11 +36,10 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 	id, err := user.GetID()
 
 	if err != nil {
-		log.Println(err)
 		errors.New("could not access school's id!")
 	}
 
-	log.Println("adding students for school id: ", id, "of role: ", role)
+	log.Info().Str("role", role).Int("id", id).Str("path", "AddStudents").Msg("adding students")
 
 	var s []*model.Student
 	for _, student := range students {
@@ -57,17 +61,17 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 	}
 	//Create records in postgres
 	if err := r.Sql.Db.Create(s).Error; err != nil {
-		log.Println(err)
+		log.Error().Str("first_record_name", s[0].Name).Str("path", "AddStudents").Msg(err.Error())
 		return nil, errors.New("an unexpected error occurred while creating the school account. please try again later or contact support")
 	}
 	//Create records in neo4j
 	result, err := neo4jschool.CheckSchool(r.Neo4j, id)
 	if err != nil {
-		log.Println(err)
+		go shutdown.InitiateShutdown(err, "AddStudents", id)
 		return nil, errors.New("a serious error occurred while adding students. please try again later or contact support")
 	}
 	if result == false {
-		log.Println(err)
+		go shutdown.InitiateShutdown(errors.New("school does not exist"), "AddStudents", id)
 		return nil, errors.New("a serious synchronization error occurred while adding students. please try again later or contact support")
 	}
 	for _, student := range s {
@@ -76,7 +80,7 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 		}
 
 		if err := neo4jstudent.CreateStudent(r.Neo4j, n, id); err != nil {
-			log.Fatal(err)
+			go shutdown.InitiateShutdown(err, "AddStudents", n.ID)
 			return nil, errors.New("a serious synchronization error occurred while adding: " + student.Name)
 		}
 
