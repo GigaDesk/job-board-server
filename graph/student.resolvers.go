@@ -10,6 +10,7 @@ import (
 
 	"github.com/GigaDesk/eardrum-graph/neo4jschool"
 	"github.com/GigaDesk/eardrum-graph/neo4jstudent"
+	"github.com/GigaDesk/eardrum-prefix/prefix"
 	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
@@ -44,7 +45,7 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 	var s []*model.Student
 	for _, student := range students {
 		n := &model.Student{
-			RegistrationNumber: student.RegistrationNumber,
+			RegistrationNumber: prefix.PrefixWithId(student.RegistrationNumber, id),
 			Name:               student.Name,
 			PhoneNumber:        student.PhoneNumber,
 			DateOfAdmission:    student.DateOfAdmission,
@@ -83,7 +84,7 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 			go shutdown.InitiateShutdown(err, "AddStudents", n.ID)
 			return nil, errors.New("a serious synchronization error occurred while adding: " + student.Name)
 		}
-
+        student.RegistrationNumber = prefix.DePrefixWithId(student.RegistrationNumber, id)
 	}
 	return s, nil
 }
