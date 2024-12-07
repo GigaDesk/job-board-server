@@ -1,12 +1,12 @@
 package jwt
 
 import (
-	"log"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/rs/zerolog/log"
 )
 
 // secret key being used to sign tokens
@@ -40,7 +40,6 @@ func GenerateToken(credentials TokenCredentials) (string, error) {
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 	tokenString, err := token.SignedString(JwtSecretKey)
 	if err != nil {
-		log.Fatal("Error in Generating key")
 		return "", err
 	}
 	return tokenString, nil
@@ -65,4 +64,5 @@ func ParseToken(tokenStr string) (*TokenCredentials, error) {
 // Initializes the JwtSecretKey global variable
 func InitializeJwtSecretKey() {
 	JwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+	log.Trace().Str("secretkey", string(JwtSecretKey)).Msg("completed jwt secret key initialization")
 }

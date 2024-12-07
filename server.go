@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -16,6 +16,7 @@ import (
 	"github.com/GigaDesk/eardrum-server/shutdown"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -25,10 +26,11 @@ var (
 
 
 func main() {
+
 	// Find .env file
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatalf("Error loading .env file: %s", err)
+		log.Fatal().Msg(fmt.Sprintf("Error loading .env file: %s", err))
 	}
 
 	go phoneutils.InitializeTwilio()
@@ -44,7 +46,7 @@ func main() {
 	neo4jerr:=neo4jInstance.Init(os.Getenv("NEO4J_DBURI"), os.Getenv("NEO4J_DBUSER"), os.Getenv("NEO4J_DBPASSWORD"))
 
 	if neo4jerr !=nil {
-		log.Println("problem initializing neo4j database: ", neo4jerr)
+		log.Fatal().Msg(fmt.Sprintf("problem initializing neo4j database: %s", neo4jerr))
 	}
 	
 	defer neo4jInstance.Driver.Close(neo4jInstance.Ctx)
@@ -53,12 +55,11 @@ func main() {
 	router := chi.NewRouter()
 	router.Use(auth.Middleware())
 
-	//srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Sql: &dborm}})) //.... <- here set dborm to resolver
 	server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Sql: &postgresInstance.Dborm, Neo4j: &neo4jInstance }}))
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/query", server)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Info().Msg(fmt.Sprintf("connect to http://localhost:%s/ for GraphQL playground", port))
+	log.Fatal().Msg(http.ListenAndServe(":"+port, router).Error())
 }

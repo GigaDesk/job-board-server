@@ -2,10 +2,10 @@ package phoneutils
 
 import (
 	"errors"
-	"log"
 
 	"github.com/GigaDesk/eardrum-server/graph/model"
 	"gorm.io/gorm"
+	"github.com/rs/zerolog/log"
 )
 
 // checks if phone number exists in both the unverified school table and the school table.
@@ -15,15 +15,15 @@ func CheckSchoolPhoneNumber(db *gorm.DB, phone string) (*model.PhoneNumberExists
 	var unverifiedcount int64
 
 	if err := db.Model(&model.School{}).Where("phone_number = ?", phone).Count(&verifiedcount).Error; err != nil {
-		log.Println(err)
+		log.Error().Str("phone_number", phone).Msg(err.Error())
 		return nil, errors.New("error checking verified phone number existence")
 	} 
 	if err := db.Model(&model.UnverifiedSchool{}).Where("phone_number = ?", phone).Count(&unverifiedcount).Error; err != nil {
-		log.Println(err)
+		log.Error().Str("phone_number", phone).Msg(err.Error())
 		return nil, errors.New("error checking unverified phone number existence")
 	} 
 	if verifiedcount > 0 && unverifiedcount > 0{
-		log.Println("phonenumber exists in both verified and unverified states")
+		log.Warn().Str("phone_number", phone).Msg("phonenumber exists in both verified and unverified states")
 	}
 	
 	phoneExists:= &model.PhoneNumberExists{

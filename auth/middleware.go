@@ -2,10 +2,10 @@ package auth
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/GigaDesk/eardrum-server/pkg/jwt"
+	"github.com/rs/zerolog/log"
 )
 
 type favContextKey string
@@ -18,7 +18,7 @@ func Middleware() func(http.Handler) http.Handler {
 			header := r.Header.Get("Authorization")
 			// Allow unauthenticated users in
 			if header == "" {
-				log.Println("Allowed unauthenticated user")
+				log.Info().Msg("Allowed unauthenticated user")
 				next.ServeHTTP(w, r)
 				return
 			}
