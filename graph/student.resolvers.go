@@ -7,6 +7,7 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/GigaDesk/eardrum-graph/neo4jschool"
 	"github.com/GigaDesk/eardrum-graph/neo4jstudent"
@@ -42,7 +43,12 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 
 	log.Info().Str("role", role).Int("id", id).Str("path", "AddStudents").Msg("adding students")
 
+	//a slice of students
 	var s []*model.Student
+	// a map of registration numbers to a boolean that shows if they already exist or not
+	m:= make(map[string]bool)
+	//a slice of non repeated registration numbers
+	var registration_numbers []string
 	for _, student := range students {
 		n := &model.Student{
 			RegistrationNumber: prefix.PrefixWithId(student.RegistrationNumber, id),
@@ -52,6 +58,15 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 			DateOfBirth:        student.DateOfBirth,
 			ProfilePicture:     student.ProfilePicture,
 		}
+        
+		if m[n.RegistrationNumber]{
+			log.Info().Str("registration_number", n.RegistrationNumber).Str("path", "AddStudents").Msg("student contain duplicate registration number")
+			return nil, errors.New(fmt.Sprintf("student registration numbers %s is duplicated", n.RegistrationNumber))
+		}
+		m[n.RegistrationNumber] = true
+
+		registration_numbers = append(registration_numbers, n.RegistrationNumber)
+
 		//encrypt student password
 		encryptedpassword, err := encrypt.HashPassword(student.Password)
 		if err != nil {
@@ -59,6 +74,15 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 		}
 		n.Password = encryptedpassword
 		s = append(s, n)
+	}
+    //get students in the database with similar registration numbers
+	var duplicated_students []model.Student
+	r.Sql.Db.Where("registration_number IN ?", registration_numbers).Find(&duplicated_students)
+
+	//check if there exists students in the database with similar registration numbers
+	if len(duplicated_students)!=0 {
+		log.Info().Str("registration_number", duplicated_students[0].RegistrationNumber).Str("path", "AddStudents").Msg("student with registration number already exists")
+		return nil, errors.New(fmt.Sprintf("student with registration number %s already exists", duplicated_students[0].RegistrationNumber))
 	}
 	//Create records in postgres
 	if err := r.Sql.Db.Create(s).Error; err != nil {
