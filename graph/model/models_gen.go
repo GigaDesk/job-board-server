@@ -220,12 +220,14 @@ type SchoolPatch struct {
 }
 
 type SchoolProfile struct {
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	Name        string    `json:"name"`
-	PhoneNumber string    `json:"phone_number"`
-	Badge       *string   `json:"badge,omitempty"`
-	Website     *string   `json:"Website,omitempty"`
+	ID          int        `json:"id"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   time.Time  `json:"updatedAt"`
+	Name        string     `json:"name"`
+	PhoneNumber string     `json:"phone_number"`
+	Badge       *string    `json:"badge,omitempty"`
+	Website     *string    `json:"Website,omitempty"`
+	Students    []*Student `json:"students,omitempty"`
 }
 
 // School result

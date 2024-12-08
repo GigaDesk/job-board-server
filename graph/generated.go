@@ -49,6 +49,7 @@ type ResolverRoot interface {
 	DeleteUnverifiedSchoolPayload() DeleteUnverifiedSchoolPayloadResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	SchoolProfile() SchoolProfileResolver
 	UpdateSchoolPayload() UpdateSchoolPayloadResolver
 	UpdateStudentPayload() UpdateStudentPayloadResolver
 	UpdateUnverifiedSchoolPayload() UpdateUnverifiedSchoolPayloadResolver
@@ -151,8 +152,10 @@ type ComplexityRoot struct {
 	SchoolProfile struct {
 		Badge       func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
+		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
 		PhoneNumber func(childComplexity int) int
+		Students    func(childComplexity int) int
 		UpdatedAt   func(childComplexity int) int
 		Website     func(childComplexity int) int
 	}
@@ -275,6 +278,9 @@ type QueryResolver interface {
 	QueryStudent(ctx context.Context, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) (*model.StudentQueryResult, error)
 	GetUnverifiedSchool(ctx context.Context, id int) (*model.UnverifiedSchool, error)
 	QueryUnverifiedSchool(ctx context.Context, filter *model.UnverifiedSchoolFiltersInput, order *model.UnverifiedSchoolOrder, first *int, offset *int, group []model.UnverifiedSchoolGroup) (*model.UnverifiedSchoolQueryResult, error)
+}
+type SchoolProfileResolver interface {
+	Students(ctx context.Context, obj *model.SchoolProfile) ([]*model.Student, error)
 }
 type UpdateSchoolPayloadResolver interface {
 	School(ctx context.Context, obj *model.UpdateSchoolPayload, filter *model.SchoolFiltersInput, order *model.SchoolOrder, first *int, offset *int, group []model.SchoolGroup) (*model.SchoolQueryResult, error)
@@ -883,6 +889,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SchoolProfile.CreatedAt(childComplexity), true
 
+	case "SchoolProfile.id":
+		if e.complexity.SchoolProfile.ID == nil {
+			break
+		}
+
+		return e.complexity.SchoolProfile.ID(childComplexity), true
+
 	case "SchoolProfile.name":
 		if e.complexity.SchoolProfile.Name == nil {
 			break
@@ -896,6 +909,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SchoolProfile.PhoneNumber(childComplexity), true
+
+	case "SchoolProfile.students":
+		if e.complexity.SchoolProfile.Students == nil {
+			break
+		}
+
+		return e.complexity.SchoolProfile.Students(childComplexity), true
 
 	case "SchoolProfile.updatedAt":
 		if e.complexity.SchoolProfile.UpdatedAt == nil {
@@ -6147,6 +6167,8 @@ func (ec *executionContext) fieldContext_Query_getSchoolProfile(_ context.Contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_SchoolProfile_id(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_SchoolProfile_createdAt(ctx, field)
 			case "updatedAt":
@@ -6159,6 +6181,8 @@ func (ec *executionContext) fieldContext_Query_getSchoolProfile(_ context.Contex
 				return ec.fieldContext_SchoolProfile_badge(ctx, field)
 			case "Website":
 				return ec.fieldContext_SchoolProfile_Website(ctx, field)
+			case "students":
+				return ec.fieldContext_SchoolProfile_students(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type SchoolProfile", field.Name)
 		},
@@ -7082,6 +7106,50 @@ func (ec *executionContext) fieldContext_School_Website(_ context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _SchoolProfile_id(ctx context.Context, field graphql.CollectedField, obj *model.SchoolProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SchoolProfile_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SchoolProfile_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SchoolProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SchoolProfile_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.SchoolProfile) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_SchoolProfile_createdAt(ctx, field)
 	if err != nil {
@@ -7335,6 +7403,71 @@ func (ec *executionContext) fieldContext_SchoolProfile_Website(_ context.Context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SchoolProfile_students(ctx context.Context, field graphql.CollectedField, obj *model.SchoolProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SchoolProfile_students(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.SchoolProfile().Students(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Student)
+	fc.Result = res
+	return ec.marshalOStudent2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStudent(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SchoolProfile_students(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SchoolProfile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Student_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Student_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Student_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Student_deletedAt(ctx, field)
+			case "registration_number":
+				return ec.fieldContext_Student_registration_number(ctx, field)
+			case "name":
+				return ec.fieldContext_Student_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_Student_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_Student_password(ctx, field)
+			case "date_of_admission":
+				return ec.fieldContext_Student_date_of_admission(ctx, field)
+			case "date_of_birth":
+				return ec.fieldContext_Student_date_of_birth(ctx, field)
+			case "profile_picture":
+				return ec.fieldContext_Student_profile_picture(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Student", field.Name)
 		},
 	}
 	return fc, nil
@@ -14094,30 +14227,68 @@ func (ec *executionContext) _SchoolProfile(ctx context.Context, sel ast.Selectio
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("SchoolProfile")
+		case "id":
+			out.Values[i] = ec._SchoolProfile_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "createdAt":
 			out.Values[i] = ec._SchoolProfile_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "updatedAt":
 			out.Values[i] = ec._SchoolProfile_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._SchoolProfile_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "phone_number":
 			out.Values[i] = ec._SchoolProfile_phone_number(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "badge":
 			out.Values[i] = ec._SchoolProfile_badge(ctx, field, obj)
 		case "Website":
 			out.Values[i] = ec._SchoolProfile_Website(ctx, field, obj)
+		case "students":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SchoolProfile_students(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -16416,6 +16587,47 @@ func (ec *executionContext) unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDe
 	}
 	res, err := ec.unmarshalInputStringFilterInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOStudent2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStudent(ctx context.Context, sel ast.SelectionSet, v []*model.Student) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOStudent2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStudent(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
 }
 
 func (ec *executionContext) marshalOStudent2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStudentᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Student) graphql.Marshaler {
