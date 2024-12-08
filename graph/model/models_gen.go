@@ -341,6 +341,12 @@ type StudentInput struct {
 	ProfilePicture     *string    `json:"profile_picture,omitempty"`
 }
 
+type StudentLogin struct {
+	Schoolid           int    `json:"schoolid"`
+	RegistrationNumber string `json:"registration_number"`
+	Password           string `json:"password"`
+}
+
 // Order Student by asc or desc
 type StudentOrder struct {
 	Asc  *StudentOrderable `json:"asc,omitempty"`

@@ -98,25 +98,29 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddSchool                  func(childComplexity int, input []*model.SchoolInput) int
-		AddStudent                 func(childComplexity int, input []*model.StudentInput) int
-		AddStudents                func(childComplexity int, students []*model.NewStudent) int
-		AddUnverifiedSchool        func(childComplexity int, input []*model.UnverifiedSchoolInput) int
-		CreateDummy                func(childComplexity int, name string) int
-		CreateSchool               func(childComplexity int, input model.NewSchool) int
-		DeleteSchool               func(childComplexity int, filter model.SchoolFiltersInput) int
-		DeleteStudent              func(childComplexity int, filter model.StudentFiltersInput) int
-		DeleteUnverifiedSchool     func(childComplexity int, filter model.UnverifiedSchoolFiltersInput) int
-		ForgotSchoolPassword       func(childComplexity int, phoneNumber string) int
-		RefreshToken               func(childComplexity int, input *model.RefreshTokenInput) int
-		RequestSchoolPasswordReset func(childComplexity int, input *model.Verificationinfo) int
-		ResetSchoolPassword        func(childComplexity int, newPassword string) int
-		SchoolLogin                func(childComplexity int, input model.SchoolLogin) int
-		SendCode                   func(childComplexity int, phoneNumber string) int
-		UpdateSchool               func(childComplexity int, input model.UpdateSchoolInput) int
-		UpdateStudent              func(childComplexity int, input model.UpdateStudentInput) int
-		UpdateUnverifiedSchool     func(childComplexity int, input model.UpdateUnverifiedSchoolInput) int
-		VerifySchool               func(childComplexity int, input model.Verificationinfo) int
+		AddSchool                   func(childComplexity int, input []*model.SchoolInput) int
+		AddStudent                  func(childComplexity int, input []*model.StudentInput) int
+		AddStudents                 func(childComplexity int, students []*model.NewStudent) int
+		AddUnverifiedSchool         func(childComplexity int, input []*model.UnverifiedSchoolInput) int
+		CreateDummy                 func(childComplexity int, name string) int
+		CreateSchool                func(childComplexity int, input model.NewSchool) int
+		DeleteSchool                func(childComplexity int, filter model.SchoolFiltersInput) int
+		DeleteStudent               func(childComplexity int, filter model.StudentFiltersInput) int
+		DeleteUnverifiedSchool      func(childComplexity int, filter model.UnverifiedSchoolFiltersInput) int
+		ForgotSchoolPassword        func(childComplexity int, phoneNumber string) int
+		ForgotStudentPassword       func(childComplexity int, phoneNumber string) int
+		RefreshToken                func(childComplexity int, input *model.RefreshTokenInput) int
+		RequestSchoolPasswordReset  func(childComplexity int, input *model.Verificationinfo) int
+		RequestStudentPasswordReset func(childComplexity int, input *model.Verificationinfo) int
+		ResetSchoolPassword         func(childComplexity int, newPassword string) int
+		ResetStudentPassword        func(childComplexity int, newPassword string) int
+		SchoolLogin                 func(childComplexity int, input model.SchoolLogin) int
+		SendCode                    func(childComplexity int, phoneNumber string) int
+		StudentLogin                func(childComplexity int, input model.StudentLogin) int
+		UpdateSchool                func(childComplexity int, input model.UpdateSchoolInput) int
+		UpdateStudent               func(childComplexity int, input model.UpdateStudentInput) int
+		UpdateUnverifiedSchool      func(childComplexity int, input model.UpdateUnverifiedSchoolInput) int
+		VerifySchool                func(childComplexity int, input model.Verificationinfo) int
 	}
 
 	PhoneNumberExists struct {
@@ -257,6 +261,10 @@ type MutationResolver interface {
 	ResetSchoolPassword(ctx context.Context, newPassword string) (*model.School, error)
 	RefreshToken(ctx context.Context, input *model.RefreshTokenInput) (*string, error)
 	AddStudents(ctx context.Context, students []*model.NewStudent) ([]*model.Student, error)
+	StudentLogin(ctx context.Context, input model.StudentLogin) (*string, error)
+	ForgotStudentPassword(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error)
+	RequestStudentPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error)
+	ResetStudentPassword(ctx context.Context, newPassword string) (*model.Student, error)
 	AddSchool(ctx context.Context, input []*model.SchoolInput) (*model.AddSchoolPayload, error)
 	UpdateSchool(ctx context.Context, input model.UpdateSchoolInput) (*model.UpdateSchoolPayload, error)
 	DeleteSchool(ctx context.Context, filter model.SchoolFiltersInput) (*model.DeleteSchoolPayload, error)
@@ -580,6 +588,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ForgotSchoolPassword(childComplexity, args["phone_number"].(string)), true
 
+	case "Mutation.forgotStudentPassword":
+		if e.complexity.Mutation.ForgotStudentPassword == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_forgotStudentPassword_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ForgotStudentPassword(childComplexity, args["phone_number"].(string)), true
+
 	case "Mutation.refreshToken":
 		if e.complexity.Mutation.RefreshToken == nil {
 			break
@@ -604,6 +624,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RequestSchoolPasswordReset(childComplexity, args["input"].(*model.Verificationinfo)), true
 
+	case "Mutation.requestStudentPasswordReset":
+		if e.complexity.Mutation.RequestStudentPasswordReset == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_requestStudentPasswordReset_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RequestStudentPasswordReset(childComplexity, args["input"].(*model.Verificationinfo)), true
+
 	case "Mutation.resetSchoolPassword":
 		if e.complexity.Mutation.ResetSchoolPassword == nil {
 			break
@@ -615,6 +647,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ResetSchoolPassword(childComplexity, args["new_password"].(string)), true
+
+	case "Mutation.resetStudentPassword":
+		if e.complexity.Mutation.ResetStudentPassword == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_resetStudentPassword_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ResetStudentPassword(childComplexity, args["new_password"].(string)), true
 
 	case "Mutation.schoolLogin":
 		if e.complexity.Mutation.SchoolLogin == nil {
@@ -639,6 +683,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.SendCode(childComplexity, args["phone_number"].(string)), true
+
+	case "Mutation.studentLogin":
+		if e.complexity.Mutation.StudentLogin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_studentLogin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.StudentLogin(childComplexity, args["input"].(model.StudentLogin)), true
 
 	case "Mutation.updateSchool":
 		if e.complexity.Mutation.UpdateSchool == nil {
@@ -1255,6 +1311,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputStringFilterInput,
 		ec.unmarshalInputStudentFiltersInput,
 		ec.unmarshalInputStudentInput,
+		ec.unmarshalInputStudentLogin,
 		ec.unmarshalInputStudentOrder,
 		ec.unmarshalInputStudentPatch,
 		ec.unmarshalInputTimeFilterBetween,
@@ -2832,6 +2889,29 @@ func (ec *executionContext) field_Mutation_forgotSchoolPassword_argsPhoneNumber(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_forgotStudentPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_forgotStudentPassword_argsPhoneNumber(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["phone_number"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_forgotStudentPassword_argsPhoneNumber(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+	if tmp, ok := rawArgs["phone_number"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_refreshToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2878,6 +2958,29 @@ func (ec *executionContext) field_Mutation_requestSchoolPasswordReset_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_requestStudentPasswordReset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_requestStudentPasswordReset_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_requestStudentPasswordReset_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.Verificationinfo, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalOverificationinfo2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐVerificationinfo(ctx, tmp)
+	}
+
+	var zeroVal *model.Verificationinfo
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_resetSchoolPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2889,6 +2992,29 @@ func (ec *executionContext) field_Mutation_resetSchoolPassword_args(ctx context.
 	return args, nil
 }
 func (ec *executionContext) field_Mutation_resetSchoolPassword_argsNewPassword(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("new_password"))
+	if tmp, ok := rawArgs["new_password"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_resetStudentPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_resetStudentPassword_argsNewPassword(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["new_password"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_resetStudentPassword_argsNewPassword(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
@@ -2944,6 +3070,29 @@ func (ec *executionContext) field_Mutation_sendCode_argsPhoneNumber(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_studentLogin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_studentLogin_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_studentLogin_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.StudentLogin, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNStudentLogin2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStudentLogin(ctx, tmp)
+	}
+
+	var zeroVal model.StudentLogin
 	return zeroVal, nil
 }
 
@@ -5334,6 +5483,244 @@ func (ec *executionContext) fieldContext_Mutation_AddStudents(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_AddStudents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_studentLogin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_studentLogin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().StudentLogin(rctx, fc.Args["input"].(model.StudentLogin))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_studentLogin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_studentLogin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_forgotStudentPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_forgotStudentPassword(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ForgotStudentPassword(rctx, fc.Args["phone_number"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.SendCodeStatus)
+	fc.Result = res
+	return ec.marshalOSendCodeStatus2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐSendCodeStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_forgotStudentPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "phone_number":
+				return ec.fieldContext_SendCodeStatus_phone_number(ctx, field)
+			case "success":
+				return ec.fieldContext_SendCodeStatus_success(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SendCodeStatus", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_forgotStudentPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_requestStudentPasswordReset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_requestStudentPasswordReset(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RequestStudentPasswordReset(rctx, fc.Args["input"].(*model.Verificationinfo))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_requestStudentPasswordReset(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_requestStudentPasswordReset_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_resetStudentPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_resetStudentPassword(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResetStudentPassword(rctx, fc.Args["new_password"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Student)
+	fc.Result = res
+	return ec.marshalOStudent2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStudent(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_resetStudentPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Student_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Student_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Student_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Student_deletedAt(ctx, field)
+			case "registration_number":
+				return ec.fieldContext_Student_registration_number(ctx, field)
+			case "name":
+				return ec.fieldContext_Student_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_Student_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_Student_password(ctx, field)
+			case "date_of_admission":
+				return ec.fieldContext_Student_date_of_admission(ctx, field)
+			case "date_of_birth":
+				return ec.fieldContext_Student_date_of_birth(ctx, field)
+			case "profile_picture":
+				return ec.fieldContext_Student_profile_picture(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Student", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_resetStudentPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -12598,6 +12985,47 @@ func (ec *executionContext) unmarshalInputStudentInput(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputStudentLogin(ctx context.Context, obj interface{}) (model.StudentLogin, error) {
+	var it model.StudentLogin
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"schoolid", "registration_number", "password"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "schoolid":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("schoolid"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Schoolid = data
+		case "registration_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("registration_number"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RegistrationNumber = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputStudentOrder(ctx context.Context, obj interface{}) (model.StudentOrder, error) {
 	var it model.StudentOrder
 	asMap := map[string]interface{}{}
@@ -13796,6 +14224,22 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "AddStudents":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_AddStudents(ctx, field)
+			})
+		case "studentLogin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_studentLogin(ctx, field)
+			})
+		case "forgotStudentPassword":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_forgotStudentPassword(ctx, field)
+			})
+		case "requestStudentPasswordReset":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_requestStudentPasswordReset(ctx, field)
+			})
+		case "resetStudentPassword":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_resetStudentPassword(ctx, field)
 			})
 		case "addSchool":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -15569,6 +16013,11 @@ func (ec *executionContext) unmarshalNStudentInput2ᚕᚖgithubᚗcomᚋGigaDesk
 func (ec *executionContext) unmarshalNStudentInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStudentInput(ctx context.Context, v interface{}) (*model.StudentInput, error) {
 	res, err := ec.unmarshalInputStudentInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNStudentLogin2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStudentLogin(ctx context.Context, v interface{}) (model.StudentLogin, error) {
+	res, err := ec.unmarshalInputStudentLogin(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNStudentPatch2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStudentPatch(ctx context.Context, v interface{}) (*model.StudentPatch, error) {
