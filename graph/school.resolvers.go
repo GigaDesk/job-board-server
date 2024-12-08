@@ -383,7 +383,7 @@ func (r *schoolProfileResolver) Students(ctx context.Context, obj *model.SchoolP
 		}
 		students = append(students, student)
 	}
-	if len(students) == 0{
+	if len(students) == 0 {
 		return nil, nil
 	}
 	return students, nil
