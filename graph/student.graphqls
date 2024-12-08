@@ -1,3 +1,4 @@
+#student data model, only includes properties that cannot be shared
 type Student @SQL {
   id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
   createdAt: Time!
@@ -11,7 +12,7 @@ type Student @SQL {
   date_of_birth: Time
   profile_picture: String
 }
-
+#fields required for adding a new student to the system
 input NewStudent {
   registration_number: String!
   name: String!
@@ -22,6 +23,17 @@ input NewStudent {
   profile_picture: String
 }
 
+#fields required by a student to log into the system
+input StudentLogin {
+  schoolid: Int!
+  registration_number: String!
+  password: String!
+}
+
 extend type Mutation {
   AddStudents(students: [NewStudent!]!): [Student!]
+  studentLogin(input: StudentLogin!): String
+  forgotStudentPassword(phone_number: String!): SendCodeStatus
+  requestStudentPasswordReset(input: verificationinfo): String
+  resetStudentPassword(new_password: String!): Student
 }
