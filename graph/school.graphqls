@@ -42,12 +42,14 @@ type SendCodeStatus {
 }
 #returns the a school's profile data
 type SchoolProfile {
+  id: Int!
   createdAt: Time!
   updatedAt: Time!
   name: String!
   phone_number: String!
   badge: String
   Website: String
+  students: [Student]
 }
 #fields required by a school to log into the system
 input SchoolLogin {
