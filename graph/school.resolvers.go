@@ -10,14 +10,17 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/AlekSi/pointer"
 	"github.com/GigaDesk/eardrum-graph/neo4jschool"
+	"github.com/GigaDesk/eardrum-graph/neo4jstudent"
+	"github.com/GigaDesk/eardrum-prefix/prefix"
 	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
 	"github.com/GigaDesk/eardrum-server/phoneutils"
 	"github.com/GigaDesk/eardrum-server/pkg/jwt"
-	"github.com/GigaDesk/eardrum-server/wrappers"
 	"github.com/GigaDesk/eardrum-server/shutdown"
+	"github.com/GigaDesk/eardrum-server/wrappers"
 	"github.com/rs/zerolog/log"
 )
 
@@ -74,7 +77,7 @@ func (r *mutationResolver) VerifySchool(ctx context.Context, input model.Verific
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
-	
+
 	//Check the validity of an OTP code
 	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
 		return nil, err
@@ -106,14 +109,14 @@ func (r *mutationResolver) VerifySchool(ctx context.Context, input model.Verific
 	s := wrappers.Neo4jSchoolWrapper{
 		School: school,
 	}
-    //create the verified school record in Neo4j
+	//create the verified school record in Neo4j
 	if err := neo4jschool.CreateSchool(r.Neo4j, s); err != nil {
 		go shutdown.InitiateShutdown(err, "VerifySchool", s.ID)
 		return nil, errors.New("a serious synchronization error occurred while verifying the school account. please try again later or contact support")
 	}
 	// delete the unverified school from the unverified school table
 	if err := r.Sql.Db.Delete(unverifiedschool).Error; err != nil {
-		 log.Error().Str("path", "VerifySchool").Int("record_id", unverifiedschool.ID).Msg(err.Error())
+		log.Error().Str("path", "VerifySchool").Int("record_id", unverifiedschool.ID).Msg(err.Error())
 		return nil, errors.New("Failed to complete school account verification. please try again later or contact support")
 	}
 
@@ -272,7 +275,7 @@ func (r *mutationResolver) ResetSchoolPassword(ctx context.Context, newPassword 
 	}
 	// Update the records' attributes with `map`
 	if err := r.Sql.Db.Model(&school).Updates(map[string]interface{}{"password": encryptedpassword}).Error; err != nil {
-		log.Error().Int("id", school.ID).Str("path", "ResetSchoolPassword").Msg(fmt.Sprintf("updating school password failed: %s",err.Error()))
+		log.Error().Int("id", school.ID).Str("path", "ResetSchoolPassword").Msg(fmt.Sprintf("updating school password failed: %s", err.Error()))
 		return nil, err
 	}
 
@@ -291,7 +294,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input *model.Refres
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
-	}	
+	}
 	credentials, err := jwt.ParseToken(input.Token)
 	if err != nil {
 		return nil, fmt.Errorf("access denied")
@@ -325,7 +328,7 @@ func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProf
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
-	}	
+	}
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("access to getSchool profile denied!")
@@ -346,6 +349,7 @@ func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProf
 		return nil, errors.New("could not access schools profile!")
 	}
 	schoolprofile := &model.SchoolProfile{
+		ID:          school.ID,
 		CreatedAt:   school.CreatedAt,
 		UpdatedAt:   school.UpdatedAt,
 		Name:        school.Name,
@@ -355,3 +359,37 @@ func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProf
 	}
 	return schoolprofile, nil
 }
+
+// Students is the resolver for the students field.
+func (r *schoolProfileResolver) Students(ctx context.Context, obj *model.SchoolProfile) ([]*model.Student, error) {
+	neo4jstudents, err := neo4jstudent.RetrieveSchoolStudents(r.Neo4j, obj.ID)
+	if err != nil {
+		log.Error().Int("id", obj.ID).Str("path", "GetSchoolProfile").Msg(err.Error())
+		return nil, errors.New("Failed to get school's students")
+	}
+	var students []*model.Student
+	for _, s := range neo4jstudents {
+		student := &model.Student{
+			ID:                 int(s.GetID()),
+			CreatedAt:          s.GetCreatedAt(),
+			UpdatedAt:          s.GetUpdatedAt(),
+			RegistrationNumber: prefix.DePrefixWithId(s.GetRegistrationNumber(), obj.ID),
+			Name:               s.GetName(),
+			PhoneNumber:        s.GetPhoneNumber(),
+			Password:           s.GetPassword(),
+			DateOfAdmission:    pointer.ToTimeOrNil(s.GetDateOfAdmission()),
+			DateOfBirth:        pointer.ToTimeOrNil(s.GetDateofBirth()),
+			ProfilePicture:     pointer.ToStringOrNil(s.GetProfilePicture()),
+		}
+		students = append(students, student)
+	}
+	if len(students) == 0{
+		return nil, nil
+	}
+	return students, nil
+}
+
+// SchoolProfile returns SchoolProfileResolver implementation.
+func (r *Resolver) SchoolProfile() SchoolProfileResolver { return &schoolProfileResolver{r} }
+
+type schoolProfileResolver struct{ *Resolver }

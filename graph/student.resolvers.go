@@ -46,7 +46,7 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 	//a slice of students
 	var s []*model.Student
 	// a map of registration numbers to a boolean that shows if they already exist or not
-	m:= make(map[string]bool)
+	m := make(map[string]bool)
 	//a slice of non repeated registration numbers
 	var registration_numbers []string
 	for _, student := range students {
@@ -58,8 +58,8 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 			DateOfBirth:        student.DateOfBirth,
 			ProfilePicture:     student.ProfilePicture,
 		}
-        
-		if m[n.RegistrationNumber]{
+
+		if m[n.RegistrationNumber] {
 			log.Info().Str("registration_number", n.RegistrationNumber).Str("path", "AddStudents").Msg("student contain duplicate registration number")
 			return nil, errors.New(fmt.Sprintf("student registration numbers %s is duplicated", n.RegistrationNumber))
 		}
@@ -75,12 +75,12 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 		n.Password = encryptedpassword
 		s = append(s, n)
 	}
-    //get students in the database with similar registration numbers
+	//get students in the database with similar registration numbers
 	var duplicated_students []model.Student
 	r.Sql.Db.Where("registration_number IN ?", registration_numbers).Find(&duplicated_students)
 
 	//check if there exists students in the database with similar registration numbers
-	if len(duplicated_students)!=0 {
+	if len(duplicated_students) != 0 {
 		log.Info().Str("registration_number", duplicated_students[0].RegistrationNumber).Str("path", "AddStudents").Msg("student with registration number already exists")
 		return nil, errors.New(fmt.Sprintf("student with registration number %s already exists", duplicated_students[0].RegistrationNumber))
 	}
@@ -108,7 +108,7 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 			go shutdown.InitiateShutdown(err, "AddStudents", n.ID)
 			return nil, errors.New("a serious synchronization error occurred while adding: " + student.Name)
 		}
-        student.RegistrationNumber = prefix.DePrefixWithId(student.RegistrationNumber, id)
+		student.RegistrationNumber = prefix.DePrefixWithId(student.RegistrationNumber, id)
 	}
 	return s, nil
 }
