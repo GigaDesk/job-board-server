@@ -178,49 +178,97 @@ func (r *mutationResolver) ForgotStudentPassword(ctx context.Context, phoneNumbe
 
 // RequestStudentPasswordReset is the resolver for the requestStudentPasswordReset field.
 func (r *mutationResolver) RequestStudentPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error) {
-		//check if system is in shutdown mode
-		if *shutdown.IsShutdown {
-			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
-		}
-		//Check the validity of an OTP code
-		if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
-			return nil, err
-		}
-		//declare a student variable
-		var student *model.Student
-	
-		// Find the first school that matches the input phone number from the school table
-	
-		if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&student).Error; err != nil {
-			log.Info().Str("phone_number", input.PhoneNumber).Str("path", "RequestStudentPasswordReset").Msg(err.Error())
-			return nil, errors.New("phone number does not exist")
-		}
-	
-		credentials := jwt.TokenCredentials{
-			Id:   strconv.Itoa(student.ID),
-			Role: "student",
-		}
-		token, err := jwt.GenerateToken(credentials)
-		if err != nil {
-			log.Error().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "RequestStudentPasswordReset").Msg(err.Error())
-			return nil, errors.New("error generating accessToken")
-		}
-		return &token, nil
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	//Check the validity of an OTP code
+	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
+		return nil, err
+	}
+	//declare a student variable
+	var student *model.Student
+
+	// Find the first school that matches the input phone number from the school table
+
+	if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&student).Error; err != nil {
+		log.Info().Str("phone_number", input.PhoneNumber).Str("path", "RequestStudentPasswordReset").Msg(err.Error())
+		return nil, errors.New("phone number does not exist")
+	}
+
+	credentials := jwt.TokenCredentials{
+		Id:   strconv.Itoa(student.ID),
+		Role: "student",
+	}
+	token, err := jwt.GenerateToken(credentials)
+	if err != nil {
+		log.Error().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "RequestStudentPasswordReset").Msg(err.Error())
+		return nil, errors.New("error generating accessToken")
+	}
+	return &token, nil
 }
 
 // ResetStudentPassword is the resolver for the resetStudentPassword field.
 func (r *mutationResolver) ResetStudentPassword(ctx context.Context, newPassword string) (*model.Student, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("access to ResetStudentPassword denied!")
+	}
+	role := user.GetRole()
+	if role != "student" {
+		return nil, errors.New("access to ResetStudentPassword denied. Only available for registered and logged in students. To fix check access token!")
+	}
+	id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access student's id!")
+	}
+
+	var student *model.Student
+	//fetch the record to be updated from the database
+	if err := r.Sql.Db.First(&student, id).Error; err != nil {
+		log.Error().Int("id", id).Str("path", "ResetStudentPassword").Msg(err.Error())
+		return nil, err
+	}
+	//encrypt input password
+	encryptedpassword, err := encrypt.HashPassword(newPassword)
+	if err != nil {
+		log.Error().Str("password", newPassword).Str("path", "ResetStudentPassword").Msg(err.Error())
+		return nil, err
+	}
+	// Update the records' attributes with `map`
+	if err := r.Sql.Db.Model(&student).Updates(map[string]interface{}{"password": encryptedpassword}).Error; err != nil {
+		log.Error().Int("id", student.ID).Str("path", "ResetStudentPassword").Msg(fmt.Sprintf("updating student password failed: %s", err.Error()))
+		return nil, err
+	}
+
+	//fetch the record again from the database, this time the updated version
+	if err := r.Sql.Db.First(&student, id).Error; err != nil {
+		log.Error().Int("id", id).Str("path", "ResetStudentPassword").Msg(err.Error())
+		return nil, err
+	}
+	student.RegistrationNumber = prefix.DePrefixWithoutId(student.RegistrationNumber)
+	//return the updated record
+	return student, nil
+}
+
+// GetStudentProfile is the resolver for the getStudentProfile field.
+func (r *queryResolver) GetStudentProfile(ctx context.Context) (*model.Student, error) {
 		//check if system is in shutdown mode
 		if *shutdown.IsShutdown {
 			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 		}
 		user := auth.ForContext(ctx)
 		if user == nil {
-			return nil, errors.New("access to ResetStudentPassword denied!")
+			return nil, errors.New("access to student profile denied!")
 		}
 		role := user.GetRole()
 		if role != "student" {
-			return nil, errors.New("access to ResetStudentPassword denied. Only available for registered and logged in students. To fix check access token!")
+			return nil, errors.New("access to student profile denied. Only available for registered and logged in students. To fix check access token!")
 		}
 		id, err := user.GetID()
 	
@@ -229,29 +277,11 @@ func (r *mutationResolver) ResetStudentPassword(ctx context.Context, newPassword
 		}
 	
 		var student *model.Student
-		//fetch the record to be updated from the database
 		if err := r.Sql.Db.First(&student, id).Error; err != nil {
-			log.Error().Int("id", id).Str("path", "ResetStudentPassword").Msg(err.Error())
-			return nil, err
+			log.Error().Int("id", id).Str("path", "GetStudentProfile").Msg(err.Error())
+			return nil, errors.New("could not access student's profile!")
 		}
-		//encrypt input password
-		encryptedpassword, err := encrypt.HashPassword(newPassword)
-		if err != nil {
-			log.Error().Str("password", newPassword).Str("path", "ResetStudentPassword").Msg(err.Error())
-			return nil, err
-		}
-		// Update the records' attributes with `map`
-		if err := r.Sql.Db.Model(&student).Updates(map[string]interface{}{"password": encryptedpassword}).Error; err != nil {
-			log.Error().Int("id", student.ID).Str("path", "ResetStudentPassword").Msg(fmt.Sprintf("updating student password failed: %s", err.Error()))
-			return nil, err
-		}
-	
-		//fetch the record again from the database, this time the updated version
-		if err := r.Sql.Db.First(&student, id).Error; err != nil {
-			log.Error().Int("id", id).Str("path", "ResetStudentPassword").Msg(err.Error())
-			return nil, err
-		}
-		student.RegistrationNumber = prefix.DePrefixWithoutId(student.RegistrationNumber)
-		//return the updated record
+        student.RegistrationNumber = prefix.DePrefixWithoutId(student.RegistrationNumber)
+		log.Info().Int("id", id).Str("path", "GetStudentProfile").Msg("getting student profile")
 		return student, nil
 }
