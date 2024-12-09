@@ -251,6 +251,7 @@ func (r *mutationResolver) ResetStudentPassword(ctx context.Context, newPassword
 			log.Error().Int("id", id).Str("path", "ResetStudentPassword").Msg(err.Error())
 			return nil, err
 		}
+		student.RegistrationNumber = prefix.DePrefixWithoutId(student.RegistrationNumber)
 		//return the updated record
 		return student, nil
 }
