@@ -257,31 +257,67 @@ func (r *mutationResolver) ResetStudentPassword(ctx context.Context, newPassword
 }
 
 // GetStudentProfile is the resolver for the getStudentProfile field.
-func (r *queryResolver) GetStudentProfile(ctx context.Context) (*model.Student, error) {
-		//check if system is in shutdown mode
-		if *shutdown.IsShutdown {
-			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
-		}
-		user := auth.ForContext(ctx)
-		if user == nil {
-			return nil, errors.New("access to student profile denied!")
-		}
-		role := user.GetRole()
-		if role != "student" {
-			return nil, errors.New("access to student profile denied. Only available for registered and logged in students. To fix check access token!")
-		}
-		id, err := user.GetID()
-	
-		if err != nil {
-			errors.New("could not access student's id!")
-		}
-	
-		var student *model.Student
-		if err := r.Sql.Db.First(&student, id).Error; err != nil {
-			log.Error().Int("id", id).Str("path", "GetStudentProfile").Msg(err.Error())
-			return nil, errors.New("could not access student's profile!")
-		}
-        student.RegistrationNumber = prefix.DePrefixWithoutId(student.RegistrationNumber)
-		log.Info().Int("id", id).Str("path", "GetStudentProfile").Msg("getting student profile")
-		return student, nil
+func (r *queryResolver) GetStudentProfile(ctx context.Context) (*model.StudentProfile, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("access to student profile denied!")
+	}
+	role := user.GetRole()
+	if role != "student" {
+		return nil, errors.New("access to student profile denied. Only available for registered and logged in students. To fix check access token!")
+	}
+	id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access student's id!")
+	}
+
+	var student *model.Student
+	if err := r.Sql.Db.First(&student, id).Error; err != nil {
+		log.Error().Int("id", id).Str("path", "GetStudentProfile").Msg(err.Error())
+		return nil, errors.New("could not access student's profile!")
+	}
+	studentprofile := &model.StudentProfile{
+		ID:                 student.ID,
+		CreatedAt:          student.CreatedAt,
+		UpdatedAt:          student.UpdatedAt,
+		DeletedAt:          student.DeletedAt,
+		RegistrationNumber: student.RegistrationNumber,
+		Name:               student.Name,
+		PhoneNumber:        student.PhoneNumber,
+		Password:           student.Password,
+		DateOfAdmission:    student.DateOfAdmission,
+		ProfilePicture:     student.ProfilePicture,
+	}
+	studentprofile.RegistrationNumber = prefix.DePrefixWithoutId(studentprofile.RegistrationNumber)
+	log.Info().Int("id", id).Str("path", "GetStudentProfile").Msg("getting student profile")
+	return studentprofile, nil
 }
+
+// School is the resolver for the school field.
+func (r *studentProfileResolver) School(ctx context.Context, obj *model.StudentProfile) (*model.SchoolProfile, error) {
+	var school *model.School
+	if err := r.Sql.Db.First(&school, 12).Error; err != nil {
+		log.Error().Int("id", 12).Str("path", "GetSchoolProfile").Msg(err.Error())
+		return nil, errors.New("could not access schools profile!")
+	}
+	schoolprofile := &model.SchoolProfile{
+		ID:          school.ID,
+		CreatedAt:   school.CreatedAt,
+		UpdatedAt:   school.UpdatedAt,
+		Name:        school.Name,
+		PhoneNumber: school.PhoneNumber,
+		Badge:       school.Badge,
+		Website:     school.Website,
+	}
+	return schoolprofile, nil
+}
+
+// StudentProfile returns StudentProfileResolver implementation.
+func (r *Resolver) StudentProfile() StudentProfileResolver { return &studentProfileResolver{r} }
+
+type studentProfileResolver struct{ *Resolver }
