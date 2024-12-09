@@ -18,7 +18,7 @@ require (
 
 require (
 	github.com/GigaDesk/eardrum-graph v1.0.0
-	github.com/GigaDesk/eardrum-prefix v1.0.0
+	github.com/GigaDesk/eardrum-prefix v1.0.1
 )
 
 require (
