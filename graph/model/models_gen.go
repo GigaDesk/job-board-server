@@ -220,14 +220,14 @@ type SchoolPatch struct {
 }
 
 type SchoolProfile struct {
-	ID          int        `json:"id"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	UpdatedAt   time.Time  `json:"updatedAt"`
-	Name        string     `json:"name"`
-	PhoneNumber string     `json:"phone_number"`
-	Badge       *string    `json:"badge,omitempty"`
-	Website     *string    `json:"Website,omitempty"`
-	Students    []*Student `json:"students,omitempty"`
+	ID          int               `json:"id"`
+	CreatedAt   time.Time         `json:"createdAt"`
+	UpdatedAt   time.Time         `json:"updatedAt"`
+	Name        string            `json:"name"`
+	PhoneNumber string            `json:"phone_number"`
+	Badge       *string           `json:"badge,omitempty"`
+	Website     *string           `json:"Website,omitempty"`
+	Students    []*StudentProfile `json:"students,omitempty"`
 }
 
 // School result
@@ -362,6 +362,21 @@ type StudentPatch struct {
 	DateOfAdmission    *time.Time `json:"date_of_admission,omitempty"`
 	DateOfBirth        *time.Time `json:"date_of_birth,omitempty"`
 	ProfilePicture     *string    `json:"profile_picture,omitempty"`
+}
+
+type StudentProfile struct {
+	ID                 int                       `json:"id"`
+	CreatedAt          time.Time                 `json:"createdAt"`
+	UpdatedAt          time.Time                 `json:"updatedAt"`
+	DeletedAt          *runtimehelper.SoftDelete `json:"deletedAt,omitempty"`
+	RegistrationNumber string                    `json:"registration_number"`
+	Name               string                    `json:"name"`
+	PhoneNumber        string                    `json:"phone_number"`
+	Password           string                    `json:"password"`
+	DateOfAdmission    *time.Time                `json:"date_of_admission,omitempty"`
+	DateOfBirth        *time.Time                `json:"date_of_birth,omitempty"`
+	ProfilePicture     *string                   `json:"profile_picture,omitempty"`
+	School             *SchoolProfile            `json:"school"`
 }
 
 // Student result

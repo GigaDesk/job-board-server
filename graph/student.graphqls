@@ -12,6 +12,21 @@ type Student @SQL {
   date_of_birth: Time
   profile_picture: String
 }
+#returns the a student's profile data
+type StudentProfile {
+  id: Int! 
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  registration_number: String!
+  name: String!
+  phone_number: String!
+  password: String!
+  date_of_admission: Time
+  date_of_birth: Time
+  profile_picture: String
+  school: SchoolProfile!
+}
 #fields required for adding a new student to the system
 input NewStudent {
   registration_number: String!
@@ -31,7 +46,7 @@ input StudentLogin {
 }
 
 extend type Query {
-  getStudentProfile: Student
+  getStudentProfile: StudentProfile
 }
 
 extend type Mutation {
