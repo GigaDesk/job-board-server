@@ -361,15 +361,15 @@ func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProf
 }
 
 // Students is the resolver for the students field.
-func (r *schoolProfileResolver) Students(ctx context.Context, obj *model.SchoolProfile) ([]*model.Student, error) {
+func (r *schoolProfileResolver) Students(ctx context.Context, obj *model.SchoolProfile) ([]*model.StudentProfile, error) {
 	neo4jstudents, err := neo4jstudent.RetrieveSchoolStudents(r.Neo4j, obj.ID)
 	if err != nil {
 		log.Error().Int("id", obj.ID).Str("path", "GetSchoolProfile").Msg(err.Error())
 		return nil, errors.New("Failed to get school's students")
 	}
-	var students []*model.Student
+	var students []*model.StudentProfile
 	for _, s := range neo4jstudents {
-		student := &model.Student{
+		student := &model.StudentProfile{
 			ID:                 int(s.GetID()),
 			CreatedAt:          s.GetCreatedAt(),
 			UpdatedAt:          s.GetUpdatedAt(),
