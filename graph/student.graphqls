@@ -30,6 +30,10 @@ input StudentLogin {
   password: String!
 }
 
+extend type Query {
+  getStudentProfile: Student
+}
+
 extend type Mutation {
   AddStudents(students: [NewStudent!]!): [Student!]
   studentLogin(input: StudentLogin!): String
