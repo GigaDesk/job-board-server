@@ -6,6 +6,8 @@ github.com/GigaDesk/eardrum-graph v1.0.0 h1:ZFKtis2aRcfzj8slmfGcNFD5vVzIX6DJKlzU
 github.com/GigaDesk/eardrum-graph v1.0.0/go.mod h1:we7J9XJ+Hsc/mhd1WvfA++72qSkaMWOcQKBjkWSa3d8=
 github.com/GigaDesk/eardrum-prefix v1.0.0 h1:t5o9QD855u2Na6SHvMgvmGsh6YPeG/k/8BBoqHV4MVE=
 github.com/GigaDesk/eardrum-prefix v1.0.0/go.mod h1:5Z5DptQSGuVsOQ16jKNtmSu8wQ8btEoH/o1zwbpP6hA=
+github.com/GigaDesk/eardrum-prefix v1.0.1 h1:jRRMh/7YPkEB73mOWR8XPB+vN/Qacbjl36p0MYXart8=
+github.com/GigaDesk/eardrum-prefix v1.0.1/go.mod h1:5Z5DptQSGuVsOQ16jKNtmSu8wQ8btEoH/o1zwbpP6hA=
 github.com/Masterminds/goutils v1.1.1 h1:5nUrii3FMTL5diU80unEVvNevw1nH4+ZV4DSLVJLSYI=
 github.com/Masterminds/goutils v1.1.1/go.mod h1:8cTjp+g8YejhMuvIA5y2vz3BpJxksy863GQaJW2MFNU=
 github.com/Masterminds/semver/v3 v3.2.0/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
