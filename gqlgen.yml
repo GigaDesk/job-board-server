@@ -99,3 +99,7 @@ models:
     fields:
       students:
         resolver: true
+  StudentProfile:
+    fields:
+      school:
+        resolver: true
