@@ -146,6 +146,7 @@ func (r *mutationResolver) StudentLogin(ctx context.Context, input model.Student
 		log.Error().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "StudentLogin").Msg(err.Error())
 		return nil, errors.New("error generating accessToken")
 	}
+	log.Info().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "StudentLogin").Msg("student logged in successfully!")
 	return &token, nil
 }
 
@@ -294,17 +295,20 @@ func (r *queryResolver) GetStudentProfile(ctx context.Context) (*model.StudentPr
 		ProfilePicture:     student.ProfilePicture,
 	}
 	studentprofile.RegistrationNumber = prefix.DePrefixWithoutId(studentprofile.RegistrationNumber)
-	log.Info().Int("id", id).Str("path", "GetStudentProfile").Msg("getting student profile")
+	log.Info().Int("id", id).Str("role", role).Str("path", "GetStudentProfile").Msg("getting student profile")
 	return studentprofile, nil
 }
 
 // School is the resolver for the school field.
 func (r *studentProfileResolver) School(ctx context.Context, obj *model.StudentProfile) (*model.SchoolProfile, error) {
+	user := auth.ForContext(ctx)
+	id,_:=user.GetID()
 	var school *model.School
 	if err := r.Sql.Db.First(&school, 12).Error; err != nil {
-		log.Error().Int("id", 12).Str("path", "GetSchoolProfile").Msg(err.Error())
+		log.Error().Int("id", id).Str("role", user.GetRole()).Msg(err.Error())
 		return nil, errors.New("could not access schools profile!")
 	}
+	log.Info().Int("id", id).Str("role", user.GetRole()).Msg("getting school profile")
 	schoolprofile := &model.SchoolProfile{
 		ID:          school.ID,
 		CreatedAt:   school.CreatedAt,

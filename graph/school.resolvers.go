@@ -171,6 +171,7 @@ func (r *mutationResolver) SchoolLogin(ctx context.Context, input model.SchoolLo
 		log.Error().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "SchoolLogin").Msg(err.Error())
 		return nil, errors.New("error generating accessToken")
 	}
+	log.Info().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "SchoolLogin").Msg("school logged in successfully!")
 	return &token, nil
 }
 
@@ -348,6 +349,7 @@ func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProf
 		log.Error().Int("id", id).Str("path", "GetSchoolProfile").Msg(err.Error())
 		return nil, errors.New("could not access schools profile!")
 	}
+	log.Info().Int("id", id).Str("role", role).Str("path", "GetSchoolProfile").Msg("getting school profile")
 	schoolprofile := &model.SchoolProfile{
 		ID:          school.ID,
 		CreatedAt:   school.CreatedAt,
@@ -362,11 +364,14 @@ func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProf
 
 // Students is the resolver for the students field.
 func (r *schoolProfileResolver) Students(ctx context.Context, obj *model.SchoolProfile) ([]*model.StudentProfile, error) {
+	user := auth.ForContext(ctx)
+	id,_:=user.GetID()
 	neo4jstudents, err := neo4jstudent.RetrieveSchoolStudents(r.Neo4j, obj.ID)
 	if err != nil {
-		log.Error().Int("id", obj.ID).Str("path", "GetSchoolProfile").Msg(err.Error())
+		log.Error().Int("id", id).Str("role", user.Role).Msg(err.Error())
 		return nil, errors.New("Failed to get school's students")
 	}
+	log.Info().Int("id", id).Str("role", user.GetRole()).Msg("getting school's students")
 	var students []*model.StudentProfile
 	for _, s := range neo4jstudents {
 		student := &model.StudentProfile{
