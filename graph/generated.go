@@ -109,10 +109,10 @@ type ComplexityRoot struct {
 		DeleteStudent               func(childComplexity int, filter model.StudentFiltersInput) int
 		DeleteUnverifiedSchool      func(childComplexity int, filter model.UnverifiedSchoolFiltersInput) int
 		ForgotSchoolPassword        func(childComplexity int, phoneNumber string) int
-		ForgotStudentPassword       func(childComplexity int, phoneNumber string) int
+		ForgotStudentPassword       func(childComplexity int, schoolid int, registrationNumber string) int
 		RefreshToken                func(childComplexity int, input *model.RefreshTokenInput) int
 		RequestSchoolPasswordReset  func(childComplexity int, input *model.Verificationinfo) int
-		RequestStudentPasswordReset func(childComplexity int, input *model.Verificationinfo) int
+		RequestStudentPasswordReset func(childComplexity int, schoolid int, registrationNumber string, phoneNumber string, otp string) int
 		ResetSchoolPassword         func(childComplexity int, newPassword string) int
 		ResetStudentPassword        func(childComplexity int, newPassword string) int
 		SchoolLogin                 func(childComplexity int, input model.SchoolLogin) int
@@ -279,8 +279,8 @@ type MutationResolver interface {
 	RefreshToken(ctx context.Context, input *model.RefreshTokenInput) (*string, error)
 	AddStudents(ctx context.Context, students []*model.NewStudent) ([]*model.Student, error)
 	StudentLogin(ctx context.Context, input model.StudentLogin) (*string, error)
-	ForgotStudentPassword(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error)
-	RequestStudentPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error)
+	ForgotStudentPassword(ctx context.Context, schoolid int, registrationNumber string) (*model.SendCodeStatus, error)
+	RequestStudentPasswordReset(ctx context.Context, schoolid int, registrationNumber string, phoneNumber string, otp string) (*string, error)
 	ResetStudentPassword(ctx context.Context, newPassword string) (*model.Student, error)
 	AddSchool(ctx context.Context, input []*model.SchoolInput) (*model.AddSchoolPayload, error)
 	UpdateSchool(ctx context.Context, input model.UpdateSchoolInput) (*model.UpdateSchoolPayload, error)
@@ -619,7 +619,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ForgotStudentPassword(childComplexity, args["phone_number"].(string)), true
+		return e.complexity.Mutation.ForgotStudentPassword(childComplexity, args["schoolid"].(int), args["registration_number"].(string)), true
 
 	case "Mutation.refreshToken":
 		if e.complexity.Mutation.RefreshToken == nil {
@@ -655,7 +655,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RequestStudentPasswordReset(childComplexity, args["input"].(*model.Verificationinfo)), true
+		return e.complexity.Mutation.RequestStudentPasswordReset(childComplexity, args["schoolid"].(int), args["registration_number"].(string), args["phone_number"].(string), args["otp"].(string)), true
 
 	case "Mutation.resetSchoolPassword":
 		if e.complexity.Mutation.ResetSchoolPassword == nil {
@@ -3004,19 +3004,37 @@ func (ec *executionContext) field_Mutation_forgotSchoolPassword_argsPhoneNumber(
 func (ec *executionContext) field_Mutation_forgotStudentPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_forgotStudentPassword_argsPhoneNumber(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_forgotStudentPassword_argsSchoolid(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["phone_number"] = arg0
+	args["schoolid"] = arg0
+	arg1, err := ec.field_Mutation_forgotStudentPassword_argsRegistrationNumber(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["registration_number"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_forgotStudentPassword_argsPhoneNumber(
+func (ec *executionContext) field_Mutation_forgotStudentPassword_argsSchoolid(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("schoolid"))
+	if tmp, ok := rawArgs["schoolid"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_forgotStudentPassword_argsRegistrationNumber(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
-	if tmp, ok := rawArgs["phone_number"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("registration_number"))
+	if tmp, ok := rawArgs["registration_number"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -3073,23 +3091,77 @@ func (ec *executionContext) field_Mutation_requestSchoolPasswordReset_argsInput(
 func (ec *executionContext) field_Mutation_requestStudentPasswordReset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_requestStudentPasswordReset_argsInput(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_requestStudentPasswordReset_argsSchoolid(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["input"] = arg0
+	args["schoolid"] = arg0
+	arg1, err := ec.field_Mutation_requestStudentPasswordReset_argsRegistrationNumber(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["registration_number"] = arg1
+	arg2, err := ec.field_Mutation_requestStudentPasswordReset_argsPhoneNumber(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["phone_number"] = arg2
+	arg3, err := ec.field_Mutation_requestStudentPasswordReset_argsOtp(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["otp"] = arg3
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_requestStudentPasswordReset_argsInput(
+func (ec *executionContext) field_Mutation_requestStudentPasswordReset_argsSchoolid(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*model.Verificationinfo, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalOverificationinfo2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐVerificationinfo(ctx, tmp)
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("schoolid"))
+	if tmp, ok := rawArgs["schoolid"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
 	}
 
-	var zeroVal *model.Verificationinfo
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_requestStudentPasswordReset_argsRegistrationNumber(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("registration_number"))
+	if tmp, ok := rawArgs["registration_number"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_requestStudentPasswordReset_argsPhoneNumber(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+	if tmp, ok := rawArgs["phone_number"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_requestStudentPasswordReset_argsOtp(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("otp"))
+	if tmp, ok := rawArgs["otp"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
 	return zeroVal, nil
 }
 
@@ -5667,7 +5739,7 @@ func (ec *executionContext) _Mutation_forgotStudentPassword(ctx context.Context,
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ForgotStudentPassword(rctx, fc.Args["phone_number"].(string))
+		return ec.resolvers.Mutation().ForgotStudentPassword(rctx, fc.Args["schoolid"].(int), fc.Args["registration_number"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5725,7 +5797,7 @@ func (ec *executionContext) _Mutation_requestStudentPasswordReset(ctx context.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RequestStudentPasswordReset(rctx, fc.Args["input"].(*model.Verificationinfo))
+		return ec.resolvers.Mutation().RequestStudentPasswordReset(rctx, fc.Args["schoolid"].(int), fc.Args["registration_number"].(string), fc.Args["phone_number"].(string), fc.Args["otp"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

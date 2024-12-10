@@ -374,7 +374,7 @@ func (r *schoolProfileResolver) Students(ctx context.Context, obj *model.SchoolP
 	if err != nil {
 		return nil, err
 	}
-	id,_:=user.GetID()
+	id, _ := user.GetID()
 	neo4jstudents, err := neo4jstudent.RetrieveSchoolStudents(r.Neo4j, obj.ID)
 	if err != nil {
 		log.Error().Int("id", id).Str("role", user.Role).Msg(err.Error())
