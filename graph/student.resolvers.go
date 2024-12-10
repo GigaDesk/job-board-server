@@ -29,7 +29,10 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
-	user := auth.ForContext(ctx)
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if user == nil {
 		return nil, errors.New("access to add students denied!")
 	}
@@ -215,7 +218,10 @@ func (r *mutationResolver) ResetStudentPassword(ctx context.Context, newPassword
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
-	user := auth.ForContext(ctx)
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if user == nil {
 		return nil, errors.New("access to ResetStudentPassword denied!")
 	}
@@ -263,7 +269,10 @@ func (r *queryResolver) GetStudentProfile(ctx context.Context) (*model.StudentPr
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
-	user := auth.ForContext(ctx)
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if user == nil {
 		return nil, errors.New("access to student profile denied!")
 	}
@@ -301,7 +310,10 @@ func (r *queryResolver) GetStudentProfile(ctx context.Context) (*model.StudentPr
 
 // School is the resolver for the school field.
 func (r *studentProfileResolver) School(ctx context.Context, obj *model.StudentProfile) (*model.SchoolProfile, error) {
-	user := auth.ForContext(ctx)
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	id,_:=user.GetID()
 	var school *model.School
 	if err := r.Sql.Db.First(&school, 12).Error; err != nil {

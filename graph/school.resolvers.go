@@ -248,7 +248,10 @@ func (r *mutationResolver) ResetSchoolPassword(ctx context.Context, newPassword 
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
-	user := auth.ForContext(ctx)
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if user == nil {
 		return nil, errors.New("access to ResetSchoolPassword denied!")
 	}
@@ -330,7 +333,10 @@ func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProf
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
-	user := auth.ForContext(ctx)
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if user == nil {
 		return nil, errors.New("access to getSchool profile denied!")
 	}
@@ -364,7 +370,10 @@ func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProf
 
 // Students is the resolver for the students field.
 func (r *schoolProfileResolver) Students(ctx context.Context, obj *model.SchoolProfile) ([]*model.StudentProfile, error) {
-	user := auth.ForContext(ctx)
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	id,_:=user.GetID()
 	neo4jstudents, err := neo4jstudent.RetrieveSchoolStudents(r.Neo4j, obj.ID)
 	if err != nil {
