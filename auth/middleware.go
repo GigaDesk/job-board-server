@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/GigaDesk/eardrum-server/pkg/jwt"
@@ -27,7 +28,11 @@ func Middleware() func(http.Handler) http.Handler {
 			tokenStr := header
 			credentials, err := jwt.ParseToken(tokenStr)
 			if err != nil {
-				http.Error(w, "Invalid token", http.StatusForbidden)
+				// put it in context
+				ctx := context.WithValue(r.Context(), "error", err)
+				// and call the next with our new context
+				r = r.WithContext(ctx)
+				next.ServeHTTP(w, r)
 				return
 			}
 
@@ -41,7 +46,11 @@ func Middleware() func(http.Handler) http.Handler {
 }
 
 // ForContext finds the token credentials from the context. REQUIRES Middleware to have run.
-func ForContext(ctx context.Context) *jwt.TokenCredentials {
+func ForContext(ctx context.Context) (*jwt.TokenCredentials, error){
+	err := ctx.Value("error")
+	if err!=nil{
+		return nil, errors.New("Invalid Authentication Token")
+	}
 	user, _ := ctx.Value(k).(*jwt.TokenCredentials)
-	return user
+	return user, nil
 }
