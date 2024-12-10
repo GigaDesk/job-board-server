@@ -14,7 +14,7 @@ type Student @SQL {
 }
 #returns the a student's profile data
 type StudentProfile {
-  id: Int! 
+  id: Int!
   createdAt: Time!
   updatedAt: Time!
   deletedAt: SoftDelete #activate softdelete
@@ -52,7 +52,15 @@ extend type Query {
 extend type Mutation {
   AddStudents(students: [NewStudent!]!): [Student!]
   studentLogin(input: StudentLogin!): String
-  forgotStudentPassword(phone_number: String!): SendCodeStatus
-  requestStudentPasswordReset(input: verificationinfo): String
+  forgotStudentPassword(
+    schoolid: Int!
+    registration_number: String!
+  ): SendCodeStatus
+  requestStudentPasswordReset(
+    schoolid: Int!
+    registration_number: String!
+    phone_number: String!
+    otp: String!
+  ): String
   resetStudentPassword(new_password: String!): Student
 }
