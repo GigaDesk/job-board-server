@@ -154,52 +154,62 @@ func (r *mutationResolver) StudentLogin(ctx context.Context, input model.Student
 }
 
 // ForgotStudentPassword is the resolver for the forgotStudentPassword field.
-func (r *mutationResolver) ForgotStudentPassword(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error) {
+func (r *mutationResolver) ForgotStudentPassword(ctx context.Context, schoolid int, registrationNumber string) (*model.SendCodeStatus, error) {
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
+	//prefix registration number with school id
+	prefixedRegistrationNumber := prefix.PrefixWithId(registrationNumber, schoolid)
 	//declare a student variable
 	var student *model.Student
-	//check if the phone number exists in the database in the student table
-	if err := r.Sql.Db.Where("phone_number = ?", phoneNumber).First(&student).Error; err != nil {
-		log.Info().Str("phone_number", phoneNumber).Str("path", "ForgotStudentPassword").Msg(err.Error())
-		return nil, errors.New("phone number does not exist")
+	//check if the registration number exists in the database in the student table
+	if err := r.Sql.Db.Where("registration_number = ?", prefixedRegistrationNumber).First(&student).Error; err != nil {
+		log.Info().Str("registration_number", prefixedRegistrationNumber).Str("path", "ForgotStudentPassword").Msg(err.Error())
+		return nil, errors.New("registration number does not exist")
 	}
 
-	//send an OTP code to the phone number provided, return error if there is any
-	if err := phoneutils.SendOtp(phoneNumber); err != nil {
-		log.Error().Str("phone_number", phoneNumber).Str("path", "ForgotStudentPassword").Msg(err.Error())
+	//send an OTP code to the students' phone number, return error if there is any
+	if err := phoneutils.SendOtp(student.PhoneNumber); err != nil {
+		log.Error().Str("phone_number", student.PhoneNumber).Str("path", "ForgotStudentPassword").Msg(err.Error())
 		return nil, err
 	}
+	log.Info().Str("phone_number", student.PhoneNumber).Str("path", "ForgotStudentPassword").Msg("OTP code sent")
 	//return status on success
 	sendcodestatus := &model.SendCodeStatus{
-		PhoneNumber: phoneNumber,
+		PhoneNumber: student.PhoneNumber,
 		Success:     true,
 	}
 	return sendcodestatus, nil
 }
 
 // RequestStudentPasswordReset is the resolver for the requestStudentPasswordReset field.
-func (r *mutationResolver) RequestStudentPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error) {
+func (r *mutationResolver) RequestStudentPasswordReset(ctx context.Context, schoolid int, registrationNumber string, phoneNumber string, otp string) (*string, error) {
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
-	//Check the validity of an OTP code
-	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
-		return nil, err
-	}
+	//prefix registration number with school id
+	prefixedRegistrationNumber := prefix.PrefixWithId(registrationNumber, schoolid)
 	//declare a student variable
 	var student *model.Student
 
-	// Find the first school that matches the input phone number from the school table
-
-	if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&student).Error; err != nil {
-		log.Info().Str("phone_number", input.PhoneNumber).Str("path", "RequestStudentPasswordReset").Msg(err.Error())
-		return nil, errors.New("phone number does not exist")
+	// Find the first student that matches the registration number from the student table
+	if err := r.Sql.Db.Where("registration_number = ?", prefixedRegistrationNumber).First(&student).Error; err != nil {
+		log.Info().Str("registration_number", prefixedRegistrationNumber).Str("path", "RequestStudentPasswordReset").Msg(err.Error())
+		return nil, errors.New("registration number does not exist")
 	}
 
+	//check if the student's phone number matches the provided phone number
+	if phoneNumber != student.PhoneNumber {
+		log.Info().Int("id", student.ID).Str("phone_number", student.PhoneNumber).Str("path", "RequestStudentPasswordReset").Msg("invalid phone number or registration number")
+		return nil, errors.New("invalid phone number or registration number")
+	}
+	//Check the validity of an OTP code
+	if err := phoneutils.CheckOtp(phoneNumber, otp); err != nil {
+		return nil, err
+	}
+	log.Info().Str("registration_number", prefixedRegistrationNumber).Str("path", "RequestStudentPasswordReset").Msg("request successfull")
 	credentials := jwt.TokenCredentials{
 		Id:   strconv.Itoa(student.ID),
 		Role: "student",
@@ -314,7 +324,7 @@ func (r *studentProfileResolver) School(ctx context.Context, obj *model.StudentP
 	if err != nil {
 		return nil, err
 	}
-	id,_:=user.GetID()
+	id, _ := user.GetID()
 	var school *model.School
 	if err := r.Sql.Db.First(&school, 12).Error; err != nil {
 		log.Error().Int("id", id).Str("role", user.GetRole()).Msg(err.Error())
