@@ -390,7 +390,6 @@ func (r *schoolProfileResolver) Students(ctx context.Context, obj *model.SchoolP
 			RegistrationNumber: prefix.DePrefixWithId(s.GetRegistrationNumber(), obj.ID),
 			Name:               s.GetName(),
 			PhoneNumber:        s.GetPhoneNumber(),
-			Password:           s.GetPassword(),
 			DateOfAdmission:    pointer.ToTimeOrNil(s.GetDateOfAdmission()),
 			DateOfBirth:        pointer.ToTimeOrNil(s.GetDateofBirth()),
 			ProfilePicture:     pointer.ToStringOrNil(s.GetProfilePicture()),
