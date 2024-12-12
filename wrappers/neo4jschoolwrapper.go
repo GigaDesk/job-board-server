@@ -13,8 +13,8 @@ type Neo4jSchoolWrapper struct{
 }
 
 // Returns the unique identifier of the school
-func (n Neo4jSchoolWrapper)GetID() int  {
-	return n.ID
+func (n Neo4jSchoolWrapper)GetID() int64  {
+	return int64(n.ID)
 }   
 // Returns the creation timestamp of the school       
 func (n Neo4jSchoolWrapper) GetCreatedAt() time.Time{
