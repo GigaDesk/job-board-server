@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/AlekSi/pointer"
 	"github.com/GigaDesk/eardrum-graph/neo4jschool"
 	"github.com/GigaDesk/eardrum-graph/neo4jstudent"
 	"github.com/GigaDesk/eardrum-prefix/prefix"
@@ -325,20 +326,21 @@ func (r *studentProfileResolver) School(ctx context.Context, obj *model.StudentP
 		return nil, err
 	}
 	id, _ := user.GetID()
-	var school *model.School
-	if err := r.Sql.Db.First(&school, 12).Error; err != nil {
+	
+	school, err :=neo4jschool.RetrieveStudentSchool(r.Neo4j, obj.ID)
+	if err != nil {
 		log.Error().Int("id", id).Str("role", user.GetRole()).Msg(err.Error())
 		return nil, errors.New("could not access schools profile!")
 	}
 	log.Info().Int("id", id).Str("role", user.GetRole()).Msg("getting school profile")
 	schoolprofile := &model.SchoolProfile{
-		ID:          school.ID,
-		CreatedAt:   school.CreatedAt,
-		UpdatedAt:   school.UpdatedAt,
-		Name:        school.Name,
-		PhoneNumber: school.PhoneNumber,
-		Badge:       school.Badge,
-		Website:     school.Website,
+		ID:          int(school.GetID()),
+		CreatedAt:   school.GetCreatedAt(),
+		UpdatedAt:   school.GetUpdatedAt(),
+		Name:        school.GetName(),
+		PhoneNumber: school.GetPhoneNumber(),
+		Badge:       pointer.ToStringOrNil(school.GetBadge()),
+		Website:     pointer.ToStringOrNil(school.GetWebsite()),
 	}
 	return schoolprofile, nil
 }
