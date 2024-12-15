@@ -14,6 +14,7 @@ import (
 	"github.com/GigaDesk/eardrum-graph/neo4jschool"
 	"github.com/GigaDesk/eardrum-graph/neo4jstudent"
 	"github.com/GigaDesk/eardrum-prefix/prefix"
+	"github.com/GigaDesk/eardrum-prefix/validate"
 	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
@@ -57,6 +58,12 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 	//a slice of non repeated registration numbers
 	var registration_numbers []string
 	for _, student := range students {
+        
+		//validate new student	
+		if err:=student.Validate(); err!=nil{
+			return nil, err
+		}
+
 		n := &model.Student{
 			RegistrationNumber: prefix.PrefixWithId(student.RegistrationNumber, id),
 			Name:               student.Name,
@@ -126,6 +133,10 @@ func (r *mutationResolver) StudentLogin(ctx context.Context, input model.Student
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
+	//validate student login inputs
+	if err := input.Validate(); err!= nil{
+		return nil, err
+	}
 	//declare a student variable
 	var student *model.Student
 
@@ -160,6 +171,14 @@ func (r *mutationResolver) ForgotStudentPassword(ctx context.Context, schoolid i
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
+	//validate school id
+	if err := validate.ValidateId(schoolid); err != nil {
+		return nil, err
+	}
+	//validate registration number
+	if err := validate.ValidateRegistrationNumber(registrationNumber); err != nil {
+		return nil, err
+	}
 	//prefix registration number with school id
 	prefixedRegistrationNumber := prefix.PrefixWithId(registrationNumber, schoolid)
 	//declare a student variable
@@ -189,6 +208,22 @@ func (r *mutationResolver) RequestStudentPasswordReset(ctx context.Context, scho
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	//validate school id
+	if err := validate.ValidateId(schoolid); err != nil {
+		return nil, err
+	}
+	//validate registration number
+	if err := validate.ValidateRegistrationNumber(registrationNumber); err != nil {
+		return nil, err
+	}
+	//validate phone number
+	if err:= validate.ValidatePhoneNumber(phoneNumber); err !=nil {
+		return nil, err
+	}
+	//validate otp
+	if err:= validate.ValidateOtp(otp); err != nil {
+		return nil, err
 	}
 	//prefix registration number with school id
 	prefixedRegistrationNumber := prefix.PrefixWithId(registrationNumber, schoolid)
@@ -245,7 +280,10 @@ func (r *mutationResolver) ResetStudentPassword(ctx context.Context, newPassword
 	if err != nil {
 		errors.New("could not access student's id!")
 	}
-
+    // validate new password
+	if err:= validate.ValidatePassword(newPassword); err!=nil{
+    return nil, err
+	}
 	var student *model.Student
 	//fetch the record to be updated from the database
 	if err := r.Sql.Db.First(&student, id).Error; err != nil {

@@ -14,6 +14,7 @@ import (
 	"github.com/GigaDesk/eardrum-graph/neo4jschool"
 	"github.com/GigaDesk/eardrum-graph/neo4jstudent"
 	"github.com/GigaDesk/eardrum-prefix/prefix"
+	"github.com/GigaDesk/eardrum-prefix/validate"
 	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
@@ -29,6 +30,10 @@ func (r *mutationResolver) CreateSchool(ctx context.Context, input model.NewScho
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	//validate inputs
+	if err := input.Validate(); err != nil {
+		return nil, err
 	}
 	//check if the phone number exists in the database
 	phoneexists, err := phoneutils.CheckSchoolPhoneNumber(r.Sql.Db, input.PhoneNumber)
@@ -77,7 +82,10 @@ func (r *mutationResolver) VerifySchool(ctx context.Context, input model.Verific
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
-
+	//validate inputs
+	if err := input.Validate(); err != nil {
+		return nil, err
+	}
 	//Check the validity of an OTP code
 	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
 		return nil, err
@@ -130,6 +138,11 @@ func (r *mutationResolver) SendCode(ctx context.Context, phoneNumber string) (*m
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
+	//validate phone number
+	if err := validate.ValidateKenyanPhoneNumber(phoneNumber); err != nil {
+		return nil, err
+	}
+
 	if err := phoneutils.SendOtp(phoneNumber); err != nil {
 		log.Error().Str("phone_number", phoneNumber).Str("path", "SendCode").Msg(err.Error())
 		return nil, err
@@ -147,9 +160,14 @@ func (r *mutationResolver) SchoolLogin(ctx context.Context, input model.SchoolLo
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
+
+	//validate SchoolLogin input
+	if err := input.Validate(); err != nil {
+		return nil, err
+	}
+
 	//declare a school variable
 	var school *model.School
-
 	// Find the first school that matches the input phone number from the school table
 
 	if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&school).Error; err != nil {
@@ -181,6 +199,12 @@ func (r *mutationResolver) ForgotSchoolPassword(ctx context.Context, phoneNumber
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
+
+	//validate phone number
+	if err := validate.ValidateKenyanPhoneNumber(phoneNumber); err != nil {
+		return nil, err
+	}
+
 	//check if the phone number exists in the database
 	phoneexists, err := phoneutils.CheckSchoolPhoneNumber(r.Sql.Db, phoneNumber)
 
@@ -216,6 +240,11 @@ func (r *mutationResolver) RequestSchoolPasswordReset(ctx context.Context, input
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
+	//validate inputs
+	if err := input.Validate(); err != nil {
+		return nil, err
+	}
+
 	//Check the validity of an OTP code
 	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
 		return nil, err
@@ -263,6 +292,11 @@ func (r *mutationResolver) ResetSchoolPassword(ctx context.Context, newPassword 
 
 	if err != nil {
 		errors.New("could not access school's id!")
+	}
+
+	//validate inputs
+	if err := validate.ValidatePassword(newPassword); err != nil {
+		return nil, err
 	}
 
 	var school *model.School
