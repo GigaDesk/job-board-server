@@ -5,7 +5,8 @@ This project is a school management system that allows multiple schools to host 
 
 * **Creation of a school account**: This project allows schools to register in order to use the system to host their data.
 * **Adding of student data**: Allows for schools to load their students' data into their network in the system.
-* **School and Student login**: Allows for schools to log into their accounts and for students to log into their accounts in the respective school network they were created in.
+* **School and Student login**: Allows for schools to log into their accounts and for students to log into their accounts in the respective school network they were created in.           
+* **Retrieving Student and School data**: Allows for retrieval of schools and students data that is already loaded into the system.
 
 ## Table of Contents
 
