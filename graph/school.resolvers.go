@@ -381,15 +381,15 @@ func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProf
 	id, err := user.GetID()
 
 	if err != nil {
-		errors.New("could not access schools id!")
+		errors.New("could not access school's id!")
 	}
 
 	var school *model.School
 	if err := r.Sql.Db.First(&school, id).Error; err != nil {
 		log.Error().Int("id", id).Str("path", "GetSchoolProfile").Msg(err.Error())
-		return nil, errors.New("could not access schools profile!")
+		return nil, errors.New("could not access school's profile!")
 	}
-	log.Info().Int("id", id).Str("role", role).Str("path", "GetSchoolProfile").Msg("getting school profile")
+	log.Info().Int("id", id).Str("role", role).Str("path", "GetSchoolProfile").Msg("getting school's profile")
 	schoolprofile := &model.SchoolProfile{
 		ID:          school.ID,
 		CreatedAt:   school.CreatedAt,
@@ -400,6 +400,38 @@ func (r *queryResolver) GetSchoolProfile(ctx context.Context) (*model.SchoolProf
 		Website:     school.Website,
 	}
 	return schoolprofile, nil
+}
+
+// GetSchoolsProfile is the resolver for the getSchoolsProfile field.
+func (r *queryResolver) GetSchoolsProfile(ctx context.Context) ([]*model.SchoolProfile, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+
+	var schools []*model.School
+	if err := r.Sql.Db.Find(&schools).Error; err != nil {
+		log.Error().Str("path", "GetSchoolsProfile").Msg(err.Error())
+		return nil, errors.New("could not access schools' profile!")
+	}
+	log.Info().Str("path", "GetSchoolProfile").Msg("getting schools' profile")
+
+	var schoolsprofile []*model.SchoolProfile
+
+	for _, school := range schools {
+		schoolprofile := &model.SchoolProfile{
+			ID:          school.ID,
+			CreatedAt:   school.CreatedAt,
+			UpdatedAt:   school.UpdatedAt,
+			Name:        school.Name,
+			PhoneNumber: school.PhoneNumber,
+			Badge:       school.Badge,
+			Website:     school.Website,
+		}
+		schoolsprofile = append(schoolsprofile, schoolprofile)
+	}
+
+	return schoolsprofile, nil
 }
 
 // Students is the resolver for the students field.

@@ -134,6 +134,7 @@ type ComplexityRoot struct {
 		GetDummys               func(childComplexity int) int
 		GetSchool               func(childComplexity int, id int) int
 		GetSchoolProfile        func(childComplexity int) int
+		GetSchoolsProfile       func(childComplexity int) int
 		GetStudent              func(childComplexity int, id int) int
 		GetStudentProfile       func(childComplexity int) int
 		GetUnverifiedSchool     func(childComplexity int, id int) int
@@ -297,6 +298,7 @@ type QueryResolver interface {
 	GetDummy(ctx context.Context, id *int) (*model.Dummy, error)
 	SchoolPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error)
 	GetSchoolProfile(ctx context.Context) (*model.SchoolProfile, error)
+	GetSchoolsProfile(ctx context.Context) ([]*model.SchoolProfile, error)
 	GetStudentProfile(ctx context.Context) (*model.StudentProfile, error)
 	GetSchool(ctx context.Context, id int) (*model.School, error)
 	QuerySchool(ctx context.Context, filter *model.SchoolFiltersInput, order *model.SchoolOrder, first *int, offset *int, group []model.SchoolGroup) (*model.SchoolQueryResult, error)
@@ -816,6 +818,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetSchoolProfile(childComplexity), true
+
+	case "Query.getSchoolsProfile":
+		if e.complexity.Query.GetSchoolsProfile == nil {
+			break
+		}
+
+		return e.complexity.Query.GetSchoolsProfile(childComplexity), true
 
 	case "Query.getStudent":
 		if e.complexity.Query.GetStudent == nil {
@@ -6731,6 +6740,65 @@ func (ec *executionContext) _Query_getSchoolProfile(ctx context.Context, field g
 }
 
 func (ec *executionContext) fieldContext_Query_getSchoolProfile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_SchoolProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_SchoolProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_SchoolProfile_updatedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_SchoolProfile_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_SchoolProfile_phone_number(ctx, field)
+			case "badge":
+				return ec.fieldContext_SchoolProfile_badge(ctx, field)
+			case "Website":
+				return ec.fieldContext_SchoolProfile_Website(ctx, field)
+			case "students":
+				return ec.fieldContext_SchoolProfile_students(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SchoolProfile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getSchoolsProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getSchoolsProfile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSchoolsProfile(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.SchoolProfile)
+	fc.Result = res
+	return ec.marshalOSchoolProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐSchoolProfileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getSchoolsProfile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -15232,6 +15300,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getSchoolsProfile":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSchoolsProfile(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "getStudentProfile":
 			field := field
 
@@ -17806,6 +17893,53 @@ func (ec *executionContext) marshalOSchoolOrderable2ᚖgithubᚗcomᚋGigaDesk�
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) marshalOSchoolProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐSchoolProfileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SchoolProfile) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSchoolProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐSchoolProfile(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalOSchoolProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐSchoolProfile(ctx context.Context, sel ast.SelectionSet, v *model.SchoolProfile) graphql.Marshaler {

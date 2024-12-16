@@ -2,12 +2,8 @@ github.com/99designs/gqlgen v0.17.55 h1:3vzrNWYyzSZjGDFo68e5j9sSauLxfKvLp+6ioRok
 github.com/99designs/gqlgen v0.17.55/go.mod h1:3Bq768f8hgVPGZxL8aY9MaYmbxa6llPM/qu1IGH1EJo=
 github.com/AlekSi/pointer v1.2.0 h1:glcy/gc4h8HnG2Z3ZECSzZ1IX1x2JxRVuDzaJwQE0+w=
 github.com/AlekSi/pointer v1.2.0/go.mod h1:gZGfd3dpW4vEc/UlyfKKi1roIqcCgwOIvb0tSNSBle0=
-github.com/GigaDesk/eardrum-graph v1.0.0 h1:ZFKtis2aRcfzj8slmfGcNFD5vVzIX6DJKlzU5tHNI3Y=
-github.com/GigaDesk/eardrum-graph v1.0.0/go.mod h1:we7J9XJ+Hsc/mhd1WvfA++72qSkaMWOcQKBjkWSa3d8=
 github.com/GigaDesk/eardrum-graph v1.0.1 h1:29QR9KDrRLe0i9WGvK8GGNbYjHOUvHREocApRd5piOA=
 github.com/GigaDesk/eardrum-graph v1.0.1/go.mod h1:we7J9XJ+Hsc/mhd1WvfA++72qSkaMWOcQKBjkWSa3d8=
-github.com/GigaDesk/eardrum-prefix v1.0.1 h1:jRRMh/7YPkEB73mOWR8XPB+vN/Qacbjl36p0MYXart8=
-github.com/GigaDesk/eardrum-prefix v1.0.1/go.mod h1:5Z5DptQSGuVsOQ16jKNtmSu8wQ8btEoH/o1zwbpP6hA=
 github.com/GigaDesk/eardrum-prefix v1.0.2 h1:GsLn7fuQ+N8UehBKbS0ZdcAzudEJ4+Gc1gSrDoziLx0=
 github.com/GigaDesk/eardrum-prefix v1.0.2/go.mod h1:5Z5DptQSGuVsOQ16jKNtmSu8wQ8btEoH/o1zwbpP6hA=
 github.com/Masterminds/goutils v1.1.1 h1:5nUrii3FMTL5diU80unEVvNevw1nH4+ZV4DSLVJLSYI=
