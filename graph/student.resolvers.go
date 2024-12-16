@@ -58,9 +58,9 @@ func (r *mutationResolver) AddStudents(ctx context.Context, students []*model.Ne
 	//a slice of non repeated registration numbers
 	var registration_numbers []string
 	for _, student := range students {
-        
-		//validate new student	
-		if err:=student.Validate(); err!=nil{
+
+		//validate new student
+		if err := student.Validate(); err != nil {
 			return nil, err
 		}
 
@@ -134,7 +134,7 @@ func (r *mutationResolver) StudentLogin(ctx context.Context, input model.Student
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
 	//validate student login inputs
-	if err := input.Validate(); err!= nil{
+	if err := input.Validate(); err != nil {
 		return nil, err
 	}
 	//declare a student variable
@@ -218,11 +218,11 @@ func (r *mutationResolver) RequestStudentPasswordReset(ctx context.Context, scho
 		return nil, err
 	}
 	//validate phone number
-	if err:= validate.ValidatePhoneNumber(phoneNumber); err !=nil {
+	if err := validate.ValidatePhoneNumber(phoneNumber); err != nil {
 		return nil, err
 	}
 	//validate otp
-	if err:= validate.ValidateOtp(otp); err != nil {
+	if err := validate.ValidateOtp(otp); err != nil {
 		return nil, err
 	}
 	//prefix registration number with school id
@@ -280,9 +280,9 @@ func (r *mutationResolver) ResetStudentPassword(ctx context.Context, newPassword
 	if err != nil {
 		errors.New("could not access student's id!")
 	}
-    // validate new password
-	if err:= validate.ValidatePassword(newPassword); err!=nil{
-    return nil, err
+	// validate new password
+	if err := validate.ValidatePassword(newPassword); err != nil {
+		return nil, err
 	}
 	var student *model.Student
 	//fetch the record to be updated from the database
@@ -364,8 +364,8 @@ func (r *studentProfileResolver) School(ctx context.Context, obj *model.StudentP
 		return nil, err
 	}
 	id, _ := user.GetID()
-	
-	school, err :=neo4jschool.RetrieveStudentSchool(r.Neo4j, obj.ID)
+
+	school, err := neo4jschool.RetrieveStudentSchool(r.Neo4j, obj.ID)
 	if err != nil {
 		log.Error().Int("id", id).Str("role", user.GetRole()).Msg(err.Error())
 		return nil, errors.New("could not access schools profile!")
