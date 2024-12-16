@@ -77,6 +77,7 @@ input RefreshTokenInput {
 extend type Query {
   schoolPhoneNumberExists(phone_number: String!): PhoneNumberExists!
   getSchoolProfile: SchoolProfile
+  getSchoolsProfile: [SchoolProfile!]
 }
 
 extend type Mutation {
