@@ -16,6 +16,7 @@ import (
 	"github.com/GigaDesk/eardrum-server/shutdown"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 )
 
@@ -53,6 +54,13 @@ func main() {
 
 	port := defaultPort
 	router := chi.NewRouter()
+	
+	c := cors.New(cors.Options{
+        AllowedOrigins:   []string{"*"},
+		AllowedHeaders:   []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"}, // Include "Authorization"
+	})
+    
+	router.Use(c.Handler)
 	router.Use(auth.Middleware())
 
 	server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{Sql: &postgresInstance.Dborm, Neo4j: &neo4jInstance }}))
