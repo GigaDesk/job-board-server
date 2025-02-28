@@ -41,21 +41,27 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	AddAdminPayload() AddAdminPayloadResolver
 	AddJobPayload() AddJobPayloadResolver
 	AddSchoolPayload() AddSchoolPayloadResolver
 	AddStudentPayload() AddStudentPayloadResolver
+	AddUnverifiedAdminPayload() AddUnverifiedAdminPayloadResolver
 	AddUnverifiedSchoolPayload() AddUnverifiedSchoolPayloadResolver
+	DeleteAdminPayload() DeleteAdminPayloadResolver
 	DeleteJobPayload() DeleteJobPayloadResolver
 	DeleteSchoolPayload() DeleteSchoolPayloadResolver
 	DeleteStudentPayload() DeleteStudentPayloadResolver
+	DeleteUnverifiedAdminPayload() DeleteUnverifiedAdminPayloadResolver
 	DeleteUnverifiedSchoolPayload() DeleteUnverifiedSchoolPayloadResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 	SchoolProfile() SchoolProfileResolver
 	StudentProfile() StudentProfileResolver
+	UpdateAdminPayload() UpdateAdminPayloadResolver
 	UpdateJobPayload() UpdateJobPayloadResolver
 	UpdateSchoolPayload() UpdateSchoolPayloadResolver
 	UpdateStudentPayload() UpdateStudentPayloadResolver
+	UpdateUnverifiedAdminPayload() UpdateUnverifiedAdminPayloadResolver
 	UpdateUnverifiedSchoolPayload() UpdateUnverifiedSchoolPayloadResolver
 }
 
@@ -63,6 +69,11 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	AddAdminPayload struct {
+		Admin    func(childComplexity int, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) int
+		Affected func(childComplexity int) int
+	}
+
 	AddJobPayload struct {
 		Affected func(childComplexity int) int
 		Job      func(childComplexity int, filter *model.JobFiltersInput, order *model.JobOrder, first *int, offset *int, group []model.JobGroup) int
@@ -78,9 +89,44 @@ type ComplexityRoot struct {
 		Student  func(childComplexity int, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) int
 	}
 
+	AddUnverifiedAdminPayload struct {
+		Affected        func(childComplexity int) int
+		UnverifiedAdmin func(childComplexity int, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) int
+	}
+
 	AddUnverifiedSchoolPayload struct {
 		Affected         func(childComplexity int) int
 		UnverifiedSchool func(childComplexity int, filter *model.UnverifiedSchoolFiltersInput, order *model.UnverifiedSchoolOrder, first *int, offset *int, group []model.UnverifiedSchoolGroup) int
+	}
+
+	Admin struct {
+		CreatedAt   func(childComplexity int) int
+		DeletedAt   func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Password    func(childComplexity int) int
+		PhoneNumber func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+	}
+
+	AdminProfile struct {
+		CreatedAt   func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		PhoneNumber func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+	}
+
+	AdminQueryResult struct {
+		Count      func(childComplexity int) int
+		Data       func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	DeleteAdminPayload struct {
+		Admin func(childComplexity int, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) int
+		Count func(childComplexity int) int
+		Msg   func(childComplexity int) int
 	}
 
 	DeleteJobPayload struct {
@@ -99,6 +145,12 @@ type ComplexityRoot struct {
 		Count   func(childComplexity int) int
 		Msg     func(childComplexity int) int
 		Student func(childComplexity int, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) int
+	}
+
+	DeleteUnverifiedAdminPayload struct {
+		Count           func(childComplexity int) int
+		Msg             func(childComplexity int) int
+		UnverifiedAdmin func(childComplexity int, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) int
 	}
 
 	DeleteUnverifiedSchoolPayload struct {
@@ -134,32 +186,44 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		AddAdmin                    func(childComplexity int, input []*model.AdminInput) int
 		AddJob                      func(childComplexity int, input []*model.JobInput) int
 		AddSchool                   func(childComplexity int, input []*model.SchoolInput) int
 		AddStudent                  func(childComplexity int, input []*model.StudentInput) int
 		AddStudents                 func(childComplexity int, students []*model.NewStudent) int
+		AddUnverifiedAdmin          func(childComplexity int, input []*model.UnverifiedAdminInput) int
 		AddUnverifiedSchool         func(childComplexity int, input []*model.UnverifiedSchoolInput) int
+		AdminLogin                  func(childComplexity int, input model.AdminLogin) int
+		CreateAdmin                 func(childComplexity int, input model.NewAdmin) int
 		CreateDummy                 func(childComplexity int, name string) int
 		CreateJob                   func(childComplexity int, input model.NewJob) int
 		CreateSchool                func(childComplexity int, input model.NewSchool) int
+		DeleteAdmin                 func(childComplexity int, filter model.AdminFiltersInput) int
 		DeleteJob                   func(childComplexity int, filter model.JobFiltersInput) int
 		DeleteSchool                func(childComplexity int, filter model.SchoolFiltersInput) int
 		DeleteStudent               func(childComplexity int, filter model.StudentFiltersInput) int
+		DeleteUnverifiedAdmin       func(childComplexity int, filter model.UnverifiedAdminFiltersInput) int
 		DeleteUnverifiedSchool      func(childComplexity int, filter model.UnverifiedSchoolFiltersInput) int
+		ForgotAdminPassword         func(childComplexity int, phoneNumber string) int
 		ForgotSchoolPassword        func(childComplexity int, phoneNumber string) int
 		ForgotStudentPassword       func(childComplexity int, schoolid int, registrationNumber string) int
 		RefreshToken                func(childComplexity int, input *model.RefreshTokenInput) int
+		RequestAdminPasswordReset   func(childComplexity int, input *model.Verificationinfo) int
 		RequestSchoolPasswordReset  func(childComplexity int, input *model.Verificationinfo) int
 		RequestStudentPasswordReset func(childComplexity int, schoolid int, registrationNumber string, phoneNumber string, otp string) int
+		ResetAdminPassword          func(childComplexity int, newPassword string) int
 		ResetSchoolPassword         func(childComplexity int, newPassword string) int
 		ResetStudentPassword        func(childComplexity int, newPassword string) int
 		SchoolLogin                 func(childComplexity int, input model.SchoolLogin) int
 		SendCode                    func(childComplexity int, phoneNumber string) int
 		StudentLogin                func(childComplexity int, input model.StudentLogin) int
+		UpdateAdmin                 func(childComplexity int, input model.UpdateAdminInput) int
 		UpdateJob                   func(childComplexity int, input model.UpdateJobInput) int
 		UpdateSchool                func(childComplexity int, input model.UpdateSchoolInput) int
 		UpdateStudent               func(childComplexity int, input model.UpdateStudentInput) int
+		UpdateUnverifiedAdmin       func(childComplexity int, input model.UpdateUnverifiedAdminInput) int
 		UpdateUnverifiedSchool      func(childComplexity int, input model.UpdateUnverifiedSchoolInput) int
+		VerifyAdmin                 func(childComplexity int, input model.Verificationinfo) int
 		VerifySchool                func(childComplexity int, input model.Verificationinfo) int
 	}
 
@@ -169,6 +233,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		AdminPhoneNumberExists  func(childComplexity int, phoneNumber string) int
+		GetAdmin                func(childComplexity int, id int) int
 		GetDummy                func(childComplexity int, id *int) int
 		GetDummys               func(childComplexity int) int
 		GetJob                  func(childComplexity int, id int) int
@@ -177,10 +243,14 @@ type ComplexityRoot struct {
 		GetSchoolsProfile       func(childComplexity int) int
 		GetStudent              func(childComplexity int, id int) int
 		GetStudentProfile       func(childComplexity int) int
+		GetUnverifiedAdmin      func(childComplexity int, id int) int
 		GetUnverifiedSchool     func(childComplexity int, id int) int
+		GetadminProfile         func(childComplexity int) int
+		QueryAdmin              func(childComplexity int, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) int
 		QueryJob                func(childComplexity int, filter *model.JobFiltersInput, order *model.JobOrder, first *int, offset *int, group []model.JobGroup) int
 		QuerySchool             func(childComplexity int, filter *model.SchoolFiltersInput, order *model.SchoolOrder, first *int, offset *int, group []model.SchoolGroup) int
 		QueryStudent            func(childComplexity int, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) int
+		QueryUnverifiedAdmin    func(childComplexity int, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) int
 		QueryUnverifiedSchool   func(childComplexity int, filter *model.UnverifiedSchoolFiltersInput, order *model.UnverifiedSchoolOrder, first *int, offset *int, group []model.UnverifiedSchoolGroup) int
 		SchoolPhoneNumberExists func(childComplexity int, phoneNumber string) int
 	}
@@ -254,6 +324,22 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
+	UnverifiedAdmin struct {
+		CreatedAt   func(childComplexity int) int
+		DeletedAt   func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Name        func(childComplexity int) int
+		Password    func(childComplexity int) int
+		PhoneNumber func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+	}
+
+	UnverifiedAdminQueryResult struct {
+		Count      func(childComplexity int) int
+		Data       func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
 	UnverifiedSchool struct {
 		Badge       func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
@@ -270,6 +356,12 @@ type ComplexityRoot struct {
 		Count      func(childComplexity int) int
 		Data       func(childComplexity int) int
 		TotalCount func(childComplexity int) int
+	}
+
+	UpdateAdminPayload struct {
+		Admin    func(childComplexity int, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) int
+		Affected func(childComplexity int) int
+		Count    func(childComplexity int) int
 	}
 
 	UpdateJobPayload struct {
@@ -290,6 +382,12 @@ type ComplexityRoot struct {
 		Student  func(childComplexity int, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) int
 	}
 
+	UpdateUnverifiedAdminPayload struct {
+		Affected        func(childComplexity int) int
+		Count           func(childComplexity int) int
+		UnverifiedAdmin func(childComplexity int, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) int
+	}
+
 	UpdateUnverifiedSchoolPayload struct {
 		Affected         func(childComplexity int) int
 		Count            func(childComplexity int) int
@@ -297,6 +395,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type AddAdminPayloadResolver interface {
+	Admin(ctx context.Context, obj *model.AddAdminPayload, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
+}
 type AddJobPayloadResolver interface {
 	Job(ctx context.Context, obj *model.AddJobPayload, filter *model.JobFiltersInput, order *model.JobOrder, first *int, offset *int, group []model.JobGroup) (*model.JobQueryResult, error)
 }
@@ -306,8 +407,14 @@ type AddSchoolPayloadResolver interface {
 type AddStudentPayloadResolver interface {
 	Student(ctx context.Context, obj *model.AddStudentPayload, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) (*model.StudentQueryResult, error)
 }
+type AddUnverifiedAdminPayloadResolver interface {
+	UnverifiedAdmin(ctx context.Context, obj *model.AddUnverifiedAdminPayload, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) (*model.UnverifiedAdminQueryResult, error)
+}
 type AddUnverifiedSchoolPayloadResolver interface {
 	UnverifiedSchool(ctx context.Context, obj *model.AddUnverifiedSchoolPayload, filter *model.UnverifiedSchoolFiltersInput, order *model.UnverifiedSchoolOrder, first *int, offset *int, group []model.UnverifiedSchoolGroup) (*model.UnverifiedSchoolQueryResult, error)
+}
+type DeleteAdminPayloadResolver interface {
+	Admin(ctx context.Context, obj *model.DeleteAdminPayload, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
 }
 type DeleteJobPayloadResolver interface {
 	Job(ctx context.Context, obj *model.DeleteJobPayload, filter *model.JobFiltersInput, order *model.JobOrder, first *int, offset *int, group []model.JobGroup) (*model.JobQueryResult, error)
@@ -318,11 +425,20 @@ type DeleteSchoolPayloadResolver interface {
 type DeleteStudentPayloadResolver interface {
 	Student(ctx context.Context, obj *model.DeleteStudentPayload, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) (*model.StudentQueryResult, error)
 }
+type DeleteUnverifiedAdminPayloadResolver interface {
+	UnverifiedAdmin(ctx context.Context, obj *model.DeleteUnverifiedAdminPayload, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) (*model.UnverifiedAdminQueryResult, error)
+}
 type DeleteUnverifiedSchoolPayloadResolver interface {
 	UnverifiedSchool(ctx context.Context, obj *model.DeleteUnverifiedSchoolPayload, filter *model.UnverifiedSchoolFiltersInput, order *model.UnverifiedSchoolOrder, first *int, offset *int, group []model.UnverifiedSchoolGroup) (*model.UnverifiedSchoolQueryResult, error)
 }
 type MutationResolver interface {
 	CreateDummy(ctx context.Context, name string) (*model.Dummy, error)
+	CreateAdmin(ctx context.Context, input model.NewAdmin) (*model.UnverifiedAdmin, error)
+	VerifyAdmin(ctx context.Context, input model.Verificationinfo) (*model.Admin, error)
+	AdminLogin(ctx context.Context, input model.AdminLogin) (*string, error)
+	ForgotAdminPassword(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error)
+	RequestAdminPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error)
+	ResetAdminPassword(ctx context.Context, newPassword string) (*model.Admin, error)
 	CreateJob(ctx context.Context, input model.NewJob) (*model.Job, error)
 	CreateSchool(ctx context.Context, input model.NewSchool) (*model.UnverifiedSchool, error)
 	VerifySchool(ctx context.Context, input model.Verificationinfo) (*model.School, error)
@@ -337,6 +453,9 @@ type MutationResolver interface {
 	ForgotStudentPassword(ctx context.Context, schoolid int, registrationNumber string) (*model.SendCodeStatus, error)
 	RequestStudentPasswordReset(ctx context.Context, schoolid int, registrationNumber string, phoneNumber string, otp string) (*string, error)
 	ResetStudentPassword(ctx context.Context, newPassword string) (*model.Student, error)
+	AddAdmin(ctx context.Context, input []*model.AdminInput) (*model.AddAdminPayload, error)
+	UpdateAdmin(ctx context.Context, input model.UpdateAdminInput) (*model.UpdateAdminPayload, error)
+	DeleteAdmin(ctx context.Context, filter model.AdminFiltersInput) (*model.DeleteAdminPayload, error)
 	AddJob(ctx context.Context, input []*model.JobInput) (*model.AddJobPayload, error)
 	UpdateJob(ctx context.Context, input model.UpdateJobInput) (*model.UpdateJobPayload, error)
 	DeleteJob(ctx context.Context, filter model.JobFiltersInput) (*model.DeleteJobPayload, error)
@@ -346,6 +465,9 @@ type MutationResolver interface {
 	AddStudent(ctx context.Context, input []*model.StudentInput) (*model.AddStudentPayload, error)
 	UpdateStudent(ctx context.Context, input model.UpdateStudentInput) (*model.UpdateStudentPayload, error)
 	DeleteStudent(ctx context.Context, filter model.StudentFiltersInput) (*model.DeleteStudentPayload, error)
+	AddUnverifiedAdmin(ctx context.Context, input []*model.UnverifiedAdminInput) (*model.AddUnverifiedAdminPayload, error)
+	UpdateUnverifiedAdmin(ctx context.Context, input model.UpdateUnverifiedAdminInput) (*model.UpdateUnverifiedAdminPayload, error)
+	DeleteUnverifiedAdmin(ctx context.Context, filter model.UnverifiedAdminFiltersInput) (*model.DeleteUnverifiedAdminPayload, error)
 	AddUnverifiedSchool(ctx context.Context, input []*model.UnverifiedSchoolInput) (*model.AddUnverifiedSchoolPayload, error)
 	UpdateUnverifiedSchool(ctx context.Context, input model.UpdateUnverifiedSchoolInput) (*model.UpdateUnverifiedSchoolPayload, error)
 	DeleteUnverifiedSchool(ctx context.Context, filter model.UnverifiedSchoolFiltersInput) (*model.DeleteUnverifiedSchoolPayload, error)
@@ -353,16 +475,22 @@ type MutationResolver interface {
 type QueryResolver interface {
 	GetDummys(ctx context.Context) ([]*model.Dummy, error)
 	GetDummy(ctx context.Context, id *int) (*model.Dummy, error)
+	AdminPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error)
+	GetadminProfile(ctx context.Context) (*model.SchoolProfile, error)
 	SchoolPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error)
 	GetSchoolProfile(ctx context.Context) (*model.SchoolProfile, error)
 	GetSchoolsProfile(ctx context.Context) ([]*model.SchoolProfile, error)
 	GetStudentProfile(ctx context.Context) (*model.StudentProfile, error)
+	GetAdmin(ctx context.Context, id int) (*model.Admin, error)
+	QueryAdmin(ctx context.Context, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
 	GetJob(ctx context.Context, id int) (*model.Job, error)
 	QueryJob(ctx context.Context, filter *model.JobFiltersInput, order *model.JobOrder, first *int, offset *int, group []model.JobGroup) (*model.JobQueryResult, error)
 	GetSchool(ctx context.Context, id int) (*model.School, error)
 	QuerySchool(ctx context.Context, filter *model.SchoolFiltersInput, order *model.SchoolOrder, first *int, offset *int, group []model.SchoolGroup) (*model.SchoolQueryResult, error)
 	GetStudent(ctx context.Context, id int) (*model.Student, error)
 	QueryStudent(ctx context.Context, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) (*model.StudentQueryResult, error)
+	GetUnverifiedAdmin(ctx context.Context, id int) (*model.UnverifiedAdmin, error)
+	QueryUnverifiedAdmin(ctx context.Context, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) (*model.UnverifiedAdminQueryResult, error)
 	GetUnverifiedSchool(ctx context.Context, id int) (*model.UnverifiedSchool, error)
 	QueryUnverifiedSchool(ctx context.Context, filter *model.UnverifiedSchoolFiltersInput, order *model.UnverifiedSchoolOrder, first *int, offset *int, group []model.UnverifiedSchoolGroup) (*model.UnverifiedSchoolQueryResult, error)
 }
@@ -372,6 +500,9 @@ type SchoolProfileResolver interface {
 type StudentProfileResolver interface {
 	School(ctx context.Context, obj *model.StudentProfile) (*model.SchoolProfile, error)
 }
+type UpdateAdminPayloadResolver interface {
+	Admin(ctx context.Context, obj *model.UpdateAdminPayload, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
+}
 type UpdateJobPayloadResolver interface {
 	Job(ctx context.Context, obj *model.UpdateJobPayload, filter *model.JobFiltersInput, order *model.JobOrder, first *int, offset *int, group []model.JobGroup) (*model.JobQueryResult, error)
 }
@@ -380,6 +511,9 @@ type UpdateSchoolPayloadResolver interface {
 }
 type UpdateStudentPayloadResolver interface {
 	Student(ctx context.Context, obj *model.UpdateStudentPayload, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) (*model.StudentQueryResult, error)
+}
+type UpdateUnverifiedAdminPayloadResolver interface {
+	UnverifiedAdmin(ctx context.Context, obj *model.UpdateUnverifiedAdminPayload, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) (*model.UnverifiedAdminQueryResult, error)
 }
 type UpdateUnverifiedSchoolPayloadResolver interface {
 	UnverifiedSchool(ctx context.Context, obj *model.UpdateUnverifiedSchoolPayload, filter *model.UnverifiedSchoolFiltersInput, order *model.UnverifiedSchoolOrder, first *int, offset *int, group []model.UnverifiedSchoolGroup) (*model.UnverifiedSchoolQueryResult, error)
@@ -403,6 +537,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "AddAdminPayload.admin":
+		if e.complexity.AddAdminPayload.Admin == nil {
+			break
+		}
+
+		args, err := ec.field_AddAdminPayload_admin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.AddAdminPayload.Admin(childComplexity, args["filter"].(*model.AdminFiltersInput), args["order"].(*model.AdminOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.AdminGroup)), true
+
+	case "AddAdminPayload.affected":
+		if e.complexity.AddAdminPayload.Affected == nil {
+			break
+		}
+
+		return e.complexity.AddAdminPayload.Affected(childComplexity), true
 
 	case "AddJobPayload.affected":
 		if e.complexity.AddJobPayload.Affected == nil {
@@ -461,6 +614,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AddStudentPayload.Student(childComplexity, args["filter"].(*model.StudentFiltersInput), args["order"].(*model.StudentOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.StudentGroup)), true
 
+	case "AddUnverifiedAdminPayload.affected":
+		if e.complexity.AddUnverifiedAdminPayload.Affected == nil {
+			break
+		}
+
+		return e.complexity.AddUnverifiedAdminPayload.Affected(childComplexity), true
+
+	case "AddUnverifiedAdminPayload.unverifiedAdmin":
+		if e.complexity.AddUnverifiedAdminPayload.UnverifiedAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_AddUnverifiedAdminPayload_unverifiedAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.AddUnverifiedAdminPayload.UnverifiedAdmin(childComplexity, args["filter"].(*model.UnverifiedAdminFiltersInput), args["order"].(*model.UnverifiedAdminOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.UnverifiedAdminGroup)), true
+
 	case "AddUnverifiedSchoolPayload.affected":
 		if e.complexity.AddUnverifiedSchoolPayload.Affected == nil {
 			break
@@ -479,6 +651,137 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AddUnverifiedSchoolPayload.UnverifiedSchool(childComplexity, args["filter"].(*model.UnverifiedSchoolFiltersInput), args["order"].(*model.UnverifiedSchoolOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.UnverifiedSchoolGroup)), true
+
+	case "Admin.createdAt":
+		if e.complexity.Admin.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Admin.CreatedAt(childComplexity), true
+
+	case "Admin.deletedAt":
+		if e.complexity.Admin.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.Admin.DeletedAt(childComplexity), true
+
+	case "Admin.id":
+		if e.complexity.Admin.ID == nil {
+			break
+		}
+
+		return e.complexity.Admin.ID(childComplexity), true
+
+	case "Admin.name":
+		if e.complexity.Admin.Name == nil {
+			break
+		}
+
+		return e.complexity.Admin.Name(childComplexity), true
+
+	case "Admin.password":
+		if e.complexity.Admin.Password == nil {
+			break
+		}
+
+		return e.complexity.Admin.Password(childComplexity), true
+
+	case "Admin.phone_number":
+		if e.complexity.Admin.PhoneNumber == nil {
+			break
+		}
+
+		return e.complexity.Admin.PhoneNumber(childComplexity), true
+
+	case "Admin.updatedAt":
+		if e.complexity.Admin.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Admin.UpdatedAt(childComplexity), true
+
+	case "AdminProfile.createdAt":
+		if e.complexity.AdminProfile.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.AdminProfile.CreatedAt(childComplexity), true
+
+	case "AdminProfile.id":
+		if e.complexity.AdminProfile.ID == nil {
+			break
+		}
+
+		return e.complexity.AdminProfile.ID(childComplexity), true
+
+	case "AdminProfile.name":
+		if e.complexity.AdminProfile.Name == nil {
+			break
+		}
+
+		return e.complexity.AdminProfile.Name(childComplexity), true
+
+	case "AdminProfile.phone_number":
+		if e.complexity.AdminProfile.PhoneNumber == nil {
+			break
+		}
+
+		return e.complexity.AdminProfile.PhoneNumber(childComplexity), true
+
+	case "AdminProfile.updatedAt":
+		if e.complexity.AdminProfile.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.AdminProfile.UpdatedAt(childComplexity), true
+
+	case "AdminQueryResult.count":
+		if e.complexity.AdminQueryResult.Count == nil {
+			break
+		}
+
+		return e.complexity.AdminQueryResult.Count(childComplexity), true
+
+	case "AdminQueryResult.data":
+		if e.complexity.AdminQueryResult.Data == nil {
+			break
+		}
+
+		return e.complexity.AdminQueryResult.Data(childComplexity), true
+
+	case "AdminQueryResult.totalCount":
+		if e.complexity.AdminQueryResult.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.AdminQueryResult.TotalCount(childComplexity), true
+
+	case "DeleteAdminPayload.admin":
+		if e.complexity.DeleteAdminPayload.Admin == nil {
+			break
+		}
+
+		args, err := ec.field_DeleteAdminPayload_admin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.DeleteAdminPayload.Admin(childComplexity, args["filter"].(*model.AdminFiltersInput), args["order"].(*model.AdminOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.AdminGroup)), true
+
+	case "DeleteAdminPayload.count":
+		if e.complexity.DeleteAdminPayload.Count == nil {
+			break
+		}
+
+		return e.complexity.DeleteAdminPayload.Count(childComplexity), true
+
+	case "DeleteAdminPayload.msg":
+		if e.complexity.DeleteAdminPayload.Msg == nil {
+			break
+		}
+
+		return e.complexity.DeleteAdminPayload.Msg(childComplexity), true
 
 	case "DeleteJobPayload.count":
 		if e.complexity.DeleteJobPayload.Count == nil {
@@ -557,6 +860,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DeleteStudentPayload.Student(childComplexity, args["filter"].(*model.StudentFiltersInput), args["order"].(*model.StudentOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.StudentGroup)), true
+
+	case "DeleteUnverifiedAdminPayload.count":
+		if e.complexity.DeleteUnverifiedAdminPayload.Count == nil {
+			break
+		}
+
+		return e.complexity.DeleteUnverifiedAdminPayload.Count(childComplexity), true
+
+	case "DeleteUnverifiedAdminPayload.msg":
+		if e.complexity.DeleteUnverifiedAdminPayload.Msg == nil {
+			break
+		}
+
+		return e.complexity.DeleteUnverifiedAdminPayload.Msg(childComplexity), true
+
+	case "DeleteUnverifiedAdminPayload.unverifiedAdmin":
+		if e.complexity.DeleteUnverifiedAdminPayload.UnverifiedAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_DeleteUnverifiedAdminPayload_unverifiedAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.DeleteUnverifiedAdminPayload.UnverifiedAdmin(childComplexity, args["filter"].(*model.UnverifiedAdminFiltersInput), args["order"].(*model.UnverifiedAdminOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.UnverifiedAdminGroup)), true
 
 	case "DeleteUnverifiedSchoolPayload.count":
 		if e.complexity.DeleteUnverifiedSchoolPayload.Count == nil {
@@ -703,6 +1032,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.JobQueryResult.TotalCount(childComplexity), true
 
+	case "Mutation.addAdmin":
+		if e.complexity.Mutation.AddAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddAdmin(childComplexity, args["input"].([]*model.AdminInput)), true
+
 	case "Mutation.addJob":
 		if e.complexity.Mutation.AddJob == nil {
 			break
@@ -751,6 +1092,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AddStudents(childComplexity, args["students"].([]*model.NewStudent)), true
 
+	case "Mutation.addUnverifiedAdmin":
+		if e.complexity.Mutation.AddUnverifiedAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addUnverifiedAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddUnverifiedAdmin(childComplexity, args["input"].([]*model.UnverifiedAdminInput)), true
+
 	case "Mutation.addUnverifiedSchool":
 		if e.complexity.Mutation.AddUnverifiedSchool == nil {
 			break
@@ -762,6 +1115,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddUnverifiedSchool(childComplexity, args["input"].([]*model.UnverifiedSchoolInput)), true
+
+	case "Mutation.adminLogin":
+		if e.complexity.Mutation.AdminLogin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_adminLogin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AdminLogin(childComplexity, args["input"].(model.AdminLogin)), true
+
+	case "Mutation.createAdmin":
+		if e.complexity.Mutation.CreateAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateAdmin(childComplexity, args["input"].(model.NewAdmin)), true
 
 	case "Mutation.createDummy":
 		if e.complexity.Mutation.CreateDummy == nil {
@@ -799,6 +1176,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateSchool(childComplexity, args["input"].(model.NewSchool)), true
 
+	case "Mutation.deleteAdmin":
+		if e.complexity.Mutation.DeleteAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteAdmin(childComplexity, args["filter"].(model.AdminFiltersInput)), true
+
 	case "Mutation.deleteJob":
 		if e.complexity.Mutation.DeleteJob == nil {
 			break
@@ -835,6 +1224,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteStudent(childComplexity, args["filter"].(model.StudentFiltersInput)), true
 
+	case "Mutation.deleteUnverifiedAdmin":
+		if e.complexity.Mutation.DeleteUnverifiedAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteUnverifiedAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteUnverifiedAdmin(childComplexity, args["filter"].(model.UnverifiedAdminFiltersInput)), true
+
 	case "Mutation.deleteUnverifiedSchool":
 		if e.complexity.Mutation.DeleteUnverifiedSchool == nil {
 			break
@@ -846,6 +1247,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteUnverifiedSchool(childComplexity, args["filter"].(model.UnverifiedSchoolFiltersInput)), true
+
+	case "Mutation.forgotAdminPassword":
+		if e.complexity.Mutation.ForgotAdminPassword == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_forgotAdminPassword_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ForgotAdminPassword(childComplexity, args["phone_number"].(string)), true
 
 	case "Mutation.forgotSchoolPassword":
 		if e.complexity.Mutation.ForgotSchoolPassword == nil {
@@ -883,6 +1296,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RefreshToken(childComplexity, args["input"].(*model.RefreshTokenInput)), true
 
+	case "Mutation.requestAdminPasswordReset":
+		if e.complexity.Mutation.RequestAdminPasswordReset == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_requestAdminPasswordReset_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RequestAdminPasswordReset(childComplexity, args["input"].(*model.Verificationinfo)), true
+
 	case "Mutation.requestSchoolPasswordReset":
 		if e.complexity.Mutation.RequestSchoolPasswordReset == nil {
 			break
@@ -906,6 +1331,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RequestStudentPasswordReset(childComplexity, args["schoolid"].(int), args["registration_number"].(string), args["phone_number"].(string), args["otp"].(string)), true
+
+	case "Mutation.resetAdminPassword":
+		if e.complexity.Mutation.ResetAdminPassword == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_resetAdminPassword_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ResetAdminPassword(childComplexity, args["new_password"].(string)), true
 
 	case "Mutation.resetSchoolPassword":
 		if e.complexity.Mutation.ResetSchoolPassword == nil {
@@ -967,6 +1404,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.StudentLogin(childComplexity, args["input"].(model.StudentLogin)), true
 
+	case "Mutation.updateAdmin":
+		if e.complexity.Mutation.UpdateAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateAdmin(childComplexity, args["input"].(model.UpdateAdminInput)), true
+
 	case "Mutation.updateJob":
 		if e.complexity.Mutation.UpdateJob == nil {
 			break
@@ -1003,6 +1452,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateStudent(childComplexity, args["input"].(model.UpdateStudentInput)), true
 
+	case "Mutation.updateUnverifiedAdmin":
+		if e.complexity.Mutation.UpdateUnverifiedAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUnverifiedAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUnverifiedAdmin(childComplexity, args["input"].(model.UpdateUnverifiedAdminInput)), true
+
 	case "Mutation.updateUnverifiedSchool":
 		if e.complexity.Mutation.UpdateUnverifiedSchool == nil {
 			break
@@ -1014,6 +1475,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateUnverifiedSchool(childComplexity, args["input"].(model.UpdateUnverifiedSchoolInput)), true
+
+	case "Mutation.verifyAdmin":
+		if e.complexity.Mutation.VerifyAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_verifyAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.VerifyAdmin(childComplexity, args["input"].(model.Verificationinfo)), true
 
 	case "Mutation.verifySchool":
 		if e.complexity.Mutation.VerifySchool == nil {
@@ -1040,6 +1513,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.PhoneNumberExists.Verified(childComplexity), true
+
+	case "Query.adminPhoneNumberExists":
+		if e.complexity.Query.AdminPhoneNumberExists == nil {
+			break
+		}
+
+		args, err := ec.field_Query_adminPhoneNumberExists_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.AdminPhoneNumberExists(childComplexity, args["phone_number"].(string)), true
+
+	case "Query.getAdmin":
+		if e.complexity.Query.GetAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetAdmin(childComplexity, args["id"].(int)), true
 
 	case "Query.getDummy":
 		if e.complexity.Query.GetDummy == nil {
@@ -1117,6 +1614,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetStudentProfile(childComplexity), true
 
+	case "Query.getUnverifiedAdmin":
+		if e.complexity.Query.GetUnverifiedAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getUnverifiedAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetUnverifiedAdmin(childComplexity, args["id"].(int)), true
+
 	case "Query.getUnverifiedSchool":
 		if e.complexity.Query.GetUnverifiedSchool == nil {
 			break
@@ -1128,6 +1637,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetUnverifiedSchool(childComplexity, args["id"].(int)), true
+
+	case "Query.getadminProfile":
+		if e.complexity.Query.GetadminProfile == nil {
+			break
+		}
+
+		return e.complexity.Query.GetadminProfile(childComplexity), true
+
+	case "Query.queryAdmin":
+		if e.complexity.Query.QueryAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Query_queryAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.QueryAdmin(childComplexity, args["filter"].(*model.AdminFiltersInput), args["order"].(*model.AdminOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.AdminGroup)), true
 
 	case "Query.queryJob":
 		if e.complexity.Query.QueryJob == nil {
@@ -1164,6 +1692,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.QueryStudent(childComplexity, args["filter"].(*model.StudentFiltersInput), args["order"].(*model.StudentOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.StudentGroup)), true
+
+	case "Query.queryUnverifiedAdmin":
+		if e.complexity.Query.QueryUnverifiedAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_Query_queryUnverifiedAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.QueryUnverifiedAdmin(childComplexity, args["filter"].(*model.UnverifiedAdminFiltersInput), args["order"].(*model.UnverifiedAdminOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.UnverifiedAdminGroup)), true
 
 	case "Query.queryUnverifiedSchool":
 		if e.complexity.Query.QueryUnverifiedSchool == nil {
@@ -1525,6 +2065,76 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StudentQueryResult.TotalCount(childComplexity), true
 
+	case "UnverifiedAdmin.createdAt":
+		if e.complexity.UnverifiedAdmin.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.UnverifiedAdmin.CreatedAt(childComplexity), true
+
+	case "UnverifiedAdmin.deletedAt":
+		if e.complexity.UnverifiedAdmin.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.UnverifiedAdmin.DeletedAt(childComplexity), true
+
+	case "UnverifiedAdmin.id":
+		if e.complexity.UnverifiedAdmin.ID == nil {
+			break
+		}
+
+		return e.complexity.UnverifiedAdmin.ID(childComplexity), true
+
+	case "UnverifiedAdmin.name":
+		if e.complexity.UnverifiedAdmin.Name == nil {
+			break
+		}
+
+		return e.complexity.UnverifiedAdmin.Name(childComplexity), true
+
+	case "UnverifiedAdmin.password":
+		if e.complexity.UnverifiedAdmin.Password == nil {
+			break
+		}
+
+		return e.complexity.UnverifiedAdmin.Password(childComplexity), true
+
+	case "UnverifiedAdmin.phone_number":
+		if e.complexity.UnverifiedAdmin.PhoneNumber == nil {
+			break
+		}
+
+		return e.complexity.UnverifiedAdmin.PhoneNumber(childComplexity), true
+
+	case "UnverifiedAdmin.updatedAt":
+		if e.complexity.UnverifiedAdmin.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.UnverifiedAdmin.UpdatedAt(childComplexity), true
+
+	case "UnverifiedAdminQueryResult.count":
+		if e.complexity.UnverifiedAdminQueryResult.Count == nil {
+			break
+		}
+
+		return e.complexity.UnverifiedAdminQueryResult.Count(childComplexity), true
+
+	case "UnverifiedAdminQueryResult.data":
+		if e.complexity.UnverifiedAdminQueryResult.Data == nil {
+			break
+		}
+
+		return e.complexity.UnverifiedAdminQueryResult.Data(childComplexity), true
+
+	case "UnverifiedAdminQueryResult.totalCount":
+		if e.complexity.UnverifiedAdminQueryResult.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.UnverifiedAdminQueryResult.TotalCount(childComplexity), true
+
 	case "UnverifiedSchool.badge":
 		if e.complexity.UnverifiedSchool.Badge == nil {
 			break
@@ -1609,6 +2219,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UnverifiedSchoolQueryResult.TotalCount(childComplexity), true
 
+	case "UpdateAdminPayload.admin":
+		if e.complexity.UpdateAdminPayload.Admin == nil {
+			break
+		}
+
+		args, err := ec.field_UpdateAdminPayload_admin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.UpdateAdminPayload.Admin(childComplexity, args["filter"].(*model.AdminFiltersInput), args["order"].(*model.AdminOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.AdminGroup)), true
+
+	case "UpdateAdminPayload.affected":
+		if e.complexity.UpdateAdminPayload.Affected == nil {
+			break
+		}
+
+		return e.complexity.UpdateAdminPayload.Affected(childComplexity), true
+
+	case "UpdateAdminPayload.count":
+		if e.complexity.UpdateAdminPayload.Count == nil {
+			break
+		}
+
+		return e.complexity.UpdateAdminPayload.Count(childComplexity), true
+
 	case "UpdateJobPayload.affected":
 		if e.complexity.UpdateJobPayload.Affected == nil {
 			break
@@ -1687,6 +2323,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UpdateStudentPayload.Student(childComplexity, args["filter"].(*model.StudentFiltersInput), args["order"].(*model.StudentOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.StudentGroup)), true
 
+	case "UpdateUnverifiedAdminPayload.affected":
+		if e.complexity.UpdateUnverifiedAdminPayload.Affected == nil {
+			break
+		}
+
+		return e.complexity.UpdateUnverifiedAdminPayload.Affected(childComplexity), true
+
+	case "UpdateUnverifiedAdminPayload.count":
+		if e.complexity.UpdateUnverifiedAdminPayload.Count == nil {
+			break
+		}
+
+		return e.complexity.UpdateUnverifiedAdminPayload.Count(childComplexity), true
+
+	case "UpdateUnverifiedAdminPayload.unverifiedAdmin":
+		if e.complexity.UpdateUnverifiedAdminPayload.UnverifiedAdmin == nil {
+			break
+		}
+
+		args, err := ec.field_UpdateUnverifiedAdminPayload_unverifiedAdmin_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.UpdateUnverifiedAdminPayload.UnverifiedAdmin(childComplexity, args["filter"].(*model.UnverifiedAdminFiltersInput), args["order"].(*model.UnverifiedAdminOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.UnverifiedAdminGroup)), true
+
 	case "UpdateUnverifiedSchoolPayload.affected":
 		if e.complexity.UpdateUnverifiedSchoolPayload.Affected == nil {
 			break
@@ -1721,6 +2383,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAdminFiltersInput,
+		ec.unmarshalInputAdminInput,
+		ec.unmarshalInputAdminLogin,
+		ec.unmarshalInputAdminOrder,
+		ec.unmarshalInputAdminPatch,
 		ec.unmarshalInputBooleanFilterInput,
 		ec.unmarshalInputFloatFilterBetween,
 		ec.unmarshalInputFloatFilterInput,
@@ -1731,6 +2398,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputJobInput,
 		ec.unmarshalInputJobOrder,
 		ec.unmarshalInputJobPatch,
+		ec.unmarshalInputNewAdmin,
 		ec.unmarshalInputNewJob,
 		ec.unmarshalInputNewSchool,
 		ec.unmarshalInputNewStudent,
@@ -1752,13 +2420,19 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputStudentPatch,
 		ec.unmarshalInputTimeFilterBetween,
 		ec.unmarshalInputTimeFilterInput,
+		ec.unmarshalInputUnverifiedAdminFiltersInput,
+		ec.unmarshalInputUnverifiedAdminInput,
+		ec.unmarshalInputUnverifiedAdminOrder,
+		ec.unmarshalInputUnverifiedAdminPatch,
 		ec.unmarshalInputUnverifiedSchoolFiltersInput,
 		ec.unmarshalInputUnverifiedSchoolInput,
 		ec.unmarshalInputUnverifiedSchoolOrder,
 		ec.unmarshalInputUnverifiedSchoolPatch,
+		ec.unmarshalInputUpdateAdminInput,
 		ec.unmarshalInputUpdateJobInput,
 		ec.unmarshalInputUpdateSchoolInput,
 		ec.unmarshalInputUpdateStudentInput,
+		ec.unmarshalInputUpdateUnverifiedAdminInput,
 		ec.unmarshalInputUpdateUnverifiedSchoolInput,
 		ec.unmarshalInputverificationinfo,
 	)
@@ -1857,7 +2531,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "job.graphqls" "schema.graphqls" "school.graphqls" "student.graphqls"
+//go:embed "admin.graphqls" "job.graphqls" "schema.graphqls" "school.graphqls" "student.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -1869,6 +2543,7 @@ func sourceData(filename string) string {
 }
 
 var sources = []*ast.Source{
+	{Name: "admin.graphqls", Input: sourceData("admin.graphqls"), BuiltIn: false},
 	{Name: "job.graphqls", Input: sourceData("job.graphqls"), BuiltIn: false},
 	{Name: "schema.graphqls", Input: sourceData("schema.graphqls"), BuiltIn: false},
 	{Name: "school.graphqls", Input: sourceData("school.graphqls"), BuiltIn: false},
@@ -2065,6 +2740,145 @@ input TimeFilterBetween{
   start: Time!
   end: Time!
 }
+
+  """
+  Admin Input value to add new Admin
+  """
+  input AdminInput {
+      name: String!  
+      phone_number: String!  
+      password: String!  
+  }
+
+  """
+  Admin Patch value all values are optional to update Admin entities
+  """
+  input AdminPatch {
+      name: String  
+      phone_number: String  
+      password: String  
+  } 
+
+
+    """
+    Update rules for Admin multiupdates simple possible by global filtervalue
+    """
+    input UpdateAdminInput{
+      filter: AdminFiltersInput!
+      set: AdminPatch!
+    }
+
+    """
+    AddAdmin result with filterable data and affected rows
+    """
+    type AddAdminPayload{
+      admin(filter: AdminFiltersInput, order: AdminOrder, first: Int, offset: Int, group: [AdminGroup!]): AdminQueryResult!
+      affected: [Admin!]!
+    }
+
+    """
+    UpdateAdmin result with filterable data and affected rows
+    """
+    type UpdateAdminPayload{
+      admin(filter: AdminFiltersInput, order: AdminOrder, first: Int, offset: Int, group: [AdminGroup!]): AdminQueryResult!
+      """
+      Count of affected updates
+      """
+      count: Int!
+      affected: [Admin!]!
+    }
+
+    """
+    DeleteAdmin result with filterable data and count of affected entries
+    """
+    type DeleteAdminPayload{
+      admin(filter: AdminFiltersInput, order: AdminOrder, first: Int, offset: Int, group: [AdminGroup!]): AdminQueryResult!
+      """
+      Count of deleted Admin entities
+      """
+      count: Int!
+      msg: String
+    }
+
+    """
+    Admin result
+    """
+    type AdminQueryResult{
+      data: [Admin!]!
+      count: Int!
+      totalCount: Int!
+    }
+
+    """
+    for Admin a enum of all orderable entities
+    can be used f.e.: queryAdmin
+    """
+    enum AdminOrderable {
+        id
+        name
+        phone_number
+        password
+    }
+    """
+    Order Admin by asc or desc 
+    """
+    input AdminOrder{
+      asc: AdminOrderable
+      desc: AdminOrderable
+    }
+
+    """
+    Groupable data for  Admin
+    Can be used f.e.: by queryAdmin
+    """
+    enum AdminGroup {
+          id
+          createdAt
+          updatedAt
+          name
+          phone_number
+          password
+    }
+
+    """
+    Filter input selection for Admin
+    Can be used f.e.: by queryAdmin
+    """
+    input AdminFiltersInput{
+          id: IntFilterInput
+          createdAt: TimeFilterInput
+          updatedAt: TimeFilterInput
+          name: StringFilterInput
+          phone_number: StringFilterInput
+          password: StringFilterInput
+      and: [AdminFiltersInput]
+      or: [AdminFiltersInput]
+      not: AdminFiltersInput
+    }
+      extend type Query {
+        """
+        return one Admin selected by PrimaryKey(s)
+        """
+        getAdmin(id: Int!, ): Admin 
+        """
+        return a list of  Admin filterable, pageination, orderbale, groupable ...
+        """
+        queryAdmin(filter: AdminFiltersInput, order: AdminOrder, first: Int, offset: Int, group: [AdminGroup!] ): AdminQueryResult 
+      }
+      extend type Mutation {
+        """
+        Add new Admin
+        """
+        addAdmin(input: [AdminInput!]!): AddAdminPayload 
+        """
+        update Admin filtered by selection and update all matched values
+        """
+        updateAdmin(input: UpdateAdminInput!): UpdateAdminPayload 
+        """
+        delete Admin filtered by selection and delete all matched values
+        """
+        deleteAdmin(filter: AdminFiltersInput!): DeleteAdminPayload 
+      }
 
   """
   Job Input value to add new Job
@@ -2536,6 +3350,145 @@ input TimeFilterBetween{
       }
 
   """
+  UnverifiedAdmin Input value to add new UnverifiedAdmin
+  """
+  input UnverifiedAdminInput {
+      name: String!  
+      phone_number: String!  
+      password: String!  
+  }
+
+  """
+  UnverifiedAdmin Patch value all values are optional to update UnverifiedAdmin entities
+  """
+  input UnverifiedAdminPatch {
+      name: String  
+      phone_number: String  
+      password: String  
+  } 
+
+
+    """
+    Update rules for UnverifiedAdmin multiupdates simple possible by global filtervalue
+    """
+    input UpdateUnverifiedAdminInput{
+      filter: UnverifiedAdminFiltersInput!
+      set: UnverifiedAdminPatch!
+    }
+
+    """
+    AddUnverifiedAdmin result with filterable data and affected rows
+    """
+    type AddUnverifiedAdminPayload{
+      unverifiedAdmin(filter: UnverifiedAdminFiltersInput, order: UnverifiedAdminOrder, first: Int, offset: Int, group: [UnverifiedAdminGroup!]): UnverifiedAdminQueryResult!
+      affected: [UnverifiedAdmin!]!
+    }
+
+    """
+    UpdateUnverifiedAdmin result with filterable data and affected rows
+    """
+    type UpdateUnverifiedAdminPayload{
+      unverifiedAdmin(filter: UnverifiedAdminFiltersInput, order: UnverifiedAdminOrder, first: Int, offset: Int, group: [UnverifiedAdminGroup!]): UnverifiedAdminQueryResult!
+      """
+      Count of affected updates
+      """
+      count: Int!
+      affected: [UnverifiedAdmin!]!
+    }
+
+    """
+    DeleteUnverifiedAdmin result with filterable data and count of affected entries
+    """
+    type DeleteUnverifiedAdminPayload{
+      unverifiedAdmin(filter: UnverifiedAdminFiltersInput, order: UnverifiedAdminOrder, first: Int, offset: Int, group: [UnverifiedAdminGroup!]): UnverifiedAdminQueryResult!
+      """
+      Count of deleted UnverifiedAdmin entities
+      """
+      count: Int!
+      msg: String
+    }
+
+    """
+    UnverifiedAdmin result
+    """
+    type UnverifiedAdminQueryResult{
+      data: [UnverifiedAdmin!]!
+      count: Int!
+      totalCount: Int!
+    }
+
+    """
+    for UnverifiedAdmin a enum of all orderable entities
+    can be used f.e.: queryUnverifiedAdmin
+    """
+    enum UnverifiedAdminOrderable {
+        id
+        name
+        phone_number
+        password
+    }
+    """
+    Order UnverifiedAdmin by asc or desc 
+    """
+    input UnverifiedAdminOrder{
+      asc: UnverifiedAdminOrderable
+      desc: UnverifiedAdminOrderable
+    }
+
+    """
+    Groupable data for  UnverifiedAdmin
+    Can be used f.e.: by queryUnverifiedAdmin
+    """
+    enum UnverifiedAdminGroup {
+          id
+          createdAt
+          updatedAt
+          name
+          phone_number
+          password
+    }
+
+    """
+    Filter input selection for UnverifiedAdmin
+    Can be used f.e.: by queryUnverifiedAdmin
+    """
+    input UnverifiedAdminFiltersInput{
+          id: IntFilterInput
+          createdAt: TimeFilterInput
+          updatedAt: TimeFilterInput
+          name: StringFilterInput
+          phone_number: StringFilterInput
+          password: StringFilterInput
+      and: [UnverifiedAdminFiltersInput]
+      or: [UnverifiedAdminFiltersInput]
+      not: UnverifiedAdminFiltersInput
+    }
+      extend type Query {
+        """
+        return one UnverifiedAdmin selected by PrimaryKey(s)
+        """
+        getUnverifiedAdmin(id: Int!, ): UnverifiedAdmin 
+        """
+        return a list of  UnverifiedAdmin filterable, pageination, orderbale, groupable ...
+        """
+        queryUnverifiedAdmin(filter: UnverifiedAdminFiltersInput, order: UnverifiedAdminOrder, first: Int, offset: Int, group: [UnverifiedAdminGroup!] ): UnverifiedAdminQueryResult 
+      }
+      extend type Mutation {
+        """
+        Add new UnverifiedAdmin
+        """
+        addUnverifiedAdmin(input: [UnverifiedAdminInput!]!): AddUnverifiedAdminPayload 
+        """
+        update UnverifiedAdmin filtered by selection and update all matched values
+        """
+        updateUnverifiedAdmin(input: UpdateUnverifiedAdminInput!): UpdateUnverifiedAdminPayload 
+        """
+        delete UnverifiedAdmin filtered by selection and delete all matched values
+        """
+        deleteUnverifiedAdmin(filter: UnverifiedAdminFiltersInput!): DeleteUnverifiedAdminPayload 
+      }
+
+  """
   UnverifiedSchool Input value to add new UnverifiedSchool
   """
   input UnverifiedSchoolInput {
@@ -2689,6 +3642,101 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_AddAdminPayload_admin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_AddAdminPayload_admin_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_AddAdminPayload_admin_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_AddAdminPayload_admin_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_AddAdminPayload_admin_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_AddAdminPayload_admin_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_AddAdminPayload_admin_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.AdminFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.AdminFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddAdminPayload_admin_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.AdminOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOAdminOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.AdminOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddAdminPayload_admin_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddAdminPayload_admin_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddAdminPayload_admin_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.AdminGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.AdminGroup
+	return zeroVal, nil
+}
 
 func (ec *executionContext) field_AddJobPayload_job_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -2975,6 +4023,101 @@ func (ec *executionContext) field_AddStudentPayload_student_argsGroup(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_AddUnverifiedAdminPayload_unverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_AddUnverifiedAdminPayload_unverifiedAdmin_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_AddUnverifiedAdminPayload_unverifiedAdmin_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_AddUnverifiedAdminPayload_unverifiedAdmin_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_AddUnverifiedAdminPayload_unverifiedAdmin_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_AddUnverifiedAdminPayload_unverifiedAdmin_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_AddUnverifiedAdminPayload_unverifiedAdmin_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnverifiedAdminFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOUnverifiedAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.UnverifiedAdminFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddUnverifiedAdminPayload_unverifiedAdmin_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnverifiedAdminOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOUnverifiedAdminOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.UnverifiedAdminOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddUnverifiedAdminPayload_unverifiedAdmin_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddUnverifiedAdminPayload_unverifiedAdmin_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddUnverifiedAdminPayload_unverifiedAdmin_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.UnverifiedAdminGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOUnverifiedAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.UnverifiedAdminGroup
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_AddUnverifiedSchoolPayload_unverifiedSchool_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3067,6 +4210,101 @@ func (ec *executionContext) field_AddUnverifiedSchoolPayload_unverifiedSchool_ar
 	}
 
 	var zeroVal []model.UnverifiedSchoolGroup
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteAdminPayload_admin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_DeleteAdminPayload_admin_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_DeleteAdminPayload_admin_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_DeleteAdminPayload_admin_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_DeleteAdminPayload_admin_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_DeleteAdminPayload_admin_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_DeleteAdminPayload_admin_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.AdminFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.AdminFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteAdminPayload_admin_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.AdminOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOAdminOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.AdminOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteAdminPayload_admin_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteAdminPayload_admin_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteAdminPayload_admin_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.AdminGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.AdminGroup
 	return zeroVal, nil
 }
 
@@ -3355,6 +4593,101 @@ func (ec *executionContext) field_DeleteStudentPayload_student_argsGroup(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_DeleteUnverifiedAdminPayload_unverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_DeleteUnverifiedAdminPayload_unverifiedAdmin_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_DeleteUnverifiedAdminPayload_unverifiedAdmin_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_DeleteUnverifiedAdminPayload_unverifiedAdmin_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_DeleteUnverifiedAdminPayload_unverifiedAdmin_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_DeleteUnverifiedAdminPayload_unverifiedAdmin_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_DeleteUnverifiedAdminPayload_unverifiedAdmin_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnverifiedAdminFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOUnverifiedAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.UnverifiedAdminFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteUnverifiedAdminPayload_unverifiedAdmin_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnverifiedAdminOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOUnverifiedAdminOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.UnverifiedAdminOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteUnverifiedAdminPayload_unverifiedAdmin_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteUnverifiedAdminPayload_unverifiedAdmin_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteUnverifiedAdminPayload_unverifiedAdmin_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.UnverifiedAdminGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOUnverifiedAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.UnverifiedAdminGroup
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_DeleteUnverifiedSchoolPayload_unverifiedSchool_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3473,6 +4806,29 @@ func (ec *executionContext) field_Mutation_AddStudents_argsStudents(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_addAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_addAdmin_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_addAdmin_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.AdminInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNAdminInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.AdminInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_addJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3542,6 +4898,29 @@ func (ec *executionContext) field_Mutation_addStudent_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_addUnverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_addUnverifiedAdmin_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_addUnverifiedAdmin_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.UnverifiedAdminInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNUnverifiedAdminInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.UnverifiedAdminInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_addUnverifiedSchool_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3562,6 +4941,52 @@ func (ec *executionContext) field_Mutation_addUnverifiedSchool_argsInput(
 	}
 
 	var zeroVal []*model.UnverifiedSchoolInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_adminLogin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_adminLogin_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_adminLogin_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.AdminLogin, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNAdminLogin2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminLogin(ctx, tmp)
+	}
+
+	var zeroVal model.AdminLogin
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_createAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_createAdmin_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_createAdmin_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.NewAdmin, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNNewAdmin2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewAdmin(ctx, tmp)
+	}
+
+	var zeroVal model.NewAdmin
 	return zeroVal, nil
 }
 
@@ -3634,6 +5059,29 @@ func (ec *executionContext) field_Mutation_createSchool_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_deleteAdmin_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_deleteAdmin_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.AdminFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalNAdminFiltersInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal model.AdminFiltersInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3703,6 +5151,29 @@ func (ec *executionContext) field_Mutation_deleteStudent_argsFilter(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteUnverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_deleteUnverifiedAdmin_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_deleteUnverifiedAdmin_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.UnverifiedAdminFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalNUnverifiedAdminFiltersInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal model.UnverifiedAdminFiltersInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteUnverifiedSchool_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -3723,6 +5194,29 @@ func (ec *executionContext) field_Mutation_deleteUnverifiedSchool_argsFilter(
 	}
 
 	var zeroVal model.UnverifiedSchoolFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_forgotAdminPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_forgotAdminPassword_argsPhoneNumber(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["phone_number"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_forgotAdminPassword_argsPhoneNumber(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+	if tmp, ok := rawArgs["phone_number"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
 	return zeroVal, nil
 }
 
@@ -3810,6 +5304,29 @@ func (ec *executionContext) field_Mutation_refreshToken_argsInput(
 	}
 
 	var zeroVal *model.RefreshTokenInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_requestAdminPasswordReset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_requestAdminPasswordReset_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_requestAdminPasswordReset_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.Verificationinfo, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalOverificationinfo2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐVerificationinfo(ctx, tmp)
+	}
+
+	var zeroVal *model.Verificationinfo
 	return zeroVal, nil
 }
 
@@ -3906,6 +5423,29 @@ func (ec *executionContext) field_Mutation_requestStudentPasswordReset_argsOtp(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("otp"))
 	if tmp, ok := rawArgs["otp"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_resetAdminPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_resetAdminPassword_argsNewPassword(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["new_password"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_resetAdminPassword_argsNewPassword(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("new_password"))
+	if tmp, ok := rawArgs["new_password"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -4028,6 +5568,29 @@ func (ec *executionContext) field_Mutation_studentLogin_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_updateAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_updateAdmin_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_updateAdmin_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.UpdateAdminInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNUpdateAdminInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateAdminInput(ctx, tmp)
+	}
+
+	var zeroVal model.UpdateAdminInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_updateJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4097,6 +5660,29 @@ func (ec *executionContext) field_Mutation_updateStudent_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_updateUnverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_updateUnverifiedAdmin_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_updateUnverifiedAdmin_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.UpdateUnverifiedAdminInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNUpdateUnverifiedAdminInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnverifiedAdminInput(ctx, tmp)
+	}
+
+	var zeroVal model.UpdateUnverifiedAdminInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_updateUnverifiedSchool_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4117,6 +5703,29 @@ func (ec *executionContext) field_Mutation_updateUnverifiedSchool_argsInput(
 	}
 
 	var zeroVal model.UpdateUnverifiedSchoolInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_verifyAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_verifyAdmin_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_verifyAdmin_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.Verificationinfo, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNverificationinfo2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐVerificationinfo(ctx, tmp)
+	}
+
+	var zeroVal model.Verificationinfo
 	return zeroVal, nil
 }
 
@@ -4163,6 +5772,52 @@ func (ec *executionContext) field_Query___type_argsName(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_adminPhoneNumberExists_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_adminPhoneNumberExists_argsPhoneNumber(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["phone_number"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_adminPhoneNumberExists_argsPhoneNumber(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+	if tmp, ok := rawArgs["phone_number"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getAdmin_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getAdmin_argsID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
 	return zeroVal, nil
 }
 
@@ -4258,6 +5913,29 @@ func (ec *executionContext) field_Query_getStudent_argsID(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_getUnverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getUnverifiedAdmin_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getUnverifiedAdmin_argsID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Query_getUnverifiedSchool_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4278,6 +5956,101 @@ func (ec *executionContext) field_Query_getUnverifiedSchool_argsID(
 	}
 
 	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_queryAdmin_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_Query_queryAdmin_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_Query_queryAdmin_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_Query_queryAdmin_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_Query_queryAdmin_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_Query_queryAdmin_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.AdminFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.AdminFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryAdmin_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.AdminOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOAdminOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.AdminOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryAdmin_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryAdmin_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryAdmin_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.AdminGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.AdminGroup
 	return zeroVal, nil
 }
 
@@ -4566,6 +6339,101 @@ func (ec *executionContext) field_Query_queryStudent_argsGroup(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_queryUnverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_queryUnverifiedAdmin_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_Query_queryUnverifiedAdmin_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_Query_queryUnverifiedAdmin_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_Query_queryUnverifiedAdmin_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_Query_queryUnverifiedAdmin_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_Query_queryUnverifiedAdmin_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnverifiedAdminFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOUnverifiedAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.UnverifiedAdminFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryUnverifiedAdmin_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnverifiedAdminOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOUnverifiedAdminOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.UnverifiedAdminOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryUnverifiedAdmin_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryUnverifiedAdmin_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryUnverifiedAdmin_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.UnverifiedAdminGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOUnverifiedAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.UnverifiedAdminGroup
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Query_queryUnverifiedSchool_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4681,6 +6549,101 @@ func (ec *executionContext) field_Query_schoolPhoneNumberExists_argsPhoneNumber(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateAdminPayload_admin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_UpdateAdminPayload_admin_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_UpdateAdminPayload_admin_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_UpdateAdminPayload_admin_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_UpdateAdminPayload_admin_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_UpdateAdminPayload_admin_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_UpdateAdminPayload_admin_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.AdminFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.AdminFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateAdminPayload_admin_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.AdminOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOAdminOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.AdminOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateAdminPayload_admin_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateAdminPayload_admin_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateAdminPayload_admin_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.AdminGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.AdminGroup
 	return zeroVal, nil
 }
 
@@ -4969,6 +6932,101 @@ func (ec *executionContext) field_UpdateStudentPayload_student_argsGroup(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_UpdateUnverifiedAdminPayload_unverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_UpdateUnverifiedAdminPayload_unverifiedAdmin_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_UpdateUnverifiedAdminPayload_unverifiedAdmin_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_UpdateUnverifiedAdminPayload_unverifiedAdmin_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_UpdateUnverifiedAdminPayload_unverifiedAdmin_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_UpdateUnverifiedAdminPayload_unverifiedAdmin_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_UpdateUnverifiedAdminPayload_unverifiedAdmin_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnverifiedAdminFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOUnverifiedAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.UnverifiedAdminFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateUnverifiedAdminPayload_unverifiedAdmin_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnverifiedAdminOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOUnverifiedAdminOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.UnverifiedAdminOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateUnverifiedAdminPayload_unverifiedAdmin_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateUnverifiedAdminPayload_unverifiedAdmin_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateUnverifiedAdminPayload_unverifiedAdmin_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.UnverifiedAdminGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOUnverifiedAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.UnverifiedAdminGroup
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_UpdateUnverifiedSchoolPayload_unverifiedSchool_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5117,6 +7175,129 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _AddAdminPayload_admin(ctx context.Context, field graphql.CollectedField, obj *model.AddAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddAdminPayload_admin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.AddAdminPayload().Admin(rctx, obj, fc.Args["filter"].(*model.AdminFiltersInput), fc.Args["order"].(*model.AdminOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.AdminGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.AdminQueryResult)
+	fc.Result = res
+	return ec.marshalNAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddAdminPayload_admin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddAdminPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_AdminQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_AdminQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_AdminQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AdminQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_AddAdminPayload_admin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddAdminPayload_affected(ctx context.Context, field graphql.CollectedField, obj *model.AddAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddAdminPayload_affected(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Affected, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Admin)
+	fc.Result = res
+	return ec.marshalNAdmin2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddAdminPayload_affected(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddAdminPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Admin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Admin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Admin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Admin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_Admin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_Admin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_Admin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Admin", field.Name)
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _AddJobPayload_job(ctx context.Context, field graphql.CollectedField, obj *model.AddJobPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_AddJobPayload_job(ctx, field)
@@ -5509,6 +7690,129 @@ func (ec *executionContext) fieldContext_AddStudentPayload_affected(_ context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _AddUnverifiedAdminPayload_unverifiedAdmin(ctx context.Context, field graphql.CollectedField, obj *model.AddUnverifiedAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddUnverifiedAdminPayload_unverifiedAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.AddUnverifiedAdminPayload().UnverifiedAdmin(rctx, obj, fc.Args["filter"].(*model.UnverifiedAdminFiltersInput), fc.Args["order"].(*model.UnverifiedAdminOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.UnverifiedAdminGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnverifiedAdminQueryResult)
+	fc.Result = res
+	return ec.marshalNUnverifiedAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddUnverifiedAdminPayload_unverifiedAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddUnverifiedAdminPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_UnverifiedAdminQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_UnverifiedAdminQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_UnverifiedAdminQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnverifiedAdminQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_AddUnverifiedAdminPayload_unverifiedAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddUnverifiedAdminPayload_affected(ctx context.Context, field graphql.CollectedField, obj *model.AddUnverifiedAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddUnverifiedAdminPayload_affected(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Affected, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UnverifiedAdmin)
+	fc.Result = res
+	return ec.marshalNUnverifiedAdmin2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddUnverifiedAdminPayload_affected(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddUnverifiedAdminPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnverifiedAdmin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnverifiedAdmin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnverifiedAdmin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnverifiedAdmin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_UnverifiedAdmin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_UnverifiedAdmin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_UnverifiedAdmin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnverifiedAdmin", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AddUnverifiedSchoolPayload_unverifiedSchool(ctx context.Context, field graphql.CollectedField, obj *model.AddUnverifiedSchoolPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_AddUnverifiedSchoolPayload_unverifiedSchool(ctx, field)
 	if err != nil {
@@ -5631,6 +7935,827 @@ func (ec *executionContext) fieldContext_AddUnverifiedSchoolPayload_affected(_ c
 				return ec.fieldContext_UnverifiedSchool_Website(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UnverifiedSchool", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Admin_id(ctx context.Context, field graphql.CollectedField, obj *model.Admin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Admin_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Admin_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Admin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Admin_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Admin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Admin_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Admin_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Admin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Admin_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Admin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Admin_updatedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Admin_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Admin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Admin_deletedAt(ctx context.Context, field graphql.CollectedField, obj *model.Admin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Admin_deletedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*runtimehelper.SoftDelete)
+	fc.Result = res
+	return ec.marshalOSoftDelete2ᚖgithubᚗcomᚋfasibioᚋautogqlᚋruntimehelperᚐSoftDelete(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Admin_deletedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Admin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type SoftDelete does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Admin_name(ctx context.Context, field graphql.CollectedField, obj *model.Admin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Admin_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Admin_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Admin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Admin_phone_number(ctx context.Context, field graphql.CollectedField, obj *model.Admin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Admin_phone_number(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PhoneNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Admin_phone_number(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Admin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Admin_password(ctx context.Context, field graphql.CollectedField, obj *model.Admin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Admin_password(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Password, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Admin_password(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Admin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdminProfile_id(ctx context.Context, field graphql.CollectedField, obj *model.AdminProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdminProfile_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdminProfile_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdminProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdminProfile_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.AdminProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdminProfile_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdminProfile_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdminProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdminProfile_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.AdminProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdminProfile_updatedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdminProfile_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdminProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdminProfile_name(ctx context.Context, field graphql.CollectedField, obj *model.AdminProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdminProfile_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdminProfile_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdminProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdminProfile_phone_number(ctx context.Context, field graphql.CollectedField, obj *model.AdminProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdminProfile_phone_number(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PhoneNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdminProfile_phone_number(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdminProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdminQueryResult_data(ctx context.Context, field graphql.CollectedField, obj *model.AdminQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdminQueryResult_data(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Admin)
+	fc.Result = res
+	return ec.marshalNAdmin2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdminQueryResult_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdminQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Admin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Admin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Admin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Admin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_Admin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_Admin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_Admin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Admin", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdminQueryResult_count(ctx context.Context, field graphql.CollectedField, obj *model.AdminQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdminQueryResult_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdminQueryResult_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdminQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdminQueryResult_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.AdminQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdminQueryResult_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdminQueryResult_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdminQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteAdminPayload_admin(ctx context.Context, field graphql.CollectedField, obj *model.DeleteAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteAdminPayload_admin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.DeleteAdminPayload().Admin(rctx, obj, fc.Args["filter"].(*model.AdminFiltersInput), fc.Args["order"].(*model.AdminOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.AdminGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.AdminQueryResult)
+	fc.Result = res
+	return ec.marshalNAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteAdminPayload_admin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteAdminPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_AdminQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_AdminQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_AdminQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AdminQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_DeleteAdminPayload_admin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteAdminPayload_count(ctx context.Context, field graphql.CollectedField, obj *model.DeleteAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteAdminPayload_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteAdminPayload_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteAdminPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteAdminPayload_msg(ctx context.Context, field graphql.CollectedField, obj *model.DeleteAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteAdminPayload_msg(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Msg, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteAdminPayload_msg(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteAdminPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -6070,6 +9195,154 @@ func (ec *executionContext) _DeleteStudentPayload_msg(ctx context.Context, field
 func (ec *executionContext) fieldContext_DeleteStudentPayload_msg(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "DeleteStudentPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteUnverifiedAdminPayload_unverifiedAdmin(ctx context.Context, field graphql.CollectedField, obj *model.DeleteUnverifiedAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteUnverifiedAdminPayload_unverifiedAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.DeleteUnverifiedAdminPayload().UnverifiedAdmin(rctx, obj, fc.Args["filter"].(*model.UnverifiedAdminFiltersInput), fc.Args["order"].(*model.UnverifiedAdminOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.UnverifiedAdminGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnverifiedAdminQueryResult)
+	fc.Result = res
+	return ec.marshalNUnverifiedAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteUnverifiedAdminPayload_unverifiedAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteUnverifiedAdminPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_UnverifiedAdminQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_UnverifiedAdminQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_UnverifiedAdminQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnverifiedAdminQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_DeleteUnverifiedAdminPayload_unverifiedAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteUnverifiedAdminPayload_count(ctx context.Context, field graphql.CollectedField, obj *model.DeleteUnverifiedAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteUnverifiedAdminPayload_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteUnverifiedAdminPayload_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteUnverifiedAdminPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteUnverifiedAdminPayload_msg(ctx context.Context, field graphql.CollectedField, obj *model.DeleteUnverifiedAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteUnverifiedAdminPayload_msg(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Msg, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteUnverifiedAdminPayload_msg(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteUnverifiedAdminPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -7039,6 +10312,372 @@ func (ec *executionContext) fieldContext_Mutation_createDummy(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateAdmin(rctx, fc.Args["input"].(model.NewAdmin))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnverifiedAdmin)
+	fc.Result = res
+	return ec.marshalOUnverifiedAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdmin(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnverifiedAdmin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnverifiedAdmin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnverifiedAdmin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnverifiedAdmin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_UnverifiedAdmin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_UnverifiedAdmin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_UnverifiedAdmin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnverifiedAdmin", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_verifyAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_verifyAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().VerifyAdmin(rctx, fc.Args["input"].(model.Verificationinfo))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Admin)
+	fc.Result = res
+	return ec.marshalOAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdmin(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_verifyAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Admin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Admin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Admin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Admin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_Admin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_Admin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_Admin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Admin", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_verifyAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_adminLogin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_adminLogin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AdminLogin(rctx, fc.Args["input"].(model.AdminLogin))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_adminLogin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_adminLogin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_forgotAdminPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_forgotAdminPassword(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ForgotAdminPassword(rctx, fc.Args["phone_number"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.SendCodeStatus)
+	fc.Result = res
+	return ec.marshalOSendCodeStatus2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐSendCodeStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_forgotAdminPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "phone_number":
+				return ec.fieldContext_SendCodeStatus_phone_number(ctx, field)
+			case "success":
+				return ec.fieldContext_SendCodeStatus_success(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SendCodeStatus", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_forgotAdminPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_requestAdminPasswordReset(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_requestAdminPasswordReset(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RequestAdminPasswordReset(rctx, fc.Args["input"].(*model.Verificationinfo))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_requestAdminPasswordReset(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_requestAdminPasswordReset_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_resetAdminPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_resetAdminPassword(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ResetAdminPassword(rctx, fc.Args["new_password"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Admin)
+	fc.Result = res
+	return ec.marshalOAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdmin(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_resetAdminPassword(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Admin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Admin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Admin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Admin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_Admin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_Admin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_Admin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Admin", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_resetAdminPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createJob(ctx, field)
 	if err != nil {
@@ -7922,6 +11561,184 @@ func (ec *executionContext) fieldContext_Mutation_resetStudentPassword(ctx conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_addAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddAdmin(rctx, fc.Args["input"].([]*model.AdminInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.AddAdminPayload)
+	fc.Result = res
+	return ec.marshalOAddAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddAdminPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "admin":
+				return ec.fieldContext_AddAdminPayload_admin(ctx, field)
+			case "affected":
+				return ec.fieldContext_AddAdminPayload_affected(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AddAdminPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateAdmin(rctx, fc.Args["input"].(model.UpdateAdminInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UpdateAdminPayload)
+	fc.Result = res
+	return ec.marshalOUpdateAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateAdminPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "admin":
+				return ec.fieldContext_UpdateAdminPayload_admin(ctx, field)
+			case "count":
+				return ec.fieldContext_UpdateAdminPayload_count(ctx, field)
+			case "affected":
+				return ec.fieldContext_UpdateAdminPayload_affected(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UpdateAdminPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteAdmin(rctx, fc.Args["filter"].(model.AdminFiltersInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DeleteAdminPayload)
+	fc.Result = res
+	return ec.marshalODeleteAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteAdminPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "admin":
+				return ec.fieldContext_DeleteAdminPayload_admin(ctx, field)
+			case "count":
+				return ec.fieldContext_DeleteAdminPayload_count(ctx, field)
+			case "msg":
+				return ec.fieldContext_DeleteAdminPayload_msg(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DeleteAdminPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_addJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_addJob(ctx, field)
 	if err != nil {
@@ -8456,6 +12273,184 @@ func (ec *executionContext) fieldContext_Mutation_deleteStudent(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_addUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addUnverifiedAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddUnverifiedAdmin(rctx, fc.Args["input"].([]*model.UnverifiedAdminInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.AddUnverifiedAdminPayload)
+	fc.Result = res
+	return ec.marshalOAddUnverifiedAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddUnverifiedAdminPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "unverifiedAdmin":
+				return ec.fieldContext_AddUnverifiedAdminPayload_unverifiedAdmin(ctx, field)
+			case "affected":
+				return ec.fieldContext_AddUnverifiedAdminPayload_affected(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AddUnverifiedAdminPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addUnverifiedAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateUnverifiedAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateUnverifiedAdmin(rctx, fc.Args["input"].(model.UpdateUnverifiedAdminInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UpdateUnverifiedAdminPayload)
+	fc.Result = res
+	return ec.marshalOUpdateUnverifiedAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnverifiedAdminPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "unverifiedAdmin":
+				return ec.fieldContext_UpdateUnverifiedAdminPayload_unverifiedAdmin(ctx, field)
+			case "count":
+				return ec.fieldContext_UpdateUnverifiedAdminPayload_count(ctx, field)
+			case "affected":
+				return ec.fieldContext_UpdateUnverifiedAdminPayload_affected(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UpdateUnverifiedAdminPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateUnverifiedAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteUnverifiedAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteUnverifiedAdmin(rctx, fc.Args["filter"].(model.UnverifiedAdminFiltersInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DeleteUnverifiedAdminPayload)
+	fc.Result = res
+	return ec.marshalODeleteUnverifiedAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteUnverifiedAdminPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "unverifiedAdmin":
+				return ec.fieldContext_DeleteUnverifiedAdminPayload_unverifiedAdmin(ctx, field)
+			case "count":
+				return ec.fieldContext_DeleteUnverifiedAdminPayload_count(ctx, field)
+			case "msg":
+				return ec.fieldContext_DeleteUnverifiedAdminPayload_msg(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DeleteUnverifiedAdminPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteUnverifiedAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_addUnverifiedSchool(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_addUnverifiedSchool(ctx, field)
 	if err != nil {
@@ -8830,6 +12825,126 @@ func (ec *executionContext) fieldContext_Query_getDummy(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_adminPhoneNumberExists(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_adminPhoneNumberExists(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().AdminPhoneNumberExists(rctx, fc.Args["phone_number"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PhoneNumberExists)
+	fc.Result = res
+	return ec.marshalNPhoneNumberExists2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐPhoneNumberExists(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_adminPhoneNumberExists(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "verified":
+				return ec.fieldContext_PhoneNumberExists_verified(ctx, field)
+			case "unverified":
+				return ec.fieldContext_PhoneNumberExists_unverified(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PhoneNumberExists", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_adminPhoneNumberExists_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getadminProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getadminProfile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetadminProfile(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.SchoolProfile)
+	fc.Result = res
+	return ec.marshalOSchoolProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐSchoolProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getadminProfile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_SchoolProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_SchoolProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_SchoolProfile_updatedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_SchoolProfile_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_SchoolProfile_phone_number(ctx, field)
+			case "badge":
+				return ec.fieldContext_SchoolProfile_badge(ctx, field)
+			case "Website":
+				return ec.fieldContext_SchoolProfile_Website(ctx, field)
+			case "students":
+				return ec.fieldContext_SchoolProfile_students(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SchoolProfile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_schoolPhoneNumberExists(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_schoolPhoneNumberExists(ctx, field)
 	if err != nil {
@@ -9072,6 +13187,134 @@ func (ec *executionContext) fieldContext_Query_getStudentProfile(_ context.Conte
 			}
 			return nil, fmt.Errorf("no field named %q was found under type StudentProfile", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAdmin(rctx, fc.Args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Admin)
+	fc.Result = res
+	return ec.marshalOAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdmin(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Admin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Admin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Admin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Admin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_Admin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_Admin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_Admin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Admin", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_queryAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_queryAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().QueryAdmin(rctx, fc.Args["filter"].(*model.AdminFiltersInput), fc.Args["order"].(*model.AdminOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.AdminGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.AdminQueryResult)
+	fc.Result = res
+	return ec.marshalOAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_queryAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_AdminQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_AdminQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_AdminQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AdminQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_queryAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -9476,6 +13719,134 @@ func (ec *executionContext) fieldContext_Query_queryStudent(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_queryStudent_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getUnverifiedAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUnverifiedAdmin(rctx, fc.Args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnverifiedAdmin)
+	fc.Result = res
+	return ec.marshalOUnverifiedAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdmin(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnverifiedAdmin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnverifiedAdmin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnverifiedAdmin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnverifiedAdmin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_UnverifiedAdmin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_UnverifiedAdmin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_UnverifiedAdmin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnverifiedAdmin", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getUnverifiedAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_queryUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_queryUnverifiedAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().QueryUnverifiedAdmin(rctx, fc.Args["filter"].(*model.UnverifiedAdminFiltersInput), fc.Args["order"].(*model.UnverifiedAdminOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.UnverifiedAdminGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnverifiedAdminQueryResult)
+	fc.Result = res
+	return ec.marshalOUnverifiedAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_queryUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_UnverifiedAdminQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_UnverifiedAdminQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_UnverifiedAdminQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnverifiedAdminQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_queryUnverifiedAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -11901,6 +16272,459 @@ func (ec *executionContext) fieldContext_StudentQueryResult_totalCount(_ context
 	return fc, nil
 }
 
+func (ec *executionContext) _UnverifiedAdmin_id(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdmin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnverifiedAdmin_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnverifiedAdmin_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnverifiedAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnverifiedAdmin_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdmin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnverifiedAdmin_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnverifiedAdmin_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnverifiedAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnverifiedAdmin_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdmin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnverifiedAdmin_updatedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnverifiedAdmin_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnverifiedAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnverifiedAdmin_deletedAt(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdmin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnverifiedAdmin_deletedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*runtimehelper.SoftDelete)
+	fc.Result = res
+	return ec.marshalOSoftDelete2ᚖgithubᚗcomᚋfasibioᚋautogqlᚋruntimehelperᚐSoftDelete(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnverifiedAdmin_deletedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnverifiedAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type SoftDelete does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnverifiedAdmin_name(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdmin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnverifiedAdmin_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnverifiedAdmin_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnverifiedAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnverifiedAdmin_phone_number(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdmin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnverifiedAdmin_phone_number(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PhoneNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnverifiedAdmin_phone_number(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnverifiedAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnverifiedAdmin_password(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdmin) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnverifiedAdmin_password(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Password, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnverifiedAdmin_password(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnverifiedAdmin",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnverifiedAdminQueryResult_data(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdminQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnverifiedAdminQueryResult_data(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UnverifiedAdmin)
+	fc.Result = res
+	return ec.marshalNUnverifiedAdmin2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnverifiedAdminQueryResult_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnverifiedAdminQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnverifiedAdmin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnverifiedAdmin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnverifiedAdmin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnverifiedAdmin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_UnverifiedAdmin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_UnverifiedAdmin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_UnverifiedAdmin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnverifiedAdmin", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnverifiedAdminQueryResult_count(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdminQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnverifiedAdminQueryResult_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnverifiedAdminQueryResult_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnverifiedAdminQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnverifiedAdminQueryResult_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdminQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnverifiedAdminQueryResult_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnverifiedAdminQueryResult_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnverifiedAdminQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UnverifiedSchool_id(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedSchool) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UnverifiedSchool_id(ctx, field)
 	if err != nil {
@@ -12440,6 +17264,173 @@ func (ec *executionContext) fieldContext_UnverifiedSchoolQueryResult_totalCount(
 	return fc, nil
 }
 
+func (ec *executionContext) _UpdateAdminPayload_admin(ctx context.Context, field graphql.CollectedField, obj *model.UpdateAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateAdminPayload_admin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UpdateAdminPayload().Admin(rctx, obj, fc.Args["filter"].(*model.AdminFiltersInput), fc.Args["order"].(*model.AdminOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.AdminGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.AdminQueryResult)
+	fc.Result = res
+	return ec.marshalNAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateAdminPayload_admin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateAdminPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_AdminQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_AdminQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_AdminQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AdminQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_UpdateAdminPayload_admin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateAdminPayload_count(ctx context.Context, field graphql.CollectedField, obj *model.UpdateAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateAdminPayload_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateAdminPayload_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateAdminPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateAdminPayload_affected(ctx context.Context, field graphql.CollectedField, obj *model.UpdateAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateAdminPayload_affected(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Affected, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Admin)
+	fc.Result = res
+	return ec.marshalNAdmin2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateAdminPayload_affected(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateAdminPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Admin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Admin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Admin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Admin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_Admin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_Admin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_Admin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Admin", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UpdateJobPayload_job(ctx context.Context, field graphql.CollectedField, obj *model.UpdateJobPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UpdateJobPayload_job(ctx, field)
 	if err != nil {
@@ -12958,6 +17949,173 @@ func (ec *executionContext) fieldContext_UpdateStudentPayload_affected(_ context
 				return ec.fieldContext_Student_profile_picture(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Student", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateUnverifiedAdminPayload_unverifiedAdmin(ctx context.Context, field graphql.CollectedField, obj *model.UpdateUnverifiedAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateUnverifiedAdminPayload_unverifiedAdmin(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UpdateUnverifiedAdminPayload().UnverifiedAdmin(rctx, obj, fc.Args["filter"].(*model.UnverifiedAdminFiltersInput), fc.Args["order"].(*model.UnverifiedAdminOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.UnverifiedAdminGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnverifiedAdminQueryResult)
+	fc.Result = res
+	return ec.marshalNUnverifiedAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateUnverifiedAdminPayload_unverifiedAdmin(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateUnverifiedAdminPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_UnverifiedAdminQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_UnverifiedAdminQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_UnverifiedAdminQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnverifiedAdminQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_UpdateUnverifiedAdminPayload_unverifiedAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateUnverifiedAdminPayload_count(ctx context.Context, field graphql.CollectedField, obj *model.UpdateUnverifiedAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateUnverifiedAdminPayload_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateUnverifiedAdminPayload_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateUnverifiedAdminPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateUnverifiedAdminPayload_affected(ctx context.Context, field graphql.CollectedField, obj *model.UpdateUnverifiedAdminPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateUnverifiedAdminPayload_affected(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Affected, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UnverifiedAdmin)
+	fc.Result = res
+	return ec.marshalNUnverifiedAdmin2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateUnverifiedAdminPayload_affected(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateUnverifiedAdminPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnverifiedAdmin_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnverifiedAdmin_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnverifiedAdmin_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnverifiedAdmin_deletedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_UnverifiedAdmin_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_UnverifiedAdmin_phone_number(ctx, field)
+			case "password":
+				return ec.fieldContext_UnverifiedAdmin_password(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnverifiedAdmin", field.Name)
 		},
 	}
 	return fc, nil
@@ -14907,6 +20065,239 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAdminFiltersInput(ctx context.Context, obj interface{}) (model.AdminFiltersInput, error) {
+	var it model.AdminFiltersInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "createdAt", "updatedAt", "name", "phone_number", "password", "and", "or", "not"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOIntFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐIntFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "createdAt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdAt"))
+			data, err := ec.unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐTimeFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CreatedAt = data
+		case "updatedAt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedAt"))
+			data, err := ec.unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐTimeFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UpdatedAt = data
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "phone_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PhoneNumber = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		case "and":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
+			data, err := ec.unmarshalOAdminFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.And = data
+		case "or":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
+			data, err := ec.unmarshalOAdminFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Or = data
+		case "not":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
+			data, err := ec.unmarshalOAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Not = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputAdminInput(ctx context.Context, obj interface{}) (model.AdminInput, error) {
+	var it model.AdminInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "phone_number", "password"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "phone_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PhoneNumber = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputAdminLogin(ctx context.Context, obj interface{}) (model.AdminLogin, error) {
+	var it model.AdminLogin
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"phone_number", "password"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "phone_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PhoneNumber = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputAdminOrder(ctx context.Context, obj interface{}) (model.AdminOrder, error) {
+	var it model.AdminOrder
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"asc", "desc"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "asc":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("asc"))
+			data, err := ec.unmarshalOAdminOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminOrderable(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Asc = data
+		case "desc":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("desc"))
+			data, err := ec.unmarshalOAdminOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminOrderable(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Desc = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputAdminPatch(ctx context.Context, obj interface{}) (model.AdminPatch, error) {
+	var it model.AdminPatch
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "phone_number", "password"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "phone_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PhoneNumber = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputBooleanFilterInput(ctx context.Context, obj interface{}) (model.BooleanFilterInput, error) {
 	var it model.BooleanFilterInput
 	asMap := map[string]interface{}{}
@@ -15654,6 +21045,47 @@ func (ec *executionContext) unmarshalInputJobPatch(ctx context.Context, obj inte
 				return it, err
 			}
 			it.Requirements = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewAdmin(ctx context.Context, obj interface{}) (model.NewAdmin, error) {
+	var it model.NewAdmin
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "phone_number", "password"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "phone_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PhoneNumber = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
 		}
 	}
 
@@ -17018,6 +22450,205 @@ func (ec *executionContext) unmarshalInputTimeFilterInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUnverifiedAdminFiltersInput(ctx context.Context, obj interface{}) (model.UnverifiedAdminFiltersInput, error) {
+	var it model.UnverifiedAdminFiltersInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "createdAt", "updatedAt", "name", "phone_number", "password", "and", "or", "not"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOIntFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐIntFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "createdAt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdAt"))
+			data, err := ec.unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐTimeFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CreatedAt = data
+		case "updatedAt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedAt"))
+			data, err := ec.unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐTimeFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UpdatedAt = data
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "phone_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PhoneNumber = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		case "and":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
+			data, err := ec.unmarshalOUnverifiedAdminFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.And = data
+		case "or":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
+			data, err := ec.unmarshalOUnverifiedAdminFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Or = data
+		case "not":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
+			data, err := ec.unmarshalOUnverifiedAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Not = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUnverifiedAdminInput(ctx context.Context, obj interface{}) (model.UnverifiedAdminInput, error) {
+	var it model.UnverifiedAdminInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "phone_number", "password"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "phone_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PhoneNumber = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUnverifiedAdminOrder(ctx context.Context, obj interface{}) (model.UnverifiedAdminOrder, error) {
+	var it model.UnverifiedAdminOrder
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"asc", "desc"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "asc":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("asc"))
+			data, err := ec.unmarshalOUnverifiedAdminOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminOrderable(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Asc = data
+		case "desc":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("desc"))
+			data, err := ec.unmarshalOUnverifiedAdminOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminOrderable(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Desc = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUnverifiedAdminPatch(ctx context.Context, obj interface{}) (model.UnverifiedAdminPatch, error) {
+	var it model.UnverifiedAdminPatch
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "phone_number", "password"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "phone_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PhoneNumber = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUnverifiedSchoolFiltersInput(ctx context.Context, obj interface{}) (model.UnverifiedSchoolFiltersInput, error) {
 	var it model.UnverifiedSchoolFiltersInput
 	asMap := map[string]interface{}{}
@@ -17259,6 +22890,40 @@ func (ec *executionContext) unmarshalInputUnverifiedSchoolPatch(ctx context.Cont
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateAdminInput(ctx context.Context, obj interface{}) (model.UpdateAdminInput, error) {
+	var it model.UpdateAdminInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"filter", "set"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "filter":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+			data, err := ec.unmarshalNAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Filter = data
+		case "set":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("set"))
+			data, err := ec.unmarshalNAdminPatch2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminPatch(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Set = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateJobInput(ctx context.Context, obj interface{}) (model.UpdateJobInput, error) {
 	var it model.UpdateJobInput
 	asMap := map[string]interface{}{}
@@ -17361,6 +23026,40 @@ func (ec *executionContext) unmarshalInputUpdateStudentInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateUnverifiedAdminInput(ctx context.Context, obj interface{}) (model.UpdateUnverifiedAdminInput, error) {
+	var it model.UpdateUnverifiedAdminInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"filter", "set"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "filter":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+			data, err := ec.unmarshalNUnverifiedAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Filter = data
+		case "set":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("set"))
+			data, err := ec.unmarshalNUnverifiedAdminPatch2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminPatch(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Set = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateUnverifiedSchoolInput(ctx context.Context, obj interface{}) (model.UpdateUnverifiedSchoolInput, error) {
 	var it model.UpdateUnverifiedSchoolInput
 	asMap := map[string]interface{}{}
@@ -17436,6 +23135,81 @@ func (ec *executionContext) unmarshalInputverificationinfo(ctx context.Context, 
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var addAdminPayloadImplementors = []string{"AddAdminPayload"}
+
+func (ec *executionContext) _AddAdminPayload(ctx context.Context, sel ast.SelectionSet, obj *model.AddAdminPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addAdminPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddAdminPayload")
+		case "admin":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AddAdminPayload_admin(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "affected":
+			out.Values[i] = ec._AddAdminPayload_affected(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
 
 var addJobPayloadImplementors = []string{"AddJobPayload"}
 
@@ -17662,6 +23436,81 @@ func (ec *executionContext) _AddStudentPayload(ctx context.Context, sel ast.Sele
 	return out
 }
 
+var addUnverifiedAdminPayloadImplementors = []string{"AddUnverifiedAdminPayload"}
+
+func (ec *executionContext) _AddUnverifiedAdminPayload(ctx context.Context, sel ast.SelectionSet, obj *model.AddUnverifiedAdminPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addUnverifiedAdminPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddUnverifiedAdminPayload")
+		case "unverifiedAdmin":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AddUnverifiedAdminPayload_unverifiedAdmin(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "affected":
+			out.Values[i] = ec._AddUnverifiedAdminPayload_affected(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var addUnverifiedSchoolPayloadImplementors = []string{"AddUnverifiedSchoolPayload"}
 
 func (ec *executionContext) _AddUnverifiedSchoolPayload(ctx context.Context, sel ast.SelectionSet, obj *model.AddUnverifiedSchoolPayload) graphql.Marshaler {
@@ -17714,6 +23563,257 @@ func (ec *executionContext) _AddUnverifiedSchoolPayload(ctx context.Context, sel
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var adminImplementors = []string{"Admin"}
+
+func (ec *executionContext) _Admin(ctx context.Context, sel ast.SelectionSet, obj *model.Admin) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, adminImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Admin")
+		case "id":
+			out.Values[i] = ec._Admin_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._Admin_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Admin_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deletedAt":
+			out.Values[i] = ec._Admin_deletedAt(ctx, field, obj)
+		case "name":
+			out.Values[i] = ec._Admin_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "phone_number":
+			out.Values[i] = ec._Admin_phone_number(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "password":
+			out.Values[i] = ec._Admin_password(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var adminProfileImplementors = []string{"AdminProfile"}
+
+func (ec *executionContext) _AdminProfile(ctx context.Context, sel ast.SelectionSet, obj *model.AdminProfile) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, adminProfileImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AdminProfile")
+		case "id":
+			out.Values[i] = ec._AdminProfile_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._AdminProfile_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._AdminProfile_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._AdminProfile_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "phone_number":
+			out.Values[i] = ec._AdminProfile_phone_number(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var adminQueryResultImplementors = []string{"AdminQueryResult"}
+
+func (ec *executionContext) _AdminQueryResult(ctx context.Context, sel ast.SelectionSet, obj *model.AdminQueryResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, adminQueryResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AdminQueryResult")
+		case "data":
+			out.Values[i] = ec._AdminQueryResult_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._AdminQueryResult_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._AdminQueryResult_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var deleteAdminPayloadImplementors = []string{"DeleteAdminPayload"}
+
+func (ec *executionContext) _DeleteAdminPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteAdminPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deleteAdminPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeleteAdminPayload")
+		case "admin":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._DeleteAdminPayload_admin(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "count":
+			out.Values[i] = ec._DeleteAdminPayload_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "msg":
+			out.Values[i] = ec._DeleteAdminPayload_msg(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -17945,6 +24045,83 @@ func (ec *executionContext) _DeleteStudentPayload(ctx context.Context, sel ast.S
 			}
 		case "msg":
 			out.Values[i] = ec._DeleteStudentPayload_msg(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var deleteUnverifiedAdminPayloadImplementors = []string{"DeleteUnverifiedAdminPayload"}
+
+func (ec *executionContext) _DeleteUnverifiedAdminPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteUnverifiedAdminPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deleteUnverifiedAdminPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeleteUnverifiedAdminPayload")
+		case "unverifiedAdmin":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._DeleteUnverifiedAdminPayload_unverifiedAdmin(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "count":
+			out.Values[i] = ec._DeleteUnverifiedAdminPayload_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "msg":
+			out.Values[i] = ec._DeleteUnverifiedAdminPayload_msg(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -18234,6 +24411,30 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createDummy(ctx, field)
 			})
+		case "createAdmin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createAdmin(ctx, field)
+			})
+		case "verifyAdmin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_verifyAdmin(ctx, field)
+			})
+		case "adminLogin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_adminLogin(ctx, field)
+			})
+		case "forgotAdminPassword":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_forgotAdminPassword(ctx, field)
+			})
+		case "requestAdminPasswordReset":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_requestAdminPasswordReset(ctx, field)
+			})
+		case "resetAdminPassword":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_resetAdminPassword(ctx, field)
+			})
 		case "createJob":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createJob(ctx, field)
@@ -18293,6 +24494,18 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_resetStudentPassword(ctx, field)
 			})
+		case "addAdmin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addAdmin(ctx, field)
+			})
+		case "updateAdmin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateAdmin(ctx, field)
+			})
+		case "deleteAdmin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteAdmin(ctx, field)
+			})
 		case "addJob":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addJob(ctx, field)
@@ -18328,6 +24541,18 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteStudent":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteStudent(ctx, field)
+			})
+		case "addUnverifiedAdmin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addUnverifiedAdmin(ctx, field)
+			})
+		case "updateUnverifiedAdmin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateUnverifiedAdmin(ctx, field)
+			})
+		case "deleteUnverifiedAdmin":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteUnverifiedAdmin(ctx, field)
 			})
 		case "addUnverifiedSchool":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -18468,6 +24693,47 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "adminPhoneNumberExists":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_adminPhoneNumberExists(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getadminProfile":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getadminProfile(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "schoolPhoneNumberExists":
 			field := field
 
@@ -18538,6 +24804,44 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getStudentProfile(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getAdmin":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAdmin(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "queryAdmin":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_queryAdmin(ctx, field)
 				return res
 			}
 
@@ -18652,6 +24956,44 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_queryStudent(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getUnverifiedAdmin":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUnverifiedAdmin(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "queryUnverifiedAdmin":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_queryUnverifiedAdmin(ctx, field)
 				return res
 			}
 
@@ -19228,6 +25570,121 @@ func (ec *executionContext) _StudentQueryResult(ctx context.Context, sel ast.Sel
 	return out
 }
 
+var unverifiedAdminImplementors = []string{"UnverifiedAdmin"}
+
+func (ec *executionContext) _UnverifiedAdmin(ctx context.Context, sel ast.SelectionSet, obj *model.UnverifiedAdmin) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, unverifiedAdminImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UnverifiedAdmin")
+		case "id":
+			out.Values[i] = ec._UnverifiedAdmin_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._UnverifiedAdmin_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._UnverifiedAdmin_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deletedAt":
+			out.Values[i] = ec._UnverifiedAdmin_deletedAt(ctx, field, obj)
+		case "name":
+			out.Values[i] = ec._UnverifiedAdmin_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "phone_number":
+			out.Values[i] = ec._UnverifiedAdmin_phone_number(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "password":
+			out.Values[i] = ec._UnverifiedAdmin_password(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var unverifiedAdminQueryResultImplementors = []string{"UnverifiedAdminQueryResult"}
+
+func (ec *executionContext) _UnverifiedAdminQueryResult(ctx context.Context, sel ast.SelectionSet, obj *model.UnverifiedAdminQueryResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, unverifiedAdminQueryResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UnverifiedAdminQueryResult")
+		case "data":
+			out.Values[i] = ec._UnverifiedAdminQueryResult_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._UnverifiedAdminQueryResult_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._UnverifiedAdminQueryResult_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var unverifiedSchoolImplementors = []string{"UnverifiedSchool"}
 
 func (ec *executionContext) _UnverifiedSchool(ctx context.Context, sel ast.SelectionSet, obj *model.UnverifiedSchool) graphql.Marshaler {
@@ -19323,6 +25780,86 @@ func (ec *executionContext) _UnverifiedSchoolQueryResult(ctx context.Context, se
 			out.Values[i] = ec._UnverifiedSchoolQueryResult_totalCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var updateAdminPayloadImplementors = []string{"UpdateAdminPayload"}
+
+func (ec *executionContext) _UpdateAdminPayload(ctx context.Context, sel ast.SelectionSet, obj *model.UpdateAdminPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updateAdminPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UpdateAdminPayload")
+		case "admin":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UpdateAdminPayload_admin(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "count":
+			out.Values[i] = ec._UpdateAdminPayload_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "affected":
+			out.Values[i] = ec._UpdateAdminPayload_affected(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -19561,6 +26098,86 @@ func (ec *executionContext) _UpdateStudentPayload(ctx context.Context, sel ast.S
 			}
 		case "affected":
 			out.Values[i] = ec._UpdateStudentPayload_affected(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var updateUnverifiedAdminPayloadImplementors = []string{"UpdateUnverifiedAdminPayload"}
+
+func (ec *executionContext) _UpdateUnverifiedAdminPayload(ctx context.Context, sel ast.SelectionSet, obj *model.UpdateUnverifiedAdminPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updateUnverifiedAdminPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UpdateUnverifiedAdminPayload")
+		case "unverifiedAdmin":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UpdateUnverifiedAdminPayload_unverifiedAdmin(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "count":
+			out.Values[i] = ec._UpdateUnverifiedAdminPayload_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "affected":
+			out.Values[i] = ec._UpdateUnverifiedAdminPayload_affected(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -19993,6 +26610,126 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAdmin2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Admin) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdmin(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdmin(ctx context.Context, sel ast.SelectionSet, v *model.Admin) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Admin(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNAdminFiltersInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx context.Context, v interface{}) (model.AdminFiltersInput, error) {
+	res, err := ec.unmarshalInputAdminFiltersInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx context.Context, v interface{}) (*model.AdminFiltersInput, error) {
+	res, err := ec.unmarshalInputAdminFiltersInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNAdminGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminGroup(ctx context.Context, v interface{}) (model.AdminGroup, error) {
+	var res model.AdminGroup
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAdminGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminGroup(ctx context.Context, sel ast.SelectionSet, v model.AdminGroup) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNAdminInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminInputᚄ(ctx context.Context, v interface{}) ([]*model.AdminInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.AdminInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNAdminInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNAdminInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminInput(ctx context.Context, v interface{}) (*model.AdminInput, error) {
+	res, err := ec.unmarshalInputAdminInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNAdminLogin2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminLogin(ctx context.Context, v interface{}) (model.AdminLogin, error) {
+	res, err := ec.unmarshalInputAdminLogin(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNAdminPatch2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminPatch(ctx context.Context, v interface{}) (*model.AdminPatch, error) {
+	res, err := ec.unmarshalInputAdminPatch(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAdminQueryResult2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminQueryResult(ctx context.Context, sel ast.SelectionSet, v model.AdminQueryResult) graphql.Marshaler {
+	return ec._AdminQueryResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminQueryResult(ctx context.Context, sel ast.SelectionSet, v *model.AdminQueryResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._AdminQueryResult(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -20193,6 +26930,11 @@ func (ec *executionContext) marshalNJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋ
 		return graphql.Null
 	}
 	return ec._JobQueryResult(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNNewAdmin2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewAdmin(ctx context.Context, v interface{}) (model.NewAdmin, error) {
+	res, err := ec.unmarshalInputNewAdmin(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNNewJob2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewJob(ctx context.Context, v interface{}) (model.NewJob, error) {
@@ -20525,6 +27267,121 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	return res
 }
 
+func (ec *executionContext) marshalNUnverifiedAdmin2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UnverifiedAdmin) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUnverifiedAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdmin(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNUnverifiedAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdmin(ctx context.Context, sel ast.SelectionSet, v *model.UnverifiedAdmin) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UnverifiedAdmin(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUnverifiedAdminFiltersInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx context.Context, v interface{}) (model.UnverifiedAdminFiltersInput, error) {
+	res, err := ec.unmarshalInputUnverifiedAdminFiltersInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUnverifiedAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx context.Context, v interface{}) (*model.UnverifiedAdminFiltersInput, error) {
+	res, err := ec.unmarshalInputUnverifiedAdminFiltersInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUnverifiedAdminGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminGroup(ctx context.Context, v interface{}) (model.UnverifiedAdminGroup, error) {
+	var res model.UnverifiedAdminGroup
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUnverifiedAdminGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminGroup(ctx context.Context, sel ast.SelectionSet, v model.UnverifiedAdminGroup) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNUnverifiedAdminInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminInputᚄ(ctx context.Context, v interface{}) ([]*model.UnverifiedAdminInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.UnverifiedAdminInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNUnverifiedAdminInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNUnverifiedAdminInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminInput(ctx context.Context, v interface{}) (*model.UnverifiedAdminInput, error) {
+	res, err := ec.unmarshalInputUnverifiedAdminInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUnverifiedAdminPatch2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminPatch(ctx context.Context, v interface{}) (*model.UnverifiedAdminPatch, error) {
+	res, err := ec.unmarshalInputUnverifiedAdminPatch(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUnverifiedAdminQueryResult2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminQueryResult(ctx context.Context, sel ast.SelectionSet, v model.UnverifiedAdminQueryResult) graphql.Marshaler {
+	return ec._UnverifiedAdminQueryResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUnverifiedAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminQueryResult(ctx context.Context, sel ast.SelectionSet, v *model.UnverifiedAdminQueryResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UnverifiedAdminQueryResult(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNUnverifiedSchool2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedSchoolᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UnverifiedSchool) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -20640,6 +27497,11 @@ func (ec *executionContext) marshalNUnverifiedSchoolQueryResult2ᚖgithubᚗcom�
 	return ec._UnverifiedSchoolQueryResult(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNUpdateAdminInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateAdminInput(ctx context.Context, v interface{}) (model.UpdateAdminInput, error) {
+	res, err := ec.unmarshalInputUpdateAdminInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNUpdateJobInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateJobInput(ctx context.Context, v interface{}) (model.UpdateJobInput, error) {
 	res, err := ec.unmarshalInputUpdateJobInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -20652,6 +27514,11 @@ func (ec *executionContext) unmarshalNUpdateSchoolInput2githubᚗcomᚋGigaDesk�
 
 func (ec *executionContext) unmarshalNUpdateStudentInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateStudentInput(ctx context.Context, v interface{}) (model.UpdateStudentInput, error) {
 	res, err := ec.unmarshalInputUpdateStudentInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateUnverifiedAdminInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnverifiedAdminInput(ctx context.Context, v interface{}) (model.UpdateUnverifiedAdminInput, error) {
+	res, err := ec.unmarshalInputUpdateUnverifiedAdminInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -20918,6 +27785,13 @@ func (ec *executionContext) unmarshalNverificationinfo2githubᚗcomᚋGigaDesk�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalOAddAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddAdminPayload(ctx context.Context, sel ast.SelectionSet, v *model.AddAdminPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AddAdminPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOAddJobPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddJobPayload(ctx context.Context, sel ast.SelectionSet, v *model.AddJobPayload) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -20939,11 +27813,151 @@ func (ec *executionContext) marshalOAddStudentPayload2ᚖgithubᚗcomᚋGigaDesk
 	return ec._AddStudentPayload(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOAddUnverifiedAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddUnverifiedAdminPayload(ctx context.Context, sel ast.SelectionSet, v *model.AddUnverifiedAdminPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AddUnverifiedAdminPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOAddUnverifiedSchoolPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddUnverifiedSchoolPayload(ctx context.Context, sel ast.SelectionSet, v *model.AddUnverifiedSchoolPayload) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._AddUnverifiedSchoolPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdmin(ctx context.Context, sel ast.SelectionSet, v *model.Admin) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Admin(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOAdminFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx context.Context, v interface{}) ([]*model.AdminFiltersInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.AdminFiltersInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminFiltersInput(ctx context.Context, v interface{}) (*model.AdminFiltersInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputAdminFiltersInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminGroupᚄ(ctx context.Context, v interface{}) ([]model.AdminGroup, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]model.AdminGroup, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNAdminGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminGroup(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []model.AdminGroup) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAdminGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminGroup(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOAdminOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminOrder(ctx context.Context, v interface{}) (*model.AdminOrder, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputAdminOrder(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOAdminOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminOrderable(ctx context.Context, v interface{}) (*model.AdminOrderable, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.AdminOrderable)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOAdminOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminOrderable(ctx context.Context, sel ast.SelectionSet, v *model.AdminOrderable) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) marshalOAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAdminQueryResult(ctx context.Context, sel ast.SelectionSet, v *model.AdminQueryResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AdminQueryResult(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
@@ -21012,6 +28026,13 @@ func (ec *executionContext) unmarshalOBooleanFilterInput2ᚖgithubᚗcomᚋGigaD
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalODeleteAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteAdminPayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteAdminPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DeleteAdminPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalODeleteJobPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteJobPayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteJobPayload) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -21031,6 +28052,13 @@ func (ec *executionContext) marshalODeleteStudentPayload2ᚖgithubᚗcomᚋGigaD
 		return graphql.Null
 	}
 	return ec._DeleteStudentPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODeleteUnverifiedAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteUnverifiedAdminPayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteUnverifiedAdminPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DeleteUnverifiedAdminPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalODeleteUnverifiedSchoolPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteUnverifiedSchoolPayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteUnverifiedSchoolPayload) graphql.Marshaler {
@@ -22000,6 +29028,139 @@ func (ec *executionContext) unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDesk
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalOUnverifiedAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdmin(ctx context.Context, sel ast.SelectionSet, v *model.UnverifiedAdmin) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UnverifiedAdmin(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOUnverifiedAdminFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx context.Context, v interface{}) ([]*model.UnverifiedAdminFiltersInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.UnverifiedAdminFiltersInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOUnverifiedAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOUnverifiedAdminFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminFiltersInput(ctx context.Context, v interface{}) (*model.UnverifiedAdminFiltersInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUnverifiedAdminFiltersInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUnverifiedAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminGroupᚄ(ctx context.Context, v interface{}) ([]model.UnverifiedAdminGroup, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]model.UnverifiedAdminGroup, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNUnverifiedAdminGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminGroup(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOUnverifiedAdminGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []model.UnverifiedAdminGroup) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUnverifiedAdminGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminGroup(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOUnverifiedAdminOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminOrder(ctx context.Context, v interface{}) (*model.UnverifiedAdminOrder, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUnverifiedAdminOrder(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUnverifiedAdminOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminOrderable(ctx context.Context, v interface{}) (*model.UnverifiedAdminOrderable, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.UnverifiedAdminOrderable)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUnverifiedAdminOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminOrderable(ctx context.Context, sel ast.SelectionSet, v *model.UnverifiedAdminOrderable) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) marshalOUnverifiedAdminQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminQueryResult(ctx context.Context, sel ast.SelectionSet, v *model.UnverifiedAdminQueryResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UnverifiedAdminQueryResult(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOUnverifiedSchool2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedSchool(ctx context.Context, sel ast.SelectionSet, v *model.UnverifiedSchool) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -22133,6 +29294,13 @@ func (ec *executionContext) marshalOUnverifiedSchoolQueryResult2ᚖgithubᚗcom�
 	return ec._UnverifiedSchoolQueryResult(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOUpdateAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateAdminPayload(ctx context.Context, sel ast.SelectionSet, v *model.UpdateAdminPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UpdateAdminPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOUpdateJobPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateJobPayload(ctx context.Context, sel ast.SelectionSet, v *model.UpdateJobPayload) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -22152,6 +29320,13 @@ func (ec *executionContext) marshalOUpdateStudentPayload2ᚖgithubᚗcomᚋGigaD
 		return graphql.Null
 	}
 	return ec._UpdateStudentPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOUpdateUnverifiedAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnverifiedAdminPayload(ctx context.Context, sel ast.SelectionSet, v *model.UpdateUnverifiedAdminPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UpdateUnverifiedAdminPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOUpdateUnverifiedSchoolPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnverifiedSchoolPayload(ctx context.Context, sel ast.SelectionSet, v *model.UpdateUnverifiedSchoolPayload) graphql.Marshaler {

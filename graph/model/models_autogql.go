@@ -30,16 +30,58 @@ import (
 //	}
 func GetInputStruct(name string, obj map[string]interface{}) (interface{}, error) {
 	switch name {
+	case "AdminInput":
+		return AdminInputFromMap(obj)
 	case "JobInput":
 		return JobInputFromMap(obj)
 	case "SchoolInput":
 		return SchoolInputFromMap(obj)
 	case "StudentInput":
 		return StudentInputFromMap(obj)
+	case "UnverifiedAdminInput":
+		return UnverifiedAdminInputFromMap(obj)
 	case "UnverifiedSchoolInput":
 		return UnverifiedSchoolInputFromMap(obj)
 	}
 	return nil, fmt.Errorf("%s not found", name)
+}
+
+// AdminInputFromMap return a AdminInput from data map
+// use github.com/mitchellh/mapstructure with reflaction
+func AdminInputFromMap(data map[string]interface{}) (AdminInput, error) {
+	model := AdminInput{}
+	err := mapstructure.Decode(data, &model)
+	return model, err
+}
+
+// MergeToType returns a map with all values set to AdminPatch
+func (d *AdminPatch) MergeToType() map[string]interface{} {
+	res := make(map[string]interface{})
+	if d.Name != nil {
+		res["name"] = *d.Name
+	}
+	if d.PhoneNumber != nil {
+		res["phone_number"] = *d.PhoneNumber
+	}
+	if d.Password != nil {
+		res["password"] = *d.Password
+	}
+	return res
+}
+
+// MergeToType retuns a Admin filled from AdminInput
+func (d *AdminInput) MergeToType() Admin {
+
+	tmpName := d.Name
+
+	tmpPhoneNumber := d.PhoneNumber
+
+	tmpPassword := d.Password
+	return Admin{
+		Name:        tmpName,
+		PhoneNumber: tmpPhoneNumber,
+		Password:    tmpPassword,
+	}
 }
 
 // JobInputFromMap return a JobInput from data map
@@ -257,6 +299,44 @@ func (d *StudentInput) MergeToType() Student {
 		DateOfAdmission:    tmpDateOfAdmission,
 		DateOfBirth:        tmpDateOfBirth,
 		ProfilePicture:     tmpProfilePicture,
+	}
+}
+
+// UnverifiedAdminInputFromMap return a UnverifiedAdminInput from data map
+// use github.com/mitchellh/mapstructure with reflaction
+func UnverifiedAdminInputFromMap(data map[string]interface{}) (UnverifiedAdminInput, error) {
+	model := UnverifiedAdminInput{}
+	err := mapstructure.Decode(data, &model)
+	return model, err
+}
+
+// MergeToType returns a map with all values set to UnverifiedAdminPatch
+func (d *UnverifiedAdminPatch) MergeToType() map[string]interface{} {
+	res := make(map[string]interface{})
+	if d.Name != nil {
+		res["name"] = *d.Name
+	}
+	if d.PhoneNumber != nil {
+		res["phone_number"] = *d.PhoneNumber
+	}
+	if d.Password != nil {
+		res["password"] = *d.Password
+	}
+	return res
+}
+
+// MergeToType retuns a UnverifiedAdmin filled from UnverifiedAdminInput
+func (d *UnverifiedAdminInput) MergeToType() UnverifiedAdmin {
+
+	tmpName := d.Name
+
+	tmpPhoneNumber := d.PhoneNumber
+
+	tmpPassword := d.Password
+	return UnverifiedAdmin{
+		Name:        tmpName,
+		PhoneNumber: tmpPhoneNumber,
+		Password:    tmpPassword,
 	}
 }
 

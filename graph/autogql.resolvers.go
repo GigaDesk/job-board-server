@@ -14,6 +14,279 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+// GetAdmin is the resolver for the getAdmin field.
+func (r *queryResolver) GetAdmin(ctx context.Context, id int) (*model.Admin, error) {
+	v, okHook := r.Sql.Hooks[string(db.GetAdmin)].(db.AutoGqlHookGet[model.Admin, int])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, err = v.Received(ctx, r.Sql, id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = runtimehelper.GetPreloadSelection(ctx, db, runtimehelper.GetPreloadsMap(ctx, "Admin"))
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res model.Admin
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Admin")
+	db = db.First(&res, tableName+".id = ?", id)
+	if okHook {
+		r, err := v.AfterCallDb(ctx, &res)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+		r, err = v.BeforeReturn(ctx, &res, db)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+	}
+	return &res, db.Error
+}
+
+// QueryAdmin is the resolver for the queryAdmin field.
+func (r *queryResolver) QueryAdmin(ctx context.Context, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error) {
+	v, okHook := r.Sql.Hooks[string(db.QueryAdmin)].(db.AutoGqlHookQuery[model.Admin, model.AdminFiltersInput, model.AdminOrder])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, order, first, offset, err = v.Received(ctx, r.Sql, filter, order, first, offset)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res []*model.Admin
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Admin")
+	preloadSubTables := runtimehelper.GetPreloadsMap(ctx, "data").SubTables
+	if len(preloadSubTables) > 0 {
+		db = runtimehelper.GetPreloadSelection(ctx, db, preloadSubTables[0])
+	}
+	if filter != nil {
+		blackList := make(map[string]struct{})
+		sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(db, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+		db.Where(sql, arguments...)
+	}
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if order != nil {
+		if order.Asc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s asc", runtimehelper.GetQuoteChar(db), tableName, order.Asc))
+		}
+		if order.Desc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s desc", runtimehelper.GetQuoteChar(db), tableName, order.Desc))
+		}
+	}
+	var total int64
+	db.Model(res).Count(&total)
+	if first != nil {
+		db = db.Limit(*first)
+	}
+	if offset != nil {
+		db = db.Offset(*offset)
+	}
+	if len(group) > 0 {
+		garr := make([]string, len(group))
+		for i, g := range group {
+			garr[i] = fmt.Sprintf("%s.%s", tableName, xstrings.ToSnakeCase(string(g)))
+		}
+		db = db.Group(strings.Join(garr, ","))
+	}
+	db = db.Find(&res)
+	if okHook {
+		var err error
+		res, err = v.AfterCallDb(ctx, res)
+		if err != nil {
+			return nil, err
+		}
+		res, err = v.BeforeReturn(ctx, res, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &model.AdminQueryResult{
+		Data:       res,
+		Count:      len(res),
+		TotalCount: int(total),
+	}, db.Error
+}
+func (r *Resolver) AddAdminPayload() AddAdminPayloadResolver {
+	return &adminPayloadResolver[*model.AddAdminPayload]{r}
+}
+func (r *Resolver) DeleteAdminPayload() DeleteAdminPayloadResolver {
+	return &adminPayloadResolver[*model.DeleteAdminPayload]{r}
+}
+func (r *Resolver) UpdateAdminPayload() UpdateAdminPayloadResolver {
+	return &adminPayloadResolver[*model.UpdateAdminPayload]{r}
+}
+
+type adminPayload interface {
+	*model.AddAdminPayload | *model.DeleteAdminPayload | *model.UpdateAdminPayload
+}
+
+type adminPayloadResolver[T adminPayload] struct {
+	*Resolver
+}
+
+func (r *adminPayloadResolver[T]) Admin(ctx context.Context, obj T, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error) {
+	q := r.Query().(*queryResolver)
+	return q.QueryAdmin(ctx, filter, order, first, offset, group)
+}
+
+// AddAdmin is the resolver for the addAdmin field.
+func (r *mutationResolver) AddAdmin(ctx context.Context, input []*model.AdminInput) (*model.AddAdminPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.AddAdmin)].(db.AutoGqlHookAdd[model.Admin, model.AdminInput, model.AddAdminPayload])
+	res := &model.AddAdminPayload{}
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	obj := make([]model.Admin, len(input))
+	for i, v := range input {
+		obj[i] = v.MergeToType()
+	}
+	db = db.Omit(clause.Associations)
+	if okHook {
+		var err error
+		db, obj, err = v.BeforeCallDb(ctx, db, obj)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = db.Create(&obj)
+	affectedRes := make([]*model.Admin, len(obj))
+	for i, v := range obj {
+		tmp := v
+		affectedRes[i] = &tmp
+	}
+	res.Affected = affectedRes
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, obj, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// UpdateAdmin is the resolver for the updateAdmin field.
+func (r *mutationResolver) UpdateAdmin(ctx context.Context, input model.UpdateAdminInput) (*model.UpdateAdminPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.UpdateAdmin)].(db.AutoGqlHookUpdate[model.UpdateAdminInput, model.UpdateAdminPayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, &input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Admin")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(input.Filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.Admin{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.Admin
+	queryDb.Find(&toChange)
+	update := input.Set.MergeToType()
+	if okHook {
+		var err error
+		db, update, err = v.BeforeCallDb(ctx, db, update)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Updates(update)
+	affectedRes := make([]*model.Admin, 0)
+	subTables := runtimehelper.GetPreloadsMap(ctx, "affected").SubTables
+	if len(subTables) > 0 {
+		if preloadMap := subTables[0]; len(preloadMap.Fields) > 0 {
+			affectedDb := runtimehelper.GetPreloadSelection(ctx, db, preloadMap)
+			affectedDb = affectedDb.Model(&obj)
+			affectedDb.Find(&affectedRes)
+		}
+	}
+
+	res := &model.UpdateAdminPayload{
+		Count:    int(db.RowsAffected),
+		Affected: affectedRes,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// DeleteAdmin is the resolver for the deleteAdmin field.
+func (r *mutationResolver) DeleteAdmin(ctx context.Context, filter model.AdminFiltersInput) (*model.DeleteAdminPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.DeleteAdmin)].(db.AutoGqlHookDelete[model.AdminFiltersInput, model.DeleteAdminPayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, err = v.Received(ctx, r.Sql, &filter)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Admin")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.Admin{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.Admin
+	queryDb.Find(&toChange)
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Delete(&obj)
+	msg := fmt.Sprintf("%d rows deleted", db.RowsAffected)
+	res := &model.DeleteAdminPayload{
+		Count: int(db.RowsAffected),
+		Msg:   &msg,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
 // GetJob is the resolver for the getJob field.
 func (r *queryResolver) GetJob(ctx context.Context, id int) (*model.Job, error) {
 	v, okHook := r.Sql.Hooks[string(db.GetJob)].(db.AutoGqlHookGet[model.Job, int])
@@ -820,6 +1093,279 @@ func (r *mutationResolver) DeleteStudent(ctx context.Context, filter model.Stude
 	db = db.Model(&obj).Where("id IN ?", ids).Delete(&obj)
 	msg := fmt.Sprintf("%d rows deleted", db.RowsAffected)
 	res := &model.DeleteStudentPayload{
+		Count: int(db.RowsAffected),
+		Msg:   &msg,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// GetUnverifiedAdmin is the resolver for the getUnverifiedAdmin field.
+func (r *queryResolver) GetUnverifiedAdmin(ctx context.Context, id int) (*model.UnverifiedAdmin, error) {
+	v, okHook := r.Sql.Hooks[string(db.GetUnverifiedAdmin)].(db.AutoGqlHookGet[model.UnverifiedAdmin, int])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, err = v.Received(ctx, r.Sql, id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = runtimehelper.GetPreloadSelection(ctx, db, runtimehelper.GetPreloadsMap(ctx, "UnverifiedAdmin"))
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res model.UnverifiedAdmin
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnverifiedAdmin")
+	db = db.First(&res, tableName+".id = ?", id)
+	if okHook {
+		r, err := v.AfterCallDb(ctx, &res)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+		r, err = v.BeforeReturn(ctx, &res, db)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+	}
+	return &res, db.Error
+}
+
+// QueryUnverifiedAdmin is the resolver for the queryUnverifiedAdmin field.
+func (r *queryResolver) QueryUnverifiedAdmin(ctx context.Context, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) (*model.UnverifiedAdminQueryResult, error) {
+	v, okHook := r.Sql.Hooks[string(db.QueryUnverifiedAdmin)].(db.AutoGqlHookQuery[model.UnverifiedAdmin, model.UnverifiedAdminFiltersInput, model.UnverifiedAdminOrder])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, order, first, offset, err = v.Received(ctx, r.Sql, filter, order, first, offset)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res []*model.UnverifiedAdmin
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnverifiedAdmin")
+	preloadSubTables := runtimehelper.GetPreloadsMap(ctx, "data").SubTables
+	if len(preloadSubTables) > 0 {
+		db = runtimehelper.GetPreloadSelection(ctx, db, preloadSubTables[0])
+	}
+	if filter != nil {
+		blackList := make(map[string]struct{})
+		sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(db, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+		db.Where(sql, arguments...)
+	}
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if order != nil {
+		if order.Asc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s asc", runtimehelper.GetQuoteChar(db), tableName, order.Asc))
+		}
+		if order.Desc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s desc", runtimehelper.GetQuoteChar(db), tableName, order.Desc))
+		}
+	}
+	var total int64
+	db.Model(res).Count(&total)
+	if first != nil {
+		db = db.Limit(*first)
+	}
+	if offset != nil {
+		db = db.Offset(*offset)
+	}
+	if len(group) > 0 {
+		garr := make([]string, len(group))
+		for i, g := range group {
+			garr[i] = fmt.Sprintf("%s.%s", tableName, xstrings.ToSnakeCase(string(g)))
+		}
+		db = db.Group(strings.Join(garr, ","))
+	}
+	db = db.Find(&res)
+	if okHook {
+		var err error
+		res, err = v.AfterCallDb(ctx, res)
+		if err != nil {
+			return nil, err
+		}
+		res, err = v.BeforeReturn(ctx, res, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &model.UnverifiedAdminQueryResult{
+		Data:       res,
+		Count:      len(res),
+		TotalCount: int(total),
+	}, db.Error
+}
+func (r *Resolver) AddUnverifiedAdminPayload() AddUnverifiedAdminPayloadResolver {
+	return &unverifiedAdminPayloadResolver[*model.AddUnverifiedAdminPayload]{r}
+}
+func (r *Resolver) DeleteUnverifiedAdminPayload() DeleteUnverifiedAdminPayloadResolver {
+	return &unverifiedAdminPayloadResolver[*model.DeleteUnverifiedAdminPayload]{r}
+}
+func (r *Resolver) UpdateUnverifiedAdminPayload() UpdateUnverifiedAdminPayloadResolver {
+	return &unverifiedAdminPayloadResolver[*model.UpdateUnverifiedAdminPayload]{r}
+}
+
+type unverifiedAdminPayload interface {
+	*model.AddUnverifiedAdminPayload | *model.DeleteUnverifiedAdminPayload | *model.UpdateUnverifiedAdminPayload
+}
+
+type unverifiedAdminPayloadResolver[T unverifiedAdminPayload] struct {
+	*Resolver
+}
+
+func (r *unverifiedAdminPayloadResolver[T]) UnverifiedAdmin(ctx context.Context, obj T, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) (*model.UnverifiedAdminQueryResult, error) {
+	q := r.Query().(*queryResolver)
+	return q.QueryUnverifiedAdmin(ctx, filter, order, first, offset, group)
+}
+
+// AddUnverifiedAdmin is the resolver for the addUnverifiedAdmin field.
+func (r *mutationResolver) AddUnverifiedAdmin(ctx context.Context, input []*model.UnverifiedAdminInput) (*model.AddUnverifiedAdminPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.AddUnverifiedAdmin)].(db.AutoGqlHookAdd[model.UnverifiedAdmin, model.UnverifiedAdminInput, model.AddUnverifiedAdminPayload])
+	res := &model.AddUnverifiedAdminPayload{}
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	obj := make([]model.UnverifiedAdmin, len(input))
+	for i, v := range input {
+		obj[i] = v.MergeToType()
+	}
+	db = db.Omit(clause.Associations)
+	if okHook {
+		var err error
+		db, obj, err = v.BeforeCallDb(ctx, db, obj)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = db.Create(&obj)
+	affectedRes := make([]*model.UnverifiedAdmin, len(obj))
+	for i, v := range obj {
+		tmp := v
+		affectedRes[i] = &tmp
+	}
+	res.Affected = affectedRes
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, obj, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// UpdateUnverifiedAdmin is the resolver for the updateUnverifiedAdmin field.
+func (r *mutationResolver) UpdateUnverifiedAdmin(ctx context.Context, input model.UpdateUnverifiedAdminInput) (*model.UpdateUnverifiedAdminPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.UpdateUnverifiedAdmin)].(db.AutoGqlHookUpdate[model.UpdateUnverifiedAdminInput, model.UpdateUnverifiedAdminPayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, &input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnverifiedAdmin")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(input.Filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.UnverifiedAdmin{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.UnverifiedAdmin
+	queryDb.Find(&toChange)
+	update := input.Set.MergeToType()
+	if okHook {
+		var err error
+		db, update, err = v.BeforeCallDb(ctx, db, update)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Updates(update)
+	affectedRes := make([]*model.UnverifiedAdmin, 0)
+	subTables := runtimehelper.GetPreloadsMap(ctx, "affected").SubTables
+	if len(subTables) > 0 {
+		if preloadMap := subTables[0]; len(preloadMap.Fields) > 0 {
+			affectedDb := runtimehelper.GetPreloadSelection(ctx, db, preloadMap)
+			affectedDb = affectedDb.Model(&obj)
+			affectedDb.Find(&affectedRes)
+		}
+	}
+
+	res := &model.UpdateUnverifiedAdminPayload{
+		Count:    int(db.RowsAffected),
+		Affected: affectedRes,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// DeleteUnverifiedAdmin is the resolver for the deleteUnverifiedAdmin field.
+func (r *mutationResolver) DeleteUnverifiedAdmin(ctx context.Context, filter model.UnverifiedAdminFiltersInput) (*model.DeleteUnverifiedAdminPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.DeleteUnverifiedAdmin)].(db.AutoGqlHookDelete[model.UnverifiedAdminFiltersInput, model.DeleteUnverifiedAdminPayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, err = v.Received(ctx, r.Sql, &filter)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnverifiedAdmin")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.UnverifiedAdmin{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.UnverifiedAdmin
+	queryDb.Find(&toChange)
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Delete(&obj)
+	msg := fmt.Sprintf("%d rows deleted", db.RowsAffected)
+	res := &model.DeleteUnverifiedAdminPayload{
 		Count: int(db.RowsAffected),
 		Msg:   &msg,
 	}
