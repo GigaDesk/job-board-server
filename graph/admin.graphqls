@@ -1,0 +1,64 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+#admin data model, only includes properties that cannot be shared
+
+type Admin @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  name: String!
+  phone_number: String!
+  password: String!
+}
+
+# Unverified admin data model, used to store data for newly registered admins that have not verified their phone numbers
+type UnverifiedAdmin @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  name: String!
+  phone_number: String!
+  password: String!
+}
+
+#returns the a school's profile data
+type AdminProfile {
+  id: Int!
+  createdAt: Time!
+  updatedAt: Time!
+  name: String!
+  phone_number: String!
+}
+
+#fields required by an admin to log into the system
+input AdminLogin {
+  phone_number: String!
+  password: String!
+}
+
+#fields required during an admin signup process(mandatory)
+input NewAdmin {
+  name: String!
+  phone_number: String!
+  password: String!
+}
+
+
+
+extend type Query {
+  adminPhoneNumberExists(phone_number: String!): PhoneNumberExists!
+  getadminProfile: SchoolProfile
+}
+
+extend type Mutation {
+  createAdmin(input: NewAdmin!): UnverifiedAdmin
+  verifyAdmin(input: verificationinfo!): Admin
+  adminLogin(input: AdminLogin!): String
+  forgotAdminPassword(phone_number: String!): SendCodeStatus
+  requestAdminPasswordReset(input: verificationinfo): String
+  resetAdminPassword(new_password: String!): Admin
+}
