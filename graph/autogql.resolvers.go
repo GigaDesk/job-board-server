@@ -14,6 +14,279 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+// GetJob is the resolver for the getJob field.
+func (r *queryResolver) GetJob(ctx context.Context, id int) (*model.Job, error) {
+	v, okHook := r.Sql.Hooks[string(db.GetJob)].(db.AutoGqlHookGet[model.Job, int])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, err = v.Received(ctx, r.Sql, id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = runtimehelper.GetPreloadSelection(ctx, db, runtimehelper.GetPreloadsMap(ctx, "Job"))
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res model.Job
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Job")
+	db = db.First(&res, tableName+".id = ?", id)
+	if okHook {
+		r, err := v.AfterCallDb(ctx, &res)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+		r, err = v.BeforeReturn(ctx, &res, db)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+	}
+	return &res, db.Error
+}
+
+// QueryJob is the resolver for the queryJob field.
+func (r *queryResolver) QueryJob(ctx context.Context, filter *model.JobFiltersInput, order *model.JobOrder, first *int, offset *int, group []model.JobGroup) (*model.JobQueryResult, error) {
+	v, okHook := r.Sql.Hooks[string(db.QueryJob)].(db.AutoGqlHookQuery[model.Job, model.JobFiltersInput, model.JobOrder])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, order, first, offset, err = v.Received(ctx, r.Sql, filter, order, first, offset)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res []*model.Job
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Job")
+	preloadSubTables := runtimehelper.GetPreloadsMap(ctx, "data").SubTables
+	if len(preloadSubTables) > 0 {
+		db = runtimehelper.GetPreloadSelection(ctx, db, preloadSubTables[0])
+	}
+	if filter != nil {
+		blackList := make(map[string]struct{})
+		sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(db, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+		db.Where(sql, arguments...)
+	}
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if order != nil {
+		if order.Asc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s asc", runtimehelper.GetQuoteChar(db), tableName, order.Asc))
+		}
+		if order.Desc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s desc", runtimehelper.GetQuoteChar(db), tableName, order.Desc))
+		}
+	}
+	var total int64
+	db.Model(res).Count(&total)
+	if first != nil {
+		db = db.Limit(*first)
+	}
+	if offset != nil {
+		db = db.Offset(*offset)
+	}
+	if len(group) > 0 {
+		garr := make([]string, len(group))
+		for i, g := range group {
+			garr[i] = fmt.Sprintf("%s.%s", tableName, xstrings.ToSnakeCase(string(g)))
+		}
+		db = db.Group(strings.Join(garr, ","))
+	}
+	db = db.Find(&res)
+	if okHook {
+		var err error
+		res, err = v.AfterCallDb(ctx, res)
+		if err != nil {
+			return nil, err
+		}
+		res, err = v.BeforeReturn(ctx, res, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &model.JobQueryResult{
+		Data:       res,
+		Count:      len(res),
+		TotalCount: int(total),
+	}, db.Error
+}
+func (r *Resolver) AddJobPayload() AddJobPayloadResolver {
+	return &jobPayloadResolver[*model.AddJobPayload]{r}
+}
+func (r *Resolver) DeleteJobPayload() DeleteJobPayloadResolver {
+	return &jobPayloadResolver[*model.DeleteJobPayload]{r}
+}
+func (r *Resolver) UpdateJobPayload() UpdateJobPayloadResolver {
+	return &jobPayloadResolver[*model.UpdateJobPayload]{r}
+}
+
+type jobPayload interface {
+	*model.AddJobPayload | *model.DeleteJobPayload | *model.UpdateJobPayload
+}
+
+type jobPayloadResolver[T jobPayload] struct {
+	*Resolver
+}
+
+func (r *jobPayloadResolver[T]) Job(ctx context.Context, obj T, filter *model.JobFiltersInput, order *model.JobOrder, first *int, offset *int, group []model.JobGroup) (*model.JobQueryResult, error) {
+	q := r.Query().(*queryResolver)
+	return q.QueryJob(ctx, filter, order, first, offset, group)
+}
+
+// AddJob is the resolver for the addJob field.
+func (r *mutationResolver) AddJob(ctx context.Context, input []*model.JobInput) (*model.AddJobPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.AddJob)].(db.AutoGqlHookAdd[model.Job, model.JobInput, model.AddJobPayload])
+	res := &model.AddJobPayload{}
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	obj := make([]model.Job, len(input))
+	for i, v := range input {
+		obj[i] = v.MergeToType()
+	}
+	db = db.Omit(clause.Associations)
+	if okHook {
+		var err error
+		db, obj, err = v.BeforeCallDb(ctx, db, obj)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = db.Create(&obj)
+	affectedRes := make([]*model.Job, len(obj))
+	for i, v := range obj {
+		tmp := v
+		affectedRes[i] = &tmp
+	}
+	res.Affected = affectedRes
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, obj, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// UpdateJob is the resolver for the updateJob field.
+func (r *mutationResolver) UpdateJob(ctx context.Context, input model.UpdateJobInput) (*model.UpdateJobPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.UpdateJob)].(db.AutoGqlHookUpdate[model.UpdateJobInput, model.UpdateJobPayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, &input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Job")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(input.Filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.Job{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.Job
+	queryDb.Find(&toChange)
+	update := input.Set.MergeToType()
+	if okHook {
+		var err error
+		db, update, err = v.BeforeCallDb(ctx, db, update)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Updates(update)
+	affectedRes := make([]*model.Job, 0)
+	subTables := runtimehelper.GetPreloadsMap(ctx, "affected").SubTables
+	if len(subTables) > 0 {
+		if preloadMap := subTables[0]; len(preloadMap.Fields) > 0 {
+			affectedDb := runtimehelper.GetPreloadSelection(ctx, db, preloadMap)
+			affectedDb = affectedDb.Model(&obj)
+			affectedDb.Find(&affectedRes)
+		}
+	}
+
+	res := &model.UpdateJobPayload{
+		Count:    int(db.RowsAffected),
+		Affected: affectedRes,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// DeleteJob is the resolver for the deleteJob field.
+func (r *mutationResolver) DeleteJob(ctx context.Context, filter model.JobFiltersInput) (*model.DeleteJobPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.DeleteJob)].(db.AutoGqlHookDelete[model.JobFiltersInput, model.DeleteJobPayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, err = v.Received(ctx, r.Sql, &filter)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Job")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.Job{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.Job
+	queryDb.Find(&toChange)
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Delete(&obj)
+	msg := fmt.Sprintf("%d rows deleted", db.RowsAffected)
+	res := &model.DeleteJobPayload{
+		Count: int(db.RowsAffected),
+		Msg:   &msg,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
 // GetSchool is the resolver for the getSchool field.
 func (r *queryResolver) GetSchool(ctx context.Context, id int) (*model.School, error) {
 	v, okHook := r.Sql.Hooks[string(db.GetSchool)].(db.AutoGqlHookGet[model.School, int])

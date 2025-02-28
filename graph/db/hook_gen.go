@@ -18,6 +18,11 @@ type Many2ManyAddName string
 type Many2ManyDeleteName string
 
 const (
+	GetJob                 GetName    = "GetJob"
+	QueryJob               QueryName  = "QueryJob"
+	AddJob                 AddName    = "AddJob"
+	UpdateJob              UpdateName = "UpdateJob"
+	DeleteJob              DeleteName = "DeleteJob"
 	GetSchool              GetName    = "GetSchool"
 	QuerySchool            QueryName  = "QuerySchool"
 	AddSchool              AddName    = "AddSchool"
@@ -37,12 +42,12 @@ const (
 
 // Modelhooks
 type AutoGqlHookM interface {
-	model.School | model.Student | model.UnverifiedSchool
+	model.Job | model.School | model.Student | model.UnverifiedSchool
 }
 
 // Filter Hooks
 type AutoGqlHookF interface {
-	model.SchoolFiltersInput | model.StudentFiltersInput | model.UnverifiedSchoolFiltersInput
+	model.JobFiltersInput | model.SchoolFiltersInput | model.StudentFiltersInput | model.UnverifiedSchoolFiltersInput
 }
 
 // Many2Many Hooks
@@ -51,36 +56,37 @@ type AutoGqlHookM2M interface {
 
 // Order Hooks
 type AutoGqlHookQueryO interface {
-	model.SchoolOrder | model.StudentOrder | model.UnverifiedSchoolOrder
+	model.JobOrder | model.SchoolOrder | model.StudentOrder | model.UnverifiedSchoolOrder
 }
 
 // Input Hooks
 type AutoGqlHookI interface {
-	model.SchoolInput | model.StudentInput | model.UnverifiedSchoolInput
+	model.JobInput | model.SchoolInput | model.StudentInput | model.UnverifiedSchoolInput
 }
 
 // Update Hooks
 type AutoGqlHookU interface {
-	model.UpdateSchoolInput | model.UpdateStudentInput | model.UpdateUnverifiedSchoolInput
+	model.UpdateJobInput | model.UpdateSchoolInput | model.UpdateStudentInput | model.UpdateUnverifiedSchoolInput
 }
 
 // Update Payload Hooks
 type AutoGqlHookUP interface {
-	model.UpdateSchoolPayload | model.UpdateStudentPayload | model.UpdateUnverifiedSchoolPayload
+	model.UpdateJobPayload | model.UpdateSchoolPayload | model.UpdateStudentPayload | model.UpdateUnverifiedSchoolPayload
 }
 
 // Delete Payload Hooks
 type AutoGqlHookDP interface {
-	model.DeleteSchoolPayload | model.DeleteStudentPayload | model.DeleteUnverifiedSchoolPayload
+	model.DeleteJobPayload | model.DeleteSchoolPayload | model.DeleteStudentPayload | model.DeleteUnverifiedSchoolPayload
 }
 
 // Add Payload Hooks
 type AutoGqlHookAP interface {
-	model.AddSchoolPayload | model.AddStudentPayload | model.AddUnverifiedSchoolPayload
+	model.AddJobPayload | model.AddSchoolPayload | model.AddStudentPayload | model.AddUnverifiedSchoolPayload
 }
 
 // Add a getHook
 // useable for
+//   - GetJob
 //   - GetSchool
 //   - GetStudent
 //   - GetUnverifiedSchool
@@ -90,6 +96,7 @@ func AddGetHook[T AutoGqlHookM, I any](db *AutoGqlDB, name GetName, implementati
 
 // Add a queryHook
 // useable for
+//   - QueryJob
 //   - QuerySchool
 //   - QueryStudent
 //   - QueryUnverifiedSchool
@@ -99,6 +106,7 @@ func AddQueryHook[M AutoGqlHookM, F AutoGqlHookF, O AutoGqlHookQueryO](db *AutoG
 
 // Add a addHook
 // useable for
+//   - AddJob
 //   - AddSchool
 //   - AddStudent
 //   - AddUnverifiedSchool
@@ -108,6 +116,7 @@ func AddAddHook[M AutoGqlHookM, I AutoGqlHookI, AP AutoGqlHookAP](db *AutoGqlDB,
 
 // Add a updateHook
 // useable for
+//   - UpdateJob
 //   - UpdateSchool
 //   - UpdateStudent
 //   - UpdateUnverifiedSchool
@@ -129,6 +138,7 @@ func AddMany2ManyDeleteHook[U AutoGqlHookM2M, DP AutoGqlHookDP](db *AutoGqlDB, n
 
 // Add a updateHook
 // useable for
+//   - DeleteJob
 //   - DeleteSchool
 //   - DeleteStudent
 //   - DeleteUnverifiedSchool

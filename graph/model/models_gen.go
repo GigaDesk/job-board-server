@@ -11,6 +11,12 @@ import (
 	"github.com/fasibio/autogql/runtimehelper"
 )
 
+// AddJob result with filterable data and affected rows
+type AddJobPayload struct {
+	Job      *JobQueryResult `json:"job"`
+	Affected []*Job          `json:"affected"`
+}
+
 // AddSchool result with filterable data and affected rows
 type AddSchoolPayload struct {
 	School   *SchoolQueryResult `json:"school"`
@@ -37,6 +43,14 @@ type BooleanFilterInput struct {
 	Is      *bool               `json:"is,omitempty"`
 	Null    *bool               `json:"null,omitempty"`
 	NotNull *bool               `json:"notNull,omitempty"`
+}
+
+// DeleteJob result with filterable data and count of affected entries
+type DeleteJobPayload struct {
+	Job *JobQueryResult `json:"job"`
+	// Count of deleted Job entities
+	Count int     `json:"count"`
+	Msg   *string `json:"msg,omitempty"`
 }
 
 // DeleteSchool result with filterable data and count of affected entries
@@ -129,7 +143,90 @@ type IntFilterInput struct {
 	Between *IntFilterBetween `json:"between,omitempty"`
 }
 
+type Job struct {
+	ID             int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
+	CreatedAt      time.Time                 `json:"createdAt"`
+	UpdatedAt      time.Time                 `json:"updatedAt"`
+	DeletedAt      *runtimehelper.SoftDelete `json:"deletedAt,omitempty" gorm:"index;"`
+	Title          string                    `json:"title"`
+	Description    string                    `json:"description"`
+	Level          *string                   `json:"level,omitempty"`
+	Location       *string                   `json:"location,omitempty"`
+	Deadline       *time.Time                `json:"deadline,omitempty"`
+	EducationLevel *string                   `json:"educationLevel,omitempty"`
+	Experience     *int                      `json:"experience,omitempty"`
+	Requirements   []string                  `json:"requirements,omitempty"`
+}
+
+// Filter input selection for Job
+// Can be used f.e.: by queryJob
+type JobFiltersInput struct {
+	ID             *IntFilterInput    `json:"id,omitempty"`
+	CreatedAt      *TimeFilterInput   `json:"createdAt,omitempty"`
+	UpdatedAt      *TimeFilterInput   `json:"updatedAt,omitempty"`
+	Title          *StringFilterInput `json:"title,omitempty"`
+	Description    *StringFilterInput `json:"description,omitempty"`
+	Level          *StringFilterInput `json:"level,omitempty"`
+	Location       *StringFilterInput `json:"location,omitempty"`
+	Deadline       *TimeFilterInput   `json:"deadline,omitempty"`
+	EducationLevel *StringFilterInput `json:"educationLevel,omitempty"`
+	Experience     *IntFilterInput    `json:"experience,omitempty"`
+	Requirements   *StringFilterInput `json:"requirements,omitempty"`
+	And            []*JobFiltersInput `json:"and,omitempty"`
+	Or             []*JobFiltersInput `json:"or,omitempty"`
+	Not            *JobFiltersInput   `json:"not,omitempty"`
+}
+
+// Job Input value to add new Job
+type JobInput struct {
+	Title          string     `json:"title"`
+	Description    string     `json:"description"`
+	Level          *string    `json:"level,omitempty"`
+	Location       *string    `json:"location,omitempty"`
+	Deadline       *time.Time `json:"deadline,omitempty"`
+	EducationLevel *string    `json:"educationLevel,omitempty"`
+	Experience     *int       `json:"experience,omitempty"`
+	Requirements   []string   `json:"requirements,omitempty"`
+}
+
+// Order Job by asc or desc
+type JobOrder struct {
+	Asc  *JobOrderable `json:"asc,omitempty"`
+	Desc *JobOrderable `json:"desc,omitempty"`
+}
+
+// Job Patch value all values are optional to update Job entities
+type JobPatch struct {
+	Title          *string    `json:"title,omitempty"`
+	Description    *string    `json:"description,omitempty"`
+	Level          *string    `json:"level,omitempty"`
+	Location       *string    `json:"location,omitempty"`
+	Deadline       *time.Time `json:"deadline,omitempty"`
+	EducationLevel *string    `json:"educationLevel,omitempty"`
+	Experience     *int       `json:"experience,omitempty"`
+	Requirements   []string   `json:"requirements,omitempty"`
+}
+
+// Job result
+type JobQueryResult struct {
+	Data       []*Job `json:"data"`
+	Count      int    `json:"count"`
+	TotalCount int    `json:"totalCount"`
+}
+
 type Mutation struct {
+}
+
+type NewJob struct {
+	Title          string     `json:"title"`
+	Description    string     `json:"description"`
+	Industry       *string    `json:"industry,omitempty"`
+	Level          *string    `json:"level,omitempty"`
+	Location       *string    `json:"location,omitempty"`
+	Deadline       *time.Time `json:"deadline,omitempty"`
+	EducationLevel *string    `json:"educationLevel,omitempty"`
+	Experience     *int       `json:"experience,omitempty"`
+	Requirements   []string   `json:"requirements,omitempty"`
 }
 
 type NewSchool struct {
@@ -469,6 +566,20 @@ type UnverifiedSchoolQueryResult struct {
 	TotalCount int                 `json:"totalCount"`
 }
 
+// Update rules for Job multiupdates simple possible by global filtervalue
+type UpdateJobInput struct {
+	Filter *JobFiltersInput `json:"filter"`
+	Set    *JobPatch        `json:"set"`
+}
+
+// UpdateJob result with filterable data and affected rows
+type UpdateJobPayload struct {
+	Job *JobQueryResult `json:"job"`
+	// Count of affected updates
+	Count    int    `json:"count"`
+	Affected []*Job `json:"affected"`
+}
+
 // Update rules for School multiupdates simple possible by global filtervalue
 type UpdateSchoolInput struct {
 	Filter *SchoolFiltersInput `json:"filter"`
@@ -514,6 +625,122 @@ type UpdateUnverifiedSchoolPayload struct {
 type Verificationinfo struct {
 	PhoneNumber string `json:"phone_number"`
 	Otp         string `json:"otp"`
+}
+
+// Groupable data for  Job
+// Can be used f.e.: by queryJob
+type JobGroup string
+
+const (
+	JobGroupID             JobGroup = "id"
+	JobGroupCreatedAt      JobGroup = "createdAt"
+	JobGroupUpdatedAt      JobGroup = "updatedAt"
+	JobGroupTitle          JobGroup = "title"
+	JobGroupDescription    JobGroup = "description"
+	JobGroupLevel          JobGroup = "level"
+	JobGroupLocation       JobGroup = "location"
+	JobGroupDeadline       JobGroup = "deadline"
+	JobGroupEducationLevel JobGroup = "educationLevel"
+	JobGroupExperience     JobGroup = "experience"
+	JobGroupRequirements   JobGroup = "requirements"
+)
+
+var AllJobGroup = []JobGroup{
+	JobGroupID,
+	JobGroupCreatedAt,
+	JobGroupUpdatedAt,
+	JobGroupTitle,
+	JobGroupDescription,
+	JobGroupLevel,
+	JobGroupLocation,
+	JobGroupDeadline,
+	JobGroupEducationLevel,
+	JobGroupExperience,
+	JobGroupRequirements,
+}
+
+func (e JobGroup) IsValid() bool {
+	switch e {
+	case JobGroupID, JobGroupCreatedAt, JobGroupUpdatedAt, JobGroupTitle, JobGroupDescription, JobGroupLevel, JobGroupLocation, JobGroupDeadline, JobGroupEducationLevel, JobGroupExperience, JobGroupRequirements:
+		return true
+	}
+	return false
+}
+
+func (e JobGroup) String() string {
+	return string(e)
+}
+
+func (e *JobGroup) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = JobGroup(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid JobGroup", str)
+	}
+	return nil
+}
+
+func (e JobGroup) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// for Job a enum of all orderable entities
+// can be used f.e.: queryJob
+type JobOrderable string
+
+const (
+	JobOrderableID             JobOrderable = "id"
+	JobOrderableTitle          JobOrderable = "title"
+	JobOrderableDescription    JobOrderable = "description"
+	JobOrderableLevel          JobOrderable = "level"
+	JobOrderableLocation       JobOrderable = "location"
+	JobOrderableEducationLevel JobOrderable = "educationLevel"
+	JobOrderableExperience     JobOrderable = "experience"
+	JobOrderableRequirements   JobOrderable = "requirements"
+)
+
+var AllJobOrderable = []JobOrderable{
+	JobOrderableID,
+	JobOrderableTitle,
+	JobOrderableDescription,
+	JobOrderableLevel,
+	JobOrderableLocation,
+	JobOrderableEducationLevel,
+	JobOrderableExperience,
+	JobOrderableRequirements,
+}
+
+func (e JobOrderable) IsValid() bool {
+	switch e {
+	case JobOrderableID, JobOrderableTitle, JobOrderableDescription, JobOrderableLevel, JobOrderableLocation, JobOrderableEducationLevel, JobOrderableExperience, JobOrderableRequirements:
+		return true
+	}
+	return false
+}
+
+func (e JobOrderable) String() string {
+	return string(e)
+}
+
+func (e *JobOrderable) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = JobOrderable(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid JobOrderable", str)
+	}
+	return nil
+}
+
+func (e JobOrderable) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 // Groupable data for  School
