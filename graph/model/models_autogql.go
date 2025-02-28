@@ -30,6 +30,8 @@ import (
 //	}
 func GetInputStruct(name string, obj map[string]interface{}) (interface{}, error) {
 	switch name {
+	case "JobInput":
+		return JobInputFromMap(obj)
 	case "SchoolInput":
 		return SchoolInputFromMap(obj)
 	case "StudentInput":
@@ -38,6 +40,97 @@ func GetInputStruct(name string, obj map[string]interface{}) (interface{}, error
 		return UnverifiedSchoolInputFromMap(obj)
 	}
 	return nil, fmt.Errorf("%s not found", name)
+}
+
+// JobInputFromMap return a JobInput from data map
+// use github.com/mitchellh/mapstructure with reflaction
+func JobInputFromMap(data map[string]interface{}) (JobInput, error) {
+	model := JobInput{}
+	err := mapstructure.Decode(data, &model)
+	return model, err
+}
+
+// MergeToType returns a map with all values set to JobPatch
+func (d *JobPatch) MergeToType() map[string]interface{} {
+	res := make(map[string]interface{})
+	if d.Title != nil {
+		res["title"] = *d.Title
+	}
+	if d.Description != nil {
+		res["description"] = *d.Description
+	}
+	if d.Level != nil {
+		res["level"] = d.Level
+	}
+	if d.Location != nil {
+		res["location"] = d.Location
+	}
+	if d.Deadline != nil {
+		res["deadline"] = d.Deadline
+	}
+	if d.EducationLevel != nil {
+		res["education_level"] = d.EducationLevel
+	}
+	if d.Experience != nil {
+		res["experience"] = d.Experience
+	}
+	if d.Requirements != nil {
+		var tmpRequirements []string
+		for _, v := range d.Requirements {
+			tmp := v
+			tmpRequirements = append(tmpRequirements, tmp)
+		}
+		res["requirements"] = tmpRequirements
+	}
+	return res
+}
+
+// MergeToType retuns a Job filled from JobInput
+func (d *JobInput) MergeToType() Job {
+
+	tmpTitle := d.Title
+
+	tmpDescription := d.Description
+
+	var tmpLevel *string
+	if d.Level != nil {
+		tmpLevel = d.Level
+	}
+
+	var tmpLocation *string
+	if d.Location != nil {
+		tmpLocation = d.Location
+	}
+
+	var tmpDeadline *time.Time
+	if d.Deadline != nil {
+		tmpDeadline = d.Deadline
+	}
+
+	var tmpEducationLevel *string
+	if d.EducationLevel != nil {
+		tmpEducationLevel = d.EducationLevel
+	}
+
+	var tmpExperience *int
+	if d.Experience != nil {
+		tmpExperience = d.Experience
+	}
+
+	var tmpRequirements []string
+	if d.Requirements != nil {
+		tmpRequirements = d.Requirements
+	}
+	return Job{
+		Title:          tmpTitle,
+		Description:    tmpDescription,
+		Level:          tmpLevel,
+		Location:       tmpLocation,
+		Deadline:       tmpDeadline,
+		EducationLevel: tmpEducationLevel,
+		Experience:     tmpExperience,
+		Requirements:   tmpRequirements,
+	}
 }
 
 // SchoolInputFromMap return a SchoolInput from data map

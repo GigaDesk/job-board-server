@@ -1,0 +1,30 @@
+type Job @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  title: String!
+  description: String!
+  level: String
+  location: String
+  deadline: Time
+  educationLevel: String
+  experience: Int
+  requirements: [String!]
+}
+
+input NewJob {
+  title: String!
+  description: String!
+  industry: String
+  level: String
+  location: String
+  deadline: Time
+  educationLevel: String
+  experience: Int
+  requirements: [String!]
+}
+
+extend type Mutation {
+  createJob(input: NewJob!): Job!
+}
