@@ -247,7 +247,7 @@ type Job struct {
 	Deadline       *time.Time                `json:"deadline,omitempty"`
 	EducationLevel *string                   `json:"educationLevel,omitempty"`
 	Experience     *int                      `json:"experience,omitempty"`
-	Requirements   []string                  `json:"requirements,omitempty"`
+	Requirements   *string                   `json:"requirements,omitempty"`
 }
 
 // Filter input selection for Job
@@ -278,7 +278,7 @@ type JobInput struct {
 	Deadline       *time.Time `json:"deadline,omitempty"`
 	EducationLevel *string    `json:"educationLevel,omitempty"`
 	Experience     *int       `json:"experience,omitempty"`
-	Requirements   []string   `json:"requirements,omitempty"`
+	Requirements   *string    `json:"requirements,omitempty"`
 }
 
 // Order Job by asc or desc
@@ -296,7 +296,22 @@ type JobPatch struct {
 	Deadline       *time.Time `json:"deadline,omitempty"`
 	EducationLevel *string    `json:"educationLevel,omitempty"`
 	Experience     *int       `json:"experience,omitempty"`
-	Requirements   []string   `json:"requirements,omitempty"`
+	Requirements   *string    `json:"requirements,omitempty"`
+}
+
+type JobProfile struct {
+	ID             int                       `json:"id"`
+	CreatedAt      time.Time                 `json:"createdAt"`
+	UpdatedAt      time.Time                 `json:"updatedAt"`
+	DeletedAt      *runtimehelper.SoftDelete `json:"deletedAt,omitempty"`
+	Title          string                    `json:"title"`
+	Description    string                    `json:"description"`
+	Level          *string                   `json:"level,omitempty"`
+	Location       *string                   `json:"location,omitempty"`
+	Deadline       *time.Time                `json:"deadline,omitempty"`
+	EducationLevel *string                   `json:"educationLevel,omitempty"`
+	Experience     *int                      `json:"experience,omitempty"`
+	Requirements   []string                  `json:"requirements,omitempty"`
 }
 
 // Job result

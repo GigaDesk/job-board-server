@@ -117,12 +117,7 @@ func (d *JobPatch) MergeToType() map[string]interface{} {
 		res["experience"] = d.Experience
 	}
 	if d.Requirements != nil {
-		var tmpRequirements []string
-		for _, v := range d.Requirements {
-			tmp := v
-			tmpRequirements = append(tmpRequirements, tmp)
-		}
-		res["requirements"] = tmpRequirements
+		res["requirements"] = d.Requirements
 	}
 	return res
 }
@@ -159,7 +154,7 @@ func (d *JobInput) MergeToType() Job {
 		tmpExperience = d.Experience
 	}
 
-	var tmpRequirements []string
+	var tmpRequirements *string
 	if d.Requirements != nil {
 		tmpRequirements = d.Requirements
 	}
