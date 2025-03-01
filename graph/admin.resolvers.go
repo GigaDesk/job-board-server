@@ -290,7 +290,18 @@ func (r *mutationResolver) ResetAdminPassword(ctx context.Context, newPassword s
 
 // AdminPhoneNumberExists is the resolver for the adminPhoneNumberExists field.
 func (r *queryResolver) AdminPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error) {
-	panic(fmt.Errorf("not implemented: AdminPhoneNumberExists - adminPhoneNumberExists"))
+		//check if system is in shutdown mode
+		if *shutdown.IsShutdown {
+			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+		}
+		phoneexists, err := phoneutils.CheckAdminPhoneNumber(r.Sql.Db, phoneNumber)
+	
+		if err != nil {
+			log.Error().Str("phone_number", phoneNumber).Str("path", "AdminPhoneNumberExists").Msg(err.Error())
+			return nil, err
+		}
+	
+		return phoneexists, nil
 }
 
 // GetadminProfile is the resolver for the getadminProfile field.
