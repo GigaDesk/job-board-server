@@ -117,119 +117,119 @@ func (r *mutationResolver) VerifyAdmin(ctx context.Context, input model.Verifica
 
 // AdminLogin is the resolver for the adminLogin field.
 func (r *mutationResolver) AdminLogin(ctx context.Context, input model.AdminLogin) (*string, error) {
-		//check if system is in shutdown mode
-		if *shutdown.IsShutdown {
-			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
-		}
-	
-		//validate AdminLogin input
-		if err := input.Validate(); err != nil {
-			return nil, err
-		}
-	
-		//declare an admin variable
-		var admin *model.Admin
-		// Find the first admin that matches the input phone number from the admin table
-	
-		if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&admin).Error; err != nil {
-			log.Info().Str("phone_number", input.PhoneNumber).Str("path", "AdminLogin").Msg(err.Error())
-			return nil, errors.New("phone number does not exist")
-		}
-		//check if the password of the admin matches the input password
-		if err := encrypt.CheckPassword(admin.Password, input.Password); err != nil {
-			log.Info().Str("path", "AdminLogin").Msg(err.Error())
-			return nil, errors.New("Invalid phone number or password")
-		}
-	
-		credentials := jwt.TokenCredentials{
-			Id:   strconv.Itoa(admin.ID),
-			Role: "admin",
-		}
-		token, err := jwt.GenerateToken(credentials)
-		if err != nil {
-			log.Error().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "AdminLogin").Msg(err.Error())
-			return nil, errors.New("error generating accessToken")
-		}
-		log.Info().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "AdminLogin").Msg("admin logged in successfully!")
-		return &token, nil
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+
+	//validate AdminLogin input
+	if err := input.Validate(); err != nil {
+		return nil, err
+	}
+
+	//declare an admin variable
+	var admin *model.Admin
+	// Find the first admin that matches the input phone number from the admin table
+
+	if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&admin).Error; err != nil {
+		log.Info().Str("phone_number", input.PhoneNumber).Str("path", "AdminLogin").Msg(err.Error())
+		return nil, errors.New("phone number does not exist")
+	}
+	//check if the password of the admin matches the input password
+	if err := encrypt.CheckPassword(admin.Password, input.Password); err != nil {
+		log.Info().Str("path", "AdminLogin").Msg(err.Error())
+		return nil, errors.New("Invalid phone number or password")
+	}
+
+	credentials := jwt.TokenCredentials{
+		Id:   strconv.Itoa(admin.ID),
+		Role: "admin",
+	}
+	token, err := jwt.GenerateToken(credentials)
+	if err != nil {
+		log.Error().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "AdminLogin").Msg(err.Error())
+		return nil, errors.New("error generating accessToken")
+	}
+	log.Info().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "AdminLogin").Msg("admin logged in successfully!")
+	return &token, nil
 }
 
 // ForgotAdminPassword is the resolver for the forgotAdminPassword field.
 func (r *mutationResolver) ForgotAdminPassword(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error) {
-		//check if system is in shutdown mode
-		if *shutdown.IsShutdown {
-			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
-		}
-	
-		//validate phone number
-		if err := validate.ValidateKenyanPhoneNumber(phoneNumber); err != nil {
-			return nil, err
-		}
-	
-		//check if the phone number exists in the database
-		phoneexists, err := phoneutils.CheckAdminPhoneNumber(r.Sql.Db, phoneNumber)
-	
-		//return any error that might be associated with checking the phone number's existence in the database
-		if err != nil {
-			log.Error().Str("phone_number", phoneNumber).Str("path", "ForgotAdminPassword").Msg(err.Error())
-			return nil, err
-		}
-		//return an error if phone number exists in the unverified admin table
-		if phoneexists.Verified != true && phoneexists.Unverified == true {
-			return nil, errors.New("phone number has been registered but is yet to be verified")
-		}
-		//return an error if phone number is neither registered nor verified
-		if phoneexists.Verified != true && phoneexists.Unverified != true {
-			return nil, errors.New("phone number does not exist")
-		}
-		//send an OTP code to the phone number provided, return error if there is any
-		if err := phoneutils.SendOtp(phoneNumber); err != nil {
-			log.Error().Str("phone_number", phoneNumber).Str("path", "ForgotAdminPassword").Msg(err.Error())
-			return nil, err
-		}
-		//return status on success
-		sendcodestatus := &model.SendCodeStatus{
-			PhoneNumber: phoneNumber,
-			Success:     true,
-		}
-		return sendcodestatus, nil
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+
+	//validate phone number
+	if err := validate.ValidateKenyanPhoneNumber(phoneNumber); err != nil {
+		return nil, err
+	}
+
+	//check if the phone number exists in the database
+	phoneexists, err := phoneutils.CheckAdminPhoneNumber(r.Sql.Db, phoneNumber)
+
+	//return any error that might be associated with checking the phone number's existence in the database
+	if err != nil {
+		log.Error().Str("phone_number", phoneNumber).Str("path", "ForgotAdminPassword").Msg(err.Error())
+		return nil, err
+	}
+	//return an error if phone number exists in the unverified admin table
+	if phoneexists.Verified != true && phoneexists.Unverified == true {
+		return nil, errors.New("phone number has been registered but is yet to be verified")
+	}
+	//return an error if phone number is neither registered nor verified
+	if phoneexists.Verified != true && phoneexists.Unverified != true {
+		return nil, errors.New("phone number does not exist")
+	}
+	//send an OTP code to the phone number provided, return error if there is any
+	if err := phoneutils.SendOtp(phoneNumber); err != nil {
+		log.Error().Str("phone_number", phoneNumber).Str("path", "ForgotAdminPassword").Msg(err.Error())
+		return nil, err
+	}
+	//return status on success
+	sendcodestatus := &model.SendCodeStatus{
+		PhoneNumber: phoneNumber,
+		Success:     true,
+	}
+	return sendcodestatus, nil
 }
 
 // RequestAdminPasswordReset is the resolver for the requestAdminPasswordReset field.
 func (r *mutationResolver) RequestAdminPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error) {
-		//check if system is in shutdown mode
-		if *shutdown.IsShutdown {
-			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
-		}
-		//validate inputs
-		if err := input.Validate(); err != nil {
-			return nil, err
-		}
-	
-		//Check the validity of an OTP code
-		if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
-			return nil, err
-		}
-		//declare an admin variable
-		var admin *model.School
-	
-		// Find the first admin that matches the input phone number from the admin table
-	
-		if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&admin).Error; err != nil {
-			log.Info().Str("phone_number", input.PhoneNumber).Str("path", "RequestAdminPasswordReset").Msg(err.Error())
-			return nil, errors.New("phone number does not exist")
-		}
-	
-		credentials := jwt.TokenCredentials{
-			Id:   strconv.Itoa(admin.ID),
-			Role: "admin",
-		}
-		token, err := jwt.GenerateToken(credentials)
-		if err != nil {
-			log.Error().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "RequestAdminPasswordReset").Msg(err.Error())
-			return nil, errors.New("error generating accessToken")
-		}
-		return &token, nil
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	//validate inputs
+	if err := input.Validate(); err != nil {
+		return nil, err
+	}
+
+	//Check the validity of an OTP code
+	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
+		return nil, err
+	}
+	//declare an admin variable
+	var admin *model.School
+
+	// Find the first admin that matches the input phone number from the admin table
+
+	if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&admin).Error; err != nil {
+		log.Info().Str("phone_number", input.PhoneNumber).Str("path", "RequestAdminPasswordReset").Msg(err.Error())
+		return nil, errors.New("phone number does not exist")
+	}
+
+	credentials := jwt.TokenCredentials{
+		Id:   strconv.Itoa(admin.ID),
+		Role: "admin",
+	}
+	token, err := jwt.GenerateToken(credentials)
+	if err != nil {
+		log.Error().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "RequestAdminPasswordReset").Msg(err.Error())
+		return nil, errors.New("error generating accessToken")
+	}
+	return &token, nil
 }
 
 // ResetAdminPassword is the resolver for the resetAdminPassword field.
@@ -290,18 +290,18 @@ func (r *mutationResolver) ResetAdminPassword(ctx context.Context, newPassword s
 
 // AdminPhoneNumberExists is the resolver for the adminPhoneNumberExists field.
 func (r *queryResolver) AdminPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error) {
-		//check if system is in shutdown mode
-		if *shutdown.IsShutdown {
-			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
-		}
-		phoneexists, err := phoneutils.CheckAdminPhoneNumber(r.Sql.Db, phoneNumber)
-	
-		if err != nil {
-			log.Error().Str("phone_number", phoneNumber).Str("path", "AdminPhoneNumberExists").Msg(err.Error())
-			return nil, err
-		}
-	
-		return phoneexists, nil
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	phoneexists, err := phoneutils.CheckAdminPhoneNumber(r.Sql.Db, phoneNumber)
+
+	if err != nil {
+		log.Error().Str("phone_number", phoneNumber).Str("path", "AdminPhoneNumberExists").Msg(err.Error())
+		return nil, err
+	}
+
+	return phoneexists, nil
 }
 
 // GetadminProfile is the resolver for the getadminProfile field.
