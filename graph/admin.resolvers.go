@@ -8,10 +8,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
 	"github.com/GigaDesk/eardrum-server/phoneutils"
+	"github.com/GigaDesk/eardrum-server/pkg/jwt"
 	"github.com/GigaDesk/eardrum-server/shutdown"
 	"github.com/rs/zerolog/log"
 )
@@ -113,7 +115,41 @@ func (r *mutationResolver) VerifyAdmin(ctx context.Context, input model.Verifica
 
 // AdminLogin is the resolver for the adminLogin field.
 func (r *mutationResolver) AdminLogin(ctx context.Context, input model.AdminLogin) (*string, error) {
-	panic(fmt.Errorf("not implemented: AdminLogin - adminLogin"))
+		//check if system is in shutdown mode
+		if *shutdown.IsShutdown {
+			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+		}
+	
+		//validate AdminLogin input
+		if err := input.Validate(); err != nil {
+			return nil, err
+		}
+	
+		//declare an admin variable
+		var admin *model.Admin
+		// Find the first admin that matches the input phone number from the admin table
+	
+		if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&admin).Error; err != nil {
+			log.Info().Str("phone_number", input.PhoneNumber).Str("path", "AdminLogin").Msg(err.Error())
+			return nil, errors.New("phone number does not exist")
+		}
+		//check if the password of the admin matches the input password
+		if err := encrypt.CheckPassword(admin.Password, input.Password); err != nil {
+			log.Info().Str("path", "AdminLogin").Msg(err.Error())
+			return nil, errors.New("Invalid phone number or password")
+		}
+	
+		credentials := jwt.TokenCredentials{
+			Id:   strconv.Itoa(admin.ID),
+			Role: "admin",
+		}
+		token, err := jwt.GenerateToken(credentials)
+		if err != nil {
+			log.Error().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "AdminLogin").Msg(err.Error())
+			return nil, errors.New("error generating accessToken")
+		}
+		log.Info().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "AdminLogin").Msg("admin logged in successfully!")
+		return &token, nil
 }
 
 // ForgotAdminPassword is the resolver for the forgotAdminPassword field.
