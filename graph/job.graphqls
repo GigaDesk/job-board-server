@@ -25,6 +25,10 @@ input NewJob {
   requirements: [String!]
 }
 
+extend type Query {
+  getJobs: [Job!]
+}
+
 extend type Mutation {
   createJob(input: NewJob!): Job!
 }

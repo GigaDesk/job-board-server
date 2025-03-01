@@ -59,3 +59,20 @@ func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*
 
 	return n, nil
 }
+
+// GetJobs is the resolver for the getJobs field.
+func (r *queryResolver) GetJobs(ctx context.Context) ([]*model.Job, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+
+	var jobs []*model.Job
+	if err := r.Sql.Db.Find(&jobs).Error; err != nil {
+		log.Error().Str("path", "GetJobs").Msg(err.Error())
+		return nil, errors.New("could not access jobs!")
+	}
+	log.Info().Str("path", "GetJobs").Msg("getting jobs")
+
+	return jobs, nil
+}
