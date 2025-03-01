@@ -196,7 +196,39 @@ func (r *mutationResolver) ForgotAdminPassword(ctx context.Context, phoneNumber 
 
 // RequestAdminPasswordReset is the resolver for the requestAdminPasswordReset field.
 func (r *mutationResolver) RequestAdminPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error) {
-	panic(fmt.Errorf("not implemented: RequestAdminPasswordReset - requestAdminPasswordReset"))
+		//check if system is in shutdown mode
+		if *shutdown.IsShutdown {
+			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+		}
+		//validate inputs
+		if err := input.Validate(); err != nil {
+			return nil, err
+		}
+	
+		//Check the validity of an OTP code
+		if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
+			return nil, err
+		}
+		//declare an admin variable
+		var admin *model.School
+	
+		// Find the first admin that matches the input phone number from the admin table
+	
+		if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&admin).Error; err != nil {
+			log.Info().Str("phone_number", input.PhoneNumber).Str("path", "RequestAdminPasswordReset").Msg(err.Error())
+			return nil, errors.New("phone number does not exist")
+		}
+	
+		credentials := jwt.TokenCredentials{
+			Id:   strconv.Itoa(admin.ID),
+			Role: "admin",
+		}
+		token, err := jwt.GenerateToken(credentials)
+		if err != nil {
+			log.Error().Str("id", credentials.Id).Str("role", credentials.Role).Str("path", "RequestAdminPasswordReset").Msg(err.Error())
+			return nil, errors.New("error generating accessToken")
+		}
+		return &token, nil
 }
 
 // ResetAdminPassword is the resolver for the resetAdminPassword field.
