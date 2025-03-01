@@ -11,6 +11,12 @@ import (
 	"github.com/fasibio/autogql/runtimehelper"
 )
 
+// AddAdmin result with filterable data and affected rows
+type AddAdminPayload struct {
+	Admin    *AdminQueryResult `json:"admin"`
+	Affected []*Admin          `json:"affected"`
+}
+
 // AddJob result with filterable data and affected rows
 type AddJobPayload struct {
 	Job      *JobQueryResult `json:"job"`
@@ -29,10 +35,80 @@ type AddStudentPayload struct {
 	Affected []*Student          `json:"affected"`
 }
 
+// AddUnverifiedAdmin result with filterable data and affected rows
+type AddUnverifiedAdminPayload struct {
+	UnverifiedAdmin *UnverifiedAdminQueryResult `json:"unverifiedAdmin"`
+	Affected        []*UnverifiedAdmin          `json:"affected"`
+}
+
 // AddUnverifiedSchool result with filterable data and affected rows
 type AddUnverifiedSchoolPayload struct {
 	UnverifiedSchool *UnverifiedSchoolQueryResult `json:"unverifiedSchool"`
 	Affected         []*UnverifiedSchool          `json:"affected"`
+}
+
+type Admin struct {
+	ID          int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
+	CreatedAt   time.Time                 `json:"createdAt"`
+	UpdatedAt   time.Time                 `json:"updatedAt"`
+	DeletedAt   *runtimehelper.SoftDelete `json:"deletedAt,omitempty" gorm:"index;"`
+	Name        string                    `json:"name"`
+	PhoneNumber string                    `json:"phone_number"`
+	Password    string                    `json:"password"`
+}
+
+// Filter input selection for Admin
+// Can be used f.e.: by queryAdmin
+type AdminFiltersInput struct {
+	ID          *IntFilterInput      `json:"id,omitempty"`
+	CreatedAt   *TimeFilterInput     `json:"createdAt,omitempty"`
+	UpdatedAt   *TimeFilterInput     `json:"updatedAt,omitempty"`
+	Name        *StringFilterInput   `json:"name,omitempty"`
+	PhoneNumber *StringFilterInput   `json:"phone_number,omitempty"`
+	Password    *StringFilterInput   `json:"password,omitempty"`
+	And         []*AdminFiltersInput `json:"and,omitempty"`
+	Or          []*AdminFiltersInput `json:"or,omitempty"`
+	Not         *AdminFiltersInput   `json:"not,omitempty"`
+}
+
+// Admin Input value to add new Admin
+type AdminInput struct {
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
+}
+
+type AdminLogin struct {
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
+}
+
+// Order Admin by asc or desc
+type AdminOrder struct {
+	Asc  *AdminOrderable `json:"asc,omitempty"`
+	Desc *AdminOrderable `json:"desc,omitempty"`
+}
+
+// Admin Patch value all values are optional to update Admin entities
+type AdminPatch struct {
+	Name        *string `json:"name,omitempty"`
+	PhoneNumber *string `json:"phone_number,omitempty"`
+	Password    *string `json:"password,omitempty"`
+}
+
+type AdminProfile struct {
+	ID          int       `json:"id"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	Name        string    `json:"name"`
+	PhoneNumber string    `json:"phone_number"`
+}
+
+// Admin result
+type AdminQueryResult struct {
+	Data       []*Admin `json:"data"`
+	Count      int      `json:"count"`
+	TotalCount int      `json:"totalCount"`
 }
 
 // Boolean Filter simple datatypes
@@ -43,6 +119,14 @@ type BooleanFilterInput struct {
 	Is      *bool               `json:"is,omitempty"`
 	Null    *bool               `json:"null,omitempty"`
 	NotNull *bool               `json:"notNull,omitempty"`
+}
+
+// DeleteAdmin result with filterable data and count of affected entries
+type DeleteAdminPayload struct {
+	Admin *AdminQueryResult `json:"admin"`
+	// Count of deleted Admin entities
+	Count int     `json:"count"`
+	Msg   *string `json:"msg,omitempty"`
 }
 
 // DeleteJob result with filterable data and count of affected entries
@@ -65,6 +149,14 @@ type DeleteSchoolPayload struct {
 type DeleteStudentPayload struct {
 	Student *StudentQueryResult `json:"student"`
 	// Count of deleted Student entities
+	Count int     `json:"count"`
+	Msg   *string `json:"msg,omitempty"`
+}
+
+// DeleteUnverifiedAdmin result with filterable data and count of affected entries
+type DeleteUnverifiedAdminPayload struct {
+	UnverifiedAdmin *UnverifiedAdminQueryResult `json:"unverifiedAdmin"`
+	// Count of deleted UnverifiedAdmin entities
 	Count int     `json:"count"`
 	Msg   *string `json:"msg,omitempty"`
 }
@@ -215,6 +307,12 @@ type JobQueryResult struct {
 }
 
 type Mutation struct {
+}
+
+type NewAdmin struct {
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
 }
 
 type NewJob struct {
@@ -507,6 +605,57 @@ type TimeFilterInput struct {
 	Between *TimeFilterBetween `json:"between,omitempty"`
 }
 
+type UnverifiedAdmin struct {
+	ID          int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
+	CreatedAt   time.Time                 `json:"createdAt"`
+	UpdatedAt   time.Time                 `json:"updatedAt"`
+	DeletedAt   *runtimehelper.SoftDelete `json:"deletedAt,omitempty" gorm:"index;"`
+	Name        string                    `json:"name"`
+	PhoneNumber string                    `json:"phone_number"`
+	Password    string                    `json:"password"`
+}
+
+// Filter input selection for UnverifiedAdmin
+// Can be used f.e.: by queryUnverifiedAdmin
+type UnverifiedAdminFiltersInput struct {
+	ID          *IntFilterInput                `json:"id,omitempty"`
+	CreatedAt   *TimeFilterInput               `json:"createdAt,omitempty"`
+	UpdatedAt   *TimeFilterInput               `json:"updatedAt,omitempty"`
+	Name        *StringFilterInput             `json:"name,omitempty"`
+	PhoneNumber *StringFilterInput             `json:"phone_number,omitempty"`
+	Password    *StringFilterInput             `json:"password,omitempty"`
+	And         []*UnverifiedAdminFiltersInput `json:"and,omitempty"`
+	Or          []*UnverifiedAdminFiltersInput `json:"or,omitempty"`
+	Not         *UnverifiedAdminFiltersInput   `json:"not,omitempty"`
+}
+
+// UnverifiedAdmin Input value to add new UnverifiedAdmin
+type UnverifiedAdminInput struct {
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
+}
+
+// Order UnverifiedAdmin by asc or desc
+type UnverifiedAdminOrder struct {
+	Asc  *UnverifiedAdminOrderable `json:"asc,omitempty"`
+	Desc *UnverifiedAdminOrderable `json:"desc,omitempty"`
+}
+
+// UnverifiedAdmin Patch value all values are optional to update UnverifiedAdmin entities
+type UnverifiedAdminPatch struct {
+	Name        *string `json:"name,omitempty"`
+	PhoneNumber *string `json:"phone_number,omitempty"`
+	Password    *string `json:"password,omitempty"`
+}
+
+// UnverifiedAdmin result
+type UnverifiedAdminQueryResult struct {
+	Data       []*UnverifiedAdmin `json:"data"`
+	Count      int                `json:"count"`
+	TotalCount int                `json:"totalCount"`
+}
+
 type UnverifiedSchool struct {
 	ID          int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
 	CreatedAt   time.Time                 `json:"createdAt"`
@@ -566,6 +715,20 @@ type UnverifiedSchoolQueryResult struct {
 	TotalCount int                 `json:"totalCount"`
 }
 
+// Update rules for Admin multiupdates simple possible by global filtervalue
+type UpdateAdminInput struct {
+	Filter *AdminFiltersInput `json:"filter"`
+	Set    *AdminPatch        `json:"set"`
+}
+
+// UpdateAdmin result with filterable data and affected rows
+type UpdateAdminPayload struct {
+	Admin *AdminQueryResult `json:"admin"`
+	// Count of affected updates
+	Count    int      `json:"count"`
+	Affected []*Admin `json:"affected"`
+}
+
 // Update rules for Job multiupdates simple possible by global filtervalue
 type UpdateJobInput struct {
 	Filter *JobFiltersInput `json:"filter"`
@@ -608,6 +771,20 @@ type UpdateStudentPayload struct {
 	Affected []*Student `json:"affected"`
 }
 
+// Update rules for UnverifiedAdmin multiupdates simple possible by global filtervalue
+type UpdateUnverifiedAdminInput struct {
+	Filter *UnverifiedAdminFiltersInput `json:"filter"`
+	Set    *UnverifiedAdminPatch        `json:"set"`
+}
+
+// UpdateUnverifiedAdmin result with filterable data and affected rows
+type UpdateUnverifiedAdminPayload struct {
+	UnverifiedAdmin *UnverifiedAdminQueryResult `json:"unverifiedAdmin"`
+	// Count of affected updates
+	Count    int                `json:"count"`
+	Affected []*UnverifiedAdmin `json:"affected"`
+}
+
 // Update rules for UnverifiedSchool multiupdates simple possible by global filtervalue
 type UpdateUnverifiedSchoolInput struct {
 	Filter *UnverifiedSchoolFiltersInput `json:"filter"`
@@ -625,6 +802,104 @@ type UpdateUnverifiedSchoolPayload struct {
 type Verificationinfo struct {
 	PhoneNumber string `json:"phone_number"`
 	Otp         string `json:"otp"`
+}
+
+// Groupable data for  Admin
+// Can be used f.e.: by queryAdmin
+type AdminGroup string
+
+const (
+	AdminGroupID          AdminGroup = "id"
+	AdminGroupCreatedAt   AdminGroup = "createdAt"
+	AdminGroupUpdatedAt   AdminGroup = "updatedAt"
+	AdminGroupName        AdminGroup = "name"
+	AdminGroupPhoneNumber AdminGroup = "phone_number"
+	AdminGroupPassword    AdminGroup = "password"
+)
+
+var AllAdminGroup = []AdminGroup{
+	AdminGroupID,
+	AdminGroupCreatedAt,
+	AdminGroupUpdatedAt,
+	AdminGroupName,
+	AdminGroupPhoneNumber,
+	AdminGroupPassword,
+}
+
+func (e AdminGroup) IsValid() bool {
+	switch e {
+	case AdminGroupID, AdminGroupCreatedAt, AdminGroupUpdatedAt, AdminGroupName, AdminGroupPhoneNumber, AdminGroupPassword:
+		return true
+	}
+	return false
+}
+
+func (e AdminGroup) String() string {
+	return string(e)
+}
+
+func (e *AdminGroup) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AdminGroup(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AdminGroup", str)
+	}
+	return nil
+}
+
+func (e AdminGroup) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// for Admin a enum of all orderable entities
+// can be used f.e.: queryAdmin
+type AdminOrderable string
+
+const (
+	AdminOrderableID          AdminOrderable = "id"
+	AdminOrderableName        AdminOrderable = "name"
+	AdminOrderablePhoneNumber AdminOrderable = "phone_number"
+	AdminOrderablePassword    AdminOrderable = "password"
+)
+
+var AllAdminOrderable = []AdminOrderable{
+	AdminOrderableID,
+	AdminOrderableName,
+	AdminOrderablePhoneNumber,
+	AdminOrderablePassword,
+}
+
+func (e AdminOrderable) IsValid() bool {
+	switch e {
+	case AdminOrderableID, AdminOrderableName, AdminOrderablePhoneNumber, AdminOrderablePassword:
+		return true
+	}
+	return false
+}
+
+func (e AdminOrderable) String() string {
+	return string(e)
+}
+
+func (e *AdminOrderable) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AdminOrderable(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AdminOrderable", str)
+	}
+	return nil
+}
+
+func (e AdminOrderable) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 // Groupable data for  Job
@@ -956,6 +1231,104 @@ func (e *StudentOrderable) UnmarshalGQL(v interface{}) error {
 }
 
 func (e StudentOrderable) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Groupable data for  UnverifiedAdmin
+// Can be used f.e.: by queryUnverifiedAdmin
+type UnverifiedAdminGroup string
+
+const (
+	UnverifiedAdminGroupID          UnverifiedAdminGroup = "id"
+	UnverifiedAdminGroupCreatedAt   UnverifiedAdminGroup = "createdAt"
+	UnverifiedAdminGroupUpdatedAt   UnverifiedAdminGroup = "updatedAt"
+	UnverifiedAdminGroupName        UnverifiedAdminGroup = "name"
+	UnverifiedAdminGroupPhoneNumber UnverifiedAdminGroup = "phone_number"
+	UnverifiedAdminGroupPassword    UnverifiedAdminGroup = "password"
+)
+
+var AllUnverifiedAdminGroup = []UnverifiedAdminGroup{
+	UnverifiedAdminGroupID,
+	UnverifiedAdminGroupCreatedAt,
+	UnverifiedAdminGroupUpdatedAt,
+	UnverifiedAdminGroupName,
+	UnverifiedAdminGroupPhoneNumber,
+	UnverifiedAdminGroupPassword,
+}
+
+func (e UnverifiedAdminGroup) IsValid() bool {
+	switch e {
+	case UnverifiedAdminGroupID, UnverifiedAdminGroupCreatedAt, UnverifiedAdminGroupUpdatedAt, UnverifiedAdminGroupName, UnverifiedAdminGroupPhoneNumber, UnverifiedAdminGroupPassword:
+		return true
+	}
+	return false
+}
+
+func (e UnverifiedAdminGroup) String() string {
+	return string(e)
+}
+
+func (e *UnverifiedAdminGroup) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UnverifiedAdminGroup(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UnverifiedAdminGroup", str)
+	}
+	return nil
+}
+
+func (e UnverifiedAdminGroup) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// for UnverifiedAdmin a enum of all orderable entities
+// can be used f.e.: queryUnverifiedAdmin
+type UnverifiedAdminOrderable string
+
+const (
+	UnverifiedAdminOrderableID          UnverifiedAdminOrderable = "id"
+	UnverifiedAdminOrderableName        UnverifiedAdminOrderable = "name"
+	UnverifiedAdminOrderablePhoneNumber UnverifiedAdminOrderable = "phone_number"
+	UnverifiedAdminOrderablePassword    UnverifiedAdminOrderable = "password"
+)
+
+var AllUnverifiedAdminOrderable = []UnverifiedAdminOrderable{
+	UnverifiedAdminOrderableID,
+	UnverifiedAdminOrderableName,
+	UnverifiedAdminOrderablePhoneNumber,
+	UnverifiedAdminOrderablePassword,
+}
+
+func (e UnverifiedAdminOrderable) IsValid() bool {
+	switch e {
+	case UnverifiedAdminOrderableID, UnverifiedAdminOrderableName, UnverifiedAdminOrderablePhoneNumber, UnverifiedAdminOrderablePassword:
+		return true
+	}
+	return false
+}
+
+func (e UnverifiedAdminOrderable) String() string {
+	return string(e)
+}
+
+func (e *UnverifiedAdminOrderable) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UnverifiedAdminOrderable(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UnverifiedAdminOrderable", str)
+	}
+	return nil
+}
+
+func (e UnverifiedAdminOrderable) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
