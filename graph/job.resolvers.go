@@ -7,7 +7,9 @@ package graph
 import (
 	"context"
 	"errors"
+	"strings"
 
+	"github.com/AlekSi/pointer"
 	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/graph/model"
 	"github.com/GigaDesk/eardrum-server/shutdown"
@@ -15,7 +17,7 @@ import (
 )
 
 // CreateJob is the resolver for the CreateJob field.
-func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*model.Job, error) {
+func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*model.JobProfile, error) {
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
@@ -40,6 +42,10 @@ func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*
 
 	log.Info().Str("role", role).Int("id", id).Str("path", "AddStudents").Msg("adding students")
 
+	//Join input.Requiremets with "||" separator
+
+	requirements := strings.Join(input.Requirements, "||")
+
 	n := &model.Job{
 		Title:          input.Title,
 		Description:    input.Description,
@@ -48,7 +54,7 @@ func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*
 		Deadline:       input.Deadline,
 		EducationLevel: input.EducationLevel,
 		Experience:     input.Experience,
-		Requirements:   input.Requirements,
+		Requirements:   &requirements,
 	}
 
 	//Create records in postgres
@@ -57,11 +63,26 @@ func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*
 		return nil, errors.New("an unexpected error occurred while creating the job. please try again later or contact support")
 	}
 
-	return n, nil
+	jobprofile := &model.JobProfile{
+		ID:             n.ID,
+		CreatedAt:      n.CreatedAt,
+		UpdatedAt:      n.UpdatedAt,
+		DeletedAt:      n.DeletedAt,
+		Title:          n.Title,
+		Description:    n.Description,
+		Level:          n.Level,
+		Location:       n.Location,
+		Deadline:       n.Deadline,
+		EducationLevel: n.EducationLevel,
+		Experience:     n.Experience,
+		Requirements:   strings.Split(pointer.GetString(n.Requirements), "||"),
+	}
+
+	return jobprofile, nil
 }
 
 // GetJobs is the resolver for the getJobs field.
-func (r *queryResolver) GetJobs(ctx context.Context) ([]*model.Job, error) {
+func (r *queryResolver) GetJobs(ctx context.Context) ([]*model.JobProfile, error) {
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
@@ -74,5 +95,25 @@ func (r *queryResolver) GetJobs(ctx context.Context) ([]*model.Job, error) {
 	}
 	log.Info().Str("path", "GetJobs").Msg("getting jobs")
 
-	return jobs, nil
+	var jobprofiles []*model.JobProfile
+
+	for _, job := range jobs {
+		jobprofile := &model.JobProfile{
+			ID:             job.ID,
+			CreatedAt:      job.CreatedAt,
+			UpdatedAt:      job.UpdatedAt,
+			DeletedAt:      job.DeletedAt,
+			Title:          job.Title,
+			Description:    job.Description,
+			Level:          job.Level,
+			Location:       job.Location,
+			Deadline:       job.Deadline,
+			EducationLevel: job.EducationLevel,
+			Experience:     job.Experience,
+			Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
+		}
+		jobprofiles = append(jobprofiles, jobprofile)
+	}
+
+	return jobprofiles, nil
 }
