@@ -10,6 +10,21 @@ type Job @SQL {
   deadline: Time
   educationLevel: String
   experience: Int
+  requirements: String
+}
+
+type JobProfile{
+  id: Int!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  title: String!
+  description: String!
+  level: String
+  location: String
+  deadline: Time
+  educationLevel: String
+  experience: Int
   requirements: [String!]
 }
 
@@ -26,9 +41,9 @@ input NewJob {
 }
 
 extend type Query {
-  getJobs: [Job!]
+  getJobs: [JobProfile!]
 }
 
 extend type Mutation {
-  createJob(input: NewJob!): Job!
+  createJob(input: NewJob!): JobProfile!
 }
