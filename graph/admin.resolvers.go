@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/GigaDesk/eardrum-prefix/validate"
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
 	"github.com/GigaDesk/eardrum-server/phoneutils"
@@ -154,7 +155,43 @@ func (r *mutationResolver) AdminLogin(ctx context.Context, input model.AdminLogi
 
 // ForgotAdminPassword is the resolver for the forgotAdminPassword field.
 func (r *mutationResolver) ForgotAdminPassword(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error) {
-	panic(fmt.Errorf("not implemented: ForgotAdminPassword - forgotAdminPassword"))
+		//check if system is in shutdown mode
+		if *shutdown.IsShutdown {
+			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+		}
+	
+		//validate phone number
+		if err := validate.ValidateKenyanPhoneNumber(phoneNumber); err != nil {
+			return nil, err
+		}
+	
+		//check if the phone number exists in the database
+		phoneexists, err := phoneutils.CheckAdminPhoneNumber(r.Sql.Db, phoneNumber)
+	
+		//return any error that might be associated with checking the phone number's existence in the database
+		if err != nil {
+			log.Error().Str("phone_number", phoneNumber).Str("path", "ForgotAdminPassword").Msg(err.Error())
+			return nil, err
+		}
+		//return an error if phone number exists in the unverified admin table
+		if phoneexists.Verified != true && phoneexists.Unverified == true {
+			return nil, errors.New("phone number has been registered but is yet to be verified")
+		}
+		//return an error if phone number is neither registered nor verified
+		if phoneexists.Verified != true && phoneexists.Unverified != true {
+			return nil, errors.New("phone number does not exist")
+		}
+		//send an OTP code to the phone number provided, return error if there is any
+		if err := phoneutils.SendOtp(phoneNumber); err != nil {
+			log.Error().Str("phone_number", phoneNumber).Str("path", "ForgotAdminPassword").Msg(err.Error())
+			return nil, err
+		}
+		//return status on success
+		sendcodestatus := &model.SendCodeStatus{
+			PhoneNumber: phoneNumber,
+			Success:     true,
+		}
+		return sendcodestatus, nil
 }
 
 // RequestAdminPasswordReset is the resolver for the requestAdminPasswordReset field.
