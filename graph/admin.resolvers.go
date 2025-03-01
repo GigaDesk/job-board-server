@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/GigaDesk/eardrum-prefix/validate"
+	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/encrypt"
 	"github.com/GigaDesk/eardrum-server/graph/model"
 	"github.com/GigaDesk/eardrum-server/phoneutils"
@@ -233,7 +234,58 @@ func (r *mutationResolver) RequestAdminPasswordReset(ctx context.Context, input 
 
 // ResetAdminPassword is the resolver for the resetAdminPassword field.
 func (r *mutationResolver) ResetAdminPassword(ctx context.Context, newPassword string) (*model.Admin, error) {
-	panic(fmt.Errorf("not implemented: ResetAdminPassword - resetAdminPassword"))
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("access to ResetAdminPassword denied!")
+	}
+	role := user.GetRole()
+	if role != "admin" {
+		return nil, errors.New("access to ResetAdminPassword denied. Only available for registered and logged in admin. To fix check access token!")
+	}
+	id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access admin's id!")
+	}
+
+	//validate inputs
+	if err := validate.ValidatePassword(newPassword); err != nil {
+		return nil, err
+	}
+
+	var admin *model.Admin
+	//fetch the record to be updated from the database
+	if err := r.Sql.Db.First(&admin, id).Error; err != nil {
+		log.Error().Int("id", id).Str("path", "ResetAdminPassword").Msg(err.Error())
+		return nil, err
+	}
+	//encrypt input password
+	encryptedpassword, err := encrypt.HashPassword(newPassword)
+	if err != nil {
+		log.Error().Str("password", newPassword).Str("path", "ResetAdminPassword").Msg(err.Error())
+		return nil, err
+	}
+	// Update the records' attributes with `map`
+	if err := r.Sql.Db.Model(&admin).Updates(map[string]interface{}{"password": encryptedpassword}).Error; err != nil {
+		log.Error().Int("id", admin.ID).Str("path", "ResetAdminPassword").Msg(fmt.Sprintf("updating admin password failed: %s", err.Error()))
+		return nil, err
+	}
+
+	//fetch the record again from the database, this time the updated version
+	if err := r.Sql.Db.First(&admin, id).Error; err != nil {
+		log.Error().Int("id", id).Str("path", "ResetSchoolPassword").Msg(err.Error())
+		return nil, err
+	}
+
+	//return the updated record
+	return admin, nil
 }
 
 // AdminPhoneNumberExists is the resolver for the adminPhoneNumberExists field.
