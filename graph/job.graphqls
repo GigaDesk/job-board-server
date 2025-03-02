@@ -16,6 +16,24 @@ type Job @SQL {
   requirements: String
 }
 
+type UnapprovedJob @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  title: String!
+  industry: String
+  description: String!
+  level: String
+  location: String
+  deadline: Time
+  educationLevel: String
+  experience: Int
+  minSalary: Int
+  maxSalary: Int
+  requirements: String
+}
+
 type JobProfile{
   id: Int!
   createdAt: Time!
@@ -50,8 +68,10 @@ input NewJob {
 
 extend type Query {
   getJobs: [JobProfile!]
+  getUnapprovedJobs: [JobProfile!]
 }
 
 extend type Mutation {
   createJob(input: NewJob!): JobProfile!
+  createUnapprovedJob(input: NewJob!): JobProfile!
 }
