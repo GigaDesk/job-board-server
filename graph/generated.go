@@ -45,12 +45,14 @@ type ResolverRoot interface {
 	AddJobPayload() AddJobPayloadResolver
 	AddSchoolPayload() AddSchoolPayloadResolver
 	AddStudentPayload() AddStudentPayloadResolver
+	AddUnapprovedJobPayload() AddUnapprovedJobPayloadResolver
 	AddUnverifiedAdminPayload() AddUnverifiedAdminPayloadResolver
 	AddUnverifiedSchoolPayload() AddUnverifiedSchoolPayloadResolver
 	DeleteAdminPayload() DeleteAdminPayloadResolver
 	DeleteJobPayload() DeleteJobPayloadResolver
 	DeleteSchoolPayload() DeleteSchoolPayloadResolver
 	DeleteStudentPayload() DeleteStudentPayloadResolver
+	DeleteUnapprovedJobPayload() DeleteUnapprovedJobPayloadResolver
 	DeleteUnverifiedAdminPayload() DeleteUnverifiedAdminPayloadResolver
 	DeleteUnverifiedSchoolPayload() DeleteUnverifiedSchoolPayloadResolver
 	Mutation() MutationResolver
@@ -61,6 +63,7 @@ type ResolverRoot interface {
 	UpdateJobPayload() UpdateJobPayloadResolver
 	UpdateSchoolPayload() UpdateSchoolPayloadResolver
 	UpdateStudentPayload() UpdateStudentPayloadResolver
+	UpdateUnapprovedJobPayload() UpdateUnapprovedJobPayloadResolver
 	UpdateUnverifiedAdminPayload() UpdateUnverifiedAdminPayloadResolver
 	UpdateUnverifiedSchoolPayload() UpdateUnverifiedSchoolPayloadResolver
 }
@@ -87,6 +90,11 @@ type ComplexityRoot struct {
 	AddStudentPayload struct {
 		Affected func(childComplexity int) int
 		Student  func(childComplexity int, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) int
+	}
+
+	AddUnapprovedJobPayload struct {
+		Affected      func(childComplexity int) int
+		UnapprovedJob func(childComplexity int, filter *model.UnapprovedJobFiltersInput, order *model.UnapprovedJobOrder, first *int, offset *int, group []model.UnapprovedJobGroup) int
 	}
 
 	AddUnverifiedAdminPayload struct {
@@ -145,6 +153,12 @@ type ComplexityRoot struct {
 		Count   func(childComplexity int) int
 		Msg     func(childComplexity int) int
 		Student func(childComplexity int, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) int
+	}
+
+	DeleteUnapprovedJobPayload struct {
+		Count         func(childComplexity int) int
+		Msg           func(childComplexity int) int
+		UnapprovedJob func(childComplexity int, filter *model.UnapprovedJobFiltersInput, order *model.UnapprovedJobOrder, first *int, offset *int, group []model.UnapprovedJobGroup) int
 	}
 
 	DeleteUnverifiedAdminPayload struct {
@@ -212,6 +226,7 @@ type ComplexityRoot struct {
 		AddSchool                   func(childComplexity int, input []*model.SchoolInput) int
 		AddStudent                  func(childComplexity int, input []*model.StudentInput) int
 		AddStudents                 func(childComplexity int, students []*model.NewStudent) int
+		AddUnapprovedJob            func(childComplexity int, input []*model.UnapprovedJobInput) int
 		AddUnverifiedAdmin          func(childComplexity int, input []*model.UnverifiedAdminInput) int
 		AddUnverifiedSchool         func(childComplexity int, input []*model.UnverifiedSchoolInput) int
 		AdminLogin                  func(childComplexity int, input model.AdminLogin) int
@@ -219,10 +234,12 @@ type ComplexityRoot struct {
 		CreateDummy                 func(childComplexity int, name string) int
 		CreateJob                   func(childComplexity int, input model.NewJob) int
 		CreateSchool                func(childComplexity int, input model.NewSchool) int
+		CreateUnapprovedJob         func(childComplexity int, input model.NewJob) int
 		DeleteAdmin                 func(childComplexity int, filter model.AdminFiltersInput) int
 		DeleteJob                   func(childComplexity int, filter model.JobFiltersInput) int
 		DeleteSchool                func(childComplexity int, filter model.SchoolFiltersInput) int
 		DeleteStudent               func(childComplexity int, filter model.StudentFiltersInput) int
+		DeleteUnapprovedJob         func(childComplexity int, filter model.UnapprovedJobFiltersInput) int
 		DeleteUnverifiedAdmin       func(childComplexity int, filter model.UnverifiedAdminFiltersInput) int
 		DeleteUnverifiedSchool      func(childComplexity int, filter model.UnverifiedSchoolFiltersInput) int
 		ForgotAdminPassword         func(childComplexity int, phoneNumber string) int
@@ -242,6 +259,7 @@ type ComplexityRoot struct {
 		UpdateJob                   func(childComplexity int, input model.UpdateJobInput) int
 		UpdateSchool                func(childComplexity int, input model.UpdateSchoolInput) int
 		UpdateStudent               func(childComplexity int, input model.UpdateStudentInput) int
+		UpdateUnapprovedJob         func(childComplexity int, input model.UpdateUnapprovedJobInput) int
 		UpdateUnverifiedAdmin       func(childComplexity int, input model.UpdateUnverifiedAdminInput) int
 		UpdateUnverifiedSchool      func(childComplexity int, input model.UpdateUnverifiedSchoolInput) int
 		VerifyAdmin                 func(childComplexity int, input model.Verificationinfo) int
@@ -265,6 +283,8 @@ type ComplexityRoot struct {
 		GetSchoolsProfile       func(childComplexity int) int
 		GetStudent              func(childComplexity int, id int) int
 		GetStudentProfile       func(childComplexity int) int
+		GetUnapprovedJob        func(childComplexity int, id int) int
+		GetUnapprovedJobs       func(childComplexity int) int
 		GetUnverifiedAdmin      func(childComplexity int, id int) int
 		GetUnverifiedSchool     func(childComplexity int, id int) int
 		GetadminProfile         func(childComplexity int) int
@@ -272,6 +292,7 @@ type ComplexityRoot struct {
 		QueryJob                func(childComplexity int, filter *model.JobFiltersInput, order *model.JobOrder, first *int, offset *int, group []model.JobGroup) int
 		QuerySchool             func(childComplexity int, filter *model.SchoolFiltersInput, order *model.SchoolOrder, first *int, offset *int, group []model.SchoolGroup) int
 		QueryStudent            func(childComplexity int, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) int
+		QueryUnapprovedJob      func(childComplexity int, filter *model.UnapprovedJobFiltersInput, order *model.UnapprovedJobOrder, first *int, offset *int, group []model.UnapprovedJobGroup) int
 		QueryUnverifiedAdmin    func(childComplexity int, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) int
 		QueryUnverifiedSchool   func(childComplexity int, filter *model.UnverifiedSchoolFiltersInput, order *model.UnverifiedSchoolOrder, first *int, offset *int, group []model.UnverifiedSchoolGroup) int
 		SchoolPhoneNumberExists func(childComplexity int, phoneNumber string) int
@@ -346,6 +367,30 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
+	UnapprovedJob struct {
+		CreatedAt      func(childComplexity int) int
+		Deadline       func(childComplexity int) int
+		DeletedAt      func(childComplexity int) int
+		Description    func(childComplexity int) int
+		EducationLevel func(childComplexity int) int
+		Experience     func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Industry       func(childComplexity int) int
+		Level          func(childComplexity int) int
+		Location       func(childComplexity int) int
+		MaxSalary      func(childComplexity int) int
+		MinSalary      func(childComplexity int) int
+		Requirements   func(childComplexity int) int
+		Title          func(childComplexity int) int
+		UpdatedAt      func(childComplexity int) int
+	}
+
+	UnapprovedJobQueryResult struct {
+		Count      func(childComplexity int) int
+		Data       func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
 	UnverifiedAdmin struct {
 		CreatedAt   func(childComplexity int) int
 		DeletedAt   func(childComplexity int) int
@@ -404,6 +449,12 @@ type ComplexityRoot struct {
 		Student  func(childComplexity int, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) int
 	}
 
+	UpdateUnapprovedJobPayload struct {
+		Affected      func(childComplexity int) int
+		Count         func(childComplexity int) int
+		UnapprovedJob func(childComplexity int, filter *model.UnapprovedJobFiltersInput, order *model.UnapprovedJobOrder, first *int, offset *int, group []model.UnapprovedJobGroup) int
+	}
+
 	UpdateUnverifiedAdminPayload struct {
 		Affected        func(childComplexity int) int
 		Count           func(childComplexity int) int
@@ -429,6 +480,9 @@ type AddSchoolPayloadResolver interface {
 type AddStudentPayloadResolver interface {
 	Student(ctx context.Context, obj *model.AddStudentPayload, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) (*model.StudentQueryResult, error)
 }
+type AddUnapprovedJobPayloadResolver interface {
+	UnapprovedJob(ctx context.Context, obj *model.AddUnapprovedJobPayload, filter *model.UnapprovedJobFiltersInput, order *model.UnapprovedJobOrder, first *int, offset *int, group []model.UnapprovedJobGroup) (*model.UnapprovedJobQueryResult, error)
+}
 type AddUnverifiedAdminPayloadResolver interface {
 	UnverifiedAdmin(ctx context.Context, obj *model.AddUnverifiedAdminPayload, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) (*model.UnverifiedAdminQueryResult, error)
 }
@@ -447,6 +501,9 @@ type DeleteSchoolPayloadResolver interface {
 type DeleteStudentPayloadResolver interface {
 	Student(ctx context.Context, obj *model.DeleteStudentPayload, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) (*model.StudentQueryResult, error)
 }
+type DeleteUnapprovedJobPayloadResolver interface {
+	UnapprovedJob(ctx context.Context, obj *model.DeleteUnapprovedJobPayload, filter *model.UnapprovedJobFiltersInput, order *model.UnapprovedJobOrder, first *int, offset *int, group []model.UnapprovedJobGroup) (*model.UnapprovedJobQueryResult, error)
+}
 type DeleteUnverifiedAdminPayloadResolver interface {
 	UnverifiedAdmin(ctx context.Context, obj *model.DeleteUnverifiedAdminPayload, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) (*model.UnverifiedAdminQueryResult, error)
 }
@@ -462,6 +519,7 @@ type MutationResolver interface {
 	RequestAdminPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error)
 	ResetAdminPassword(ctx context.Context, newPassword string) (*model.Admin, error)
 	CreateJob(ctx context.Context, input model.NewJob) (*model.JobProfile, error)
+	CreateUnapprovedJob(ctx context.Context, input model.NewJob) (*model.JobProfile, error)
 	CreateSchool(ctx context.Context, input model.NewSchool) (*model.UnverifiedSchool, error)
 	VerifySchool(ctx context.Context, input model.Verificationinfo) (*model.School, error)
 	SendCode(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error)
@@ -487,6 +545,9 @@ type MutationResolver interface {
 	AddStudent(ctx context.Context, input []*model.StudentInput) (*model.AddStudentPayload, error)
 	UpdateStudent(ctx context.Context, input model.UpdateStudentInput) (*model.UpdateStudentPayload, error)
 	DeleteStudent(ctx context.Context, filter model.StudentFiltersInput) (*model.DeleteStudentPayload, error)
+	AddUnapprovedJob(ctx context.Context, input []*model.UnapprovedJobInput) (*model.AddUnapprovedJobPayload, error)
+	UpdateUnapprovedJob(ctx context.Context, input model.UpdateUnapprovedJobInput) (*model.UpdateUnapprovedJobPayload, error)
+	DeleteUnapprovedJob(ctx context.Context, filter model.UnapprovedJobFiltersInput) (*model.DeleteUnapprovedJobPayload, error)
 	AddUnverifiedAdmin(ctx context.Context, input []*model.UnverifiedAdminInput) (*model.AddUnverifiedAdminPayload, error)
 	UpdateUnverifiedAdmin(ctx context.Context, input model.UpdateUnverifiedAdminInput) (*model.UpdateUnverifiedAdminPayload, error)
 	DeleteUnverifiedAdmin(ctx context.Context, filter model.UnverifiedAdminFiltersInput) (*model.DeleteUnverifiedAdminPayload, error)
@@ -500,6 +561,7 @@ type QueryResolver interface {
 	AdminPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error)
 	GetadminProfile(ctx context.Context) (*model.SchoolProfile, error)
 	GetJobs(ctx context.Context) ([]*model.JobProfile, error)
+	GetUnapprovedJobs(ctx context.Context) ([]*model.JobProfile, error)
 	SchoolPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error)
 	GetSchoolProfile(ctx context.Context) (*model.SchoolProfile, error)
 	GetSchoolsProfile(ctx context.Context) ([]*model.SchoolProfile, error)
@@ -512,6 +574,8 @@ type QueryResolver interface {
 	QuerySchool(ctx context.Context, filter *model.SchoolFiltersInput, order *model.SchoolOrder, first *int, offset *int, group []model.SchoolGroup) (*model.SchoolQueryResult, error)
 	GetStudent(ctx context.Context, id int) (*model.Student, error)
 	QueryStudent(ctx context.Context, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) (*model.StudentQueryResult, error)
+	GetUnapprovedJob(ctx context.Context, id int) (*model.UnapprovedJob, error)
+	QueryUnapprovedJob(ctx context.Context, filter *model.UnapprovedJobFiltersInput, order *model.UnapprovedJobOrder, first *int, offset *int, group []model.UnapprovedJobGroup) (*model.UnapprovedJobQueryResult, error)
 	GetUnverifiedAdmin(ctx context.Context, id int) (*model.UnverifiedAdmin, error)
 	QueryUnverifiedAdmin(ctx context.Context, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) (*model.UnverifiedAdminQueryResult, error)
 	GetUnverifiedSchool(ctx context.Context, id int) (*model.UnverifiedSchool, error)
@@ -534,6 +598,9 @@ type UpdateSchoolPayloadResolver interface {
 }
 type UpdateStudentPayloadResolver interface {
 	Student(ctx context.Context, obj *model.UpdateStudentPayload, filter *model.StudentFiltersInput, order *model.StudentOrder, first *int, offset *int, group []model.StudentGroup) (*model.StudentQueryResult, error)
+}
+type UpdateUnapprovedJobPayloadResolver interface {
+	UnapprovedJob(ctx context.Context, obj *model.UpdateUnapprovedJobPayload, filter *model.UnapprovedJobFiltersInput, order *model.UnapprovedJobOrder, first *int, offset *int, group []model.UnapprovedJobGroup) (*model.UnapprovedJobQueryResult, error)
 }
 type UpdateUnverifiedAdminPayloadResolver interface {
 	UnverifiedAdmin(ctx context.Context, obj *model.UpdateUnverifiedAdminPayload, filter *model.UnverifiedAdminFiltersInput, order *model.UnverifiedAdminOrder, first *int, offset *int, group []model.UnverifiedAdminGroup) (*model.UnverifiedAdminQueryResult, error)
@@ -636,6 +703,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AddStudentPayload.Student(childComplexity, args["filter"].(*model.StudentFiltersInput), args["order"].(*model.StudentOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.StudentGroup)), true
+
+	case "AddUnapprovedJobPayload.affected":
+		if e.complexity.AddUnapprovedJobPayload.Affected == nil {
+			break
+		}
+
+		return e.complexity.AddUnapprovedJobPayload.Affected(childComplexity), true
+
+	case "AddUnapprovedJobPayload.unapprovedJob":
+		if e.complexity.AddUnapprovedJobPayload.UnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_AddUnapprovedJobPayload_unapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.AddUnapprovedJobPayload.UnapprovedJob(childComplexity, args["filter"].(*model.UnapprovedJobFiltersInput), args["order"].(*model.UnapprovedJobOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.UnapprovedJobGroup)), true
 
 	case "AddUnverifiedAdminPayload.affected":
 		if e.complexity.AddUnverifiedAdminPayload.Affected == nil {
@@ -883,6 +969,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DeleteStudentPayload.Student(childComplexity, args["filter"].(*model.StudentFiltersInput), args["order"].(*model.StudentOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.StudentGroup)), true
+
+	case "DeleteUnapprovedJobPayload.count":
+		if e.complexity.DeleteUnapprovedJobPayload.Count == nil {
+			break
+		}
+
+		return e.complexity.DeleteUnapprovedJobPayload.Count(childComplexity), true
+
+	case "DeleteUnapprovedJobPayload.msg":
+		if e.complexity.DeleteUnapprovedJobPayload.Msg == nil {
+			break
+		}
+
+		return e.complexity.DeleteUnapprovedJobPayload.Msg(childComplexity), true
+
+	case "DeleteUnapprovedJobPayload.unapprovedJob":
+		if e.complexity.DeleteUnapprovedJobPayload.UnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_DeleteUnapprovedJobPayload_unapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.DeleteUnapprovedJobPayload.UnapprovedJob(childComplexity, args["filter"].(*model.UnapprovedJobFiltersInput), args["order"].(*model.UnapprovedJobOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.UnapprovedJobGroup)), true
 
 	case "DeleteUnverifiedAdminPayload.count":
 		if e.complexity.DeleteUnverifiedAdminPayload.Count == nil {
@@ -1241,6 +1353,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AddStudents(childComplexity, args["students"].([]*model.NewStudent)), true
 
+	case "Mutation.addUnapprovedJob":
+		if e.complexity.Mutation.AddUnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addUnapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddUnapprovedJob(childComplexity, args["input"].([]*model.UnapprovedJobInput)), true
+
 	case "Mutation.addUnverifiedAdmin":
 		if e.complexity.Mutation.AddUnverifiedAdmin == nil {
 			break
@@ -1325,6 +1449,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateSchool(childComplexity, args["input"].(model.NewSchool)), true
 
+	case "Mutation.createUnapprovedJob":
+		if e.complexity.Mutation.CreateUnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createUnapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateUnapprovedJob(childComplexity, args["input"].(model.NewJob)), true
+
 	case "Mutation.deleteAdmin":
 		if e.complexity.Mutation.DeleteAdmin == nil {
 			break
@@ -1372,6 +1508,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteStudent(childComplexity, args["filter"].(model.StudentFiltersInput)), true
+
+	case "Mutation.deleteUnapprovedJob":
+		if e.complexity.Mutation.DeleteUnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteUnapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteUnapprovedJob(childComplexity, args["filter"].(model.UnapprovedJobFiltersInput)), true
 
 	case "Mutation.deleteUnverifiedAdmin":
 		if e.complexity.Mutation.DeleteUnverifiedAdmin == nil {
@@ -1601,6 +1749,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateStudent(childComplexity, args["input"].(model.UpdateStudentInput)), true
 
+	case "Mutation.updateUnapprovedJob":
+		if e.complexity.Mutation.UpdateUnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUnapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUnapprovedJob(childComplexity, args["input"].(model.UpdateUnapprovedJobInput)), true
+
 	case "Mutation.updateUnverifiedAdmin":
 		if e.complexity.Mutation.UpdateUnverifiedAdmin == nil {
 			break
@@ -1770,6 +1930,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetStudentProfile(childComplexity), true
 
+	case "Query.getUnapprovedJob":
+		if e.complexity.Query.GetUnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getUnapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetUnapprovedJob(childComplexity, args["id"].(int)), true
+
+	case "Query.getUnapprovedJobs":
+		if e.complexity.Query.GetUnapprovedJobs == nil {
+			break
+		}
+
+		return e.complexity.Query.GetUnapprovedJobs(childComplexity), true
+
 	case "Query.getUnverifiedAdmin":
 		if e.complexity.Query.GetUnverifiedAdmin == nil {
 			break
@@ -1848,6 +2027,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.QueryStudent(childComplexity, args["filter"].(*model.StudentFiltersInput), args["order"].(*model.StudentOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.StudentGroup)), true
+
+	case "Query.queryUnapprovedJob":
+		if e.complexity.Query.QueryUnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_Query_queryUnapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.QueryUnapprovedJob(childComplexity, args["filter"].(*model.UnapprovedJobFiltersInput), args["order"].(*model.UnapprovedJobOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.UnapprovedJobGroup)), true
 
 	case "Query.queryUnverifiedAdmin":
 		if e.complexity.Query.QueryUnverifiedAdmin == nil {
@@ -2221,6 +2412,132 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.StudentQueryResult.TotalCount(childComplexity), true
 
+	case "UnapprovedJob.createdAt":
+		if e.complexity.UnapprovedJob.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.CreatedAt(childComplexity), true
+
+	case "UnapprovedJob.deadline":
+		if e.complexity.UnapprovedJob.Deadline == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.Deadline(childComplexity), true
+
+	case "UnapprovedJob.deletedAt":
+		if e.complexity.UnapprovedJob.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.DeletedAt(childComplexity), true
+
+	case "UnapprovedJob.description":
+		if e.complexity.UnapprovedJob.Description == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.Description(childComplexity), true
+
+	case "UnapprovedJob.educationLevel":
+		if e.complexity.UnapprovedJob.EducationLevel == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.EducationLevel(childComplexity), true
+
+	case "UnapprovedJob.experience":
+		if e.complexity.UnapprovedJob.Experience == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.Experience(childComplexity), true
+
+	case "UnapprovedJob.id":
+		if e.complexity.UnapprovedJob.ID == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.ID(childComplexity), true
+
+	case "UnapprovedJob.industry":
+		if e.complexity.UnapprovedJob.Industry == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.Industry(childComplexity), true
+
+	case "UnapprovedJob.level":
+		if e.complexity.UnapprovedJob.Level == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.Level(childComplexity), true
+
+	case "UnapprovedJob.location":
+		if e.complexity.UnapprovedJob.Location == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.Location(childComplexity), true
+
+	case "UnapprovedJob.maxSalary":
+		if e.complexity.UnapprovedJob.MaxSalary == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.MaxSalary(childComplexity), true
+
+	case "UnapprovedJob.minSalary":
+		if e.complexity.UnapprovedJob.MinSalary == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.MinSalary(childComplexity), true
+
+	case "UnapprovedJob.requirements":
+		if e.complexity.UnapprovedJob.Requirements == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.Requirements(childComplexity), true
+
+	case "UnapprovedJob.title":
+		if e.complexity.UnapprovedJob.Title == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.Title(childComplexity), true
+
+	case "UnapprovedJob.updatedAt":
+		if e.complexity.UnapprovedJob.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.UpdatedAt(childComplexity), true
+
+	case "UnapprovedJobQueryResult.count":
+		if e.complexity.UnapprovedJobQueryResult.Count == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobQueryResult.Count(childComplexity), true
+
+	case "UnapprovedJobQueryResult.data":
+		if e.complexity.UnapprovedJobQueryResult.Data == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobQueryResult.Data(childComplexity), true
+
+	case "UnapprovedJobQueryResult.totalCount":
+		if e.complexity.UnapprovedJobQueryResult.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobQueryResult.TotalCount(childComplexity), true
+
 	case "UnverifiedAdmin.createdAt":
 		if e.complexity.UnverifiedAdmin.CreatedAt == nil {
 			break
@@ -2479,6 +2796,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UpdateStudentPayload.Student(childComplexity, args["filter"].(*model.StudentFiltersInput), args["order"].(*model.StudentOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.StudentGroup)), true
 
+	case "UpdateUnapprovedJobPayload.affected":
+		if e.complexity.UpdateUnapprovedJobPayload.Affected == nil {
+			break
+		}
+
+		return e.complexity.UpdateUnapprovedJobPayload.Affected(childComplexity), true
+
+	case "UpdateUnapprovedJobPayload.count":
+		if e.complexity.UpdateUnapprovedJobPayload.Count == nil {
+			break
+		}
+
+		return e.complexity.UpdateUnapprovedJobPayload.Count(childComplexity), true
+
+	case "UpdateUnapprovedJobPayload.unapprovedJob":
+		if e.complexity.UpdateUnapprovedJobPayload.UnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_UpdateUnapprovedJobPayload_unapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.UpdateUnapprovedJobPayload.UnapprovedJob(childComplexity, args["filter"].(*model.UnapprovedJobFiltersInput), args["order"].(*model.UnapprovedJobOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.UnapprovedJobGroup)), true
+
 	case "UpdateUnverifiedAdminPayload.affected":
 		if e.complexity.UpdateUnverifiedAdminPayload.Affected == nil {
 			break
@@ -2576,6 +2919,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputStudentPatch,
 		ec.unmarshalInputTimeFilterBetween,
 		ec.unmarshalInputTimeFilterInput,
+		ec.unmarshalInputUnapprovedJobFiltersInput,
+		ec.unmarshalInputUnapprovedJobInput,
+		ec.unmarshalInputUnapprovedJobOrder,
+		ec.unmarshalInputUnapprovedJobPatch,
 		ec.unmarshalInputUnverifiedAdminFiltersInput,
 		ec.unmarshalInputUnverifiedAdminInput,
 		ec.unmarshalInputUnverifiedAdminOrder,
@@ -2588,6 +2935,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUpdateJobInput,
 		ec.unmarshalInputUpdateSchoolInput,
 		ec.unmarshalInputUpdateStudentInput,
+		ec.unmarshalInputUpdateUnapprovedJobInput,
 		ec.unmarshalInputUpdateUnverifiedAdminInput,
 		ec.unmarshalInputUpdateUnverifiedSchoolInput,
 		ec.unmarshalInputverificationinfo,
@@ -3521,6 +3869,184 @@ input TimeFilterBetween{
       }
 
   """
+  UnapprovedJob Input value to add new UnapprovedJob
+  """
+  input UnapprovedJobInput {
+      title: String!  
+      industry: String  
+      description: String!  
+      level: String  
+      location: String  
+      deadline: Time  
+      educationLevel: String  
+      experience: Int  
+      minSalary: Int  
+      maxSalary: Int  
+      requirements: String  
+  }
+
+  """
+  UnapprovedJob Patch value all values are optional to update UnapprovedJob entities
+  """
+  input UnapprovedJobPatch {
+      title: String  
+      industry: String  
+      description: String  
+      level: String  
+      location: String  
+      deadline: Time  
+      educationLevel: String  
+      experience: Int  
+      minSalary: Int  
+      maxSalary: Int  
+      requirements: String  
+  } 
+
+
+    """
+    Update rules for UnapprovedJob multiupdates simple possible by global filtervalue
+    """
+    input UpdateUnapprovedJobInput{
+      filter: UnapprovedJobFiltersInput!
+      set: UnapprovedJobPatch!
+    }
+
+    """
+    AddUnapprovedJob result with filterable data and affected rows
+    """
+    type AddUnapprovedJobPayload{
+      unapprovedJob(filter: UnapprovedJobFiltersInput, order: UnapprovedJobOrder, first: Int, offset: Int, group: [UnapprovedJobGroup!]): UnapprovedJobQueryResult!
+      affected: [UnapprovedJob!]!
+    }
+
+    """
+    UpdateUnapprovedJob result with filterable data and affected rows
+    """
+    type UpdateUnapprovedJobPayload{
+      unapprovedJob(filter: UnapprovedJobFiltersInput, order: UnapprovedJobOrder, first: Int, offset: Int, group: [UnapprovedJobGroup!]): UnapprovedJobQueryResult!
+      """
+      Count of affected updates
+      """
+      count: Int!
+      affected: [UnapprovedJob!]!
+    }
+
+    """
+    DeleteUnapprovedJob result with filterable data and count of affected entries
+    """
+    type DeleteUnapprovedJobPayload{
+      unapprovedJob(filter: UnapprovedJobFiltersInput, order: UnapprovedJobOrder, first: Int, offset: Int, group: [UnapprovedJobGroup!]): UnapprovedJobQueryResult!
+      """
+      Count of deleted UnapprovedJob entities
+      """
+      count: Int!
+      msg: String
+    }
+
+    """
+    UnapprovedJob result
+    """
+    type UnapprovedJobQueryResult{
+      data: [UnapprovedJob!]!
+      count: Int!
+      totalCount: Int!
+    }
+
+    """
+    for UnapprovedJob a enum of all orderable entities
+    can be used f.e.: queryUnapprovedJob
+    """
+    enum UnapprovedJobOrderable {
+        id
+        title
+        industry
+        description
+        level
+        location
+        educationLevel
+        experience
+        minSalary
+        maxSalary
+        requirements
+    }
+    """
+    Order UnapprovedJob by asc or desc 
+    """
+    input UnapprovedJobOrder{
+      asc: UnapprovedJobOrderable
+      desc: UnapprovedJobOrderable
+    }
+
+    """
+    Groupable data for  UnapprovedJob
+    Can be used f.e.: by queryUnapprovedJob
+    """
+    enum UnapprovedJobGroup {
+          id
+          createdAt
+          updatedAt
+          title
+          industry
+          description
+          level
+          location
+          deadline
+          educationLevel
+          experience
+          minSalary
+          maxSalary
+          requirements
+    }
+
+    """
+    Filter input selection for UnapprovedJob
+    Can be used f.e.: by queryUnapprovedJob
+    """
+    input UnapprovedJobFiltersInput{
+          id: IntFilterInput
+          createdAt: TimeFilterInput
+          updatedAt: TimeFilterInput
+          title: StringFilterInput
+          industry: StringFilterInput
+          description: StringFilterInput
+          level: StringFilterInput
+          location: StringFilterInput
+          deadline: TimeFilterInput
+          educationLevel: StringFilterInput
+          experience: IntFilterInput
+          minSalary: IntFilterInput
+          maxSalary: IntFilterInput
+          requirements: StringFilterInput
+      and: [UnapprovedJobFiltersInput]
+      or: [UnapprovedJobFiltersInput]
+      not: UnapprovedJobFiltersInput
+    }
+      extend type Query {
+        """
+        return one UnapprovedJob selected by PrimaryKey(s)
+        """
+        getUnapprovedJob(id: Int!, ): UnapprovedJob 
+        """
+        return a list of  UnapprovedJob filterable, pageination, orderbale, groupable ...
+        """
+        queryUnapprovedJob(filter: UnapprovedJobFiltersInput, order: UnapprovedJobOrder, first: Int, offset: Int, group: [UnapprovedJobGroup!] ): UnapprovedJobQueryResult 
+      }
+      extend type Mutation {
+        """
+        Add new UnapprovedJob
+        """
+        addUnapprovedJob(input: [UnapprovedJobInput!]!): AddUnapprovedJobPayload 
+        """
+        update UnapprovedJob filtered by selection and update all matched values
+        """
+        updateUnapprovedJob(input: UpdateUnapprovedJobInput!): UpdateUnapprovedJobPayload 
+        """
+        delete UnapprovedJob filtered by selection and delete all matched values
+        """
+        deleteUnapprovedJob(filter: UnapprovedJobFiltersInput!): DeleteUnapprovedJobPayload 
+      }
+
+  """
   UnverifiedAdmin Input value to add new UnverifiedAdmin
   """
   input UnverifiedAdminInput {
@@ -4194,6 +4720,101 @@ func (ec *executionContext) field_AddStudentPayload_student_argsGroup(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_AddUnapprovedJobPayload_unapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_AddUnapprovedJobPayload_unapprovedJob_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_AddUnapprovedJobPayload_unapprovedJob_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_AddUnapprovedJobPayload_unapprovedJob_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_AddUnapprovedJobPayload_unapprovedJob_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_AddUnapprovedJobPayload_unapprovedJob_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_AddUnapprovedJobPayload_unapprovedJob_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnapprovedJobFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOUnapprovedJobFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.UnapprovedJobFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddUnapprovedJobPayload_unapprovedJob_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnapprovedJobOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOUnapprovedJobOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.UnapprovedJobOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddUnapprovedJobPayload_unapprovedJob_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddUnapprovedJobPayload_unapprovedJob_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddUnapprovedJobPayload_unapprovedJob_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.UnapprovedJobGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOUnapprovedJobGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.UnapprovedJobGroup
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_AddUnverifiedAdminPayload_unverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -4764,6 +5385,101 @@ func (ec *executionContext) field_DeleteStudentPayload_student_argsGroup(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_DeleteUnapprovedJobPayload_unapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_DeleteUnapprovedJobPayload_unapprovedJob_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_DeleteUnapprovedJobPayload_unapprovedJob_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_DeleteUnapprovedJobPayload_unapprovedJob_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_DeleteUnapprovedJobPayload_unapprovedJob_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_DeleteUnapprovedJobPayload_unapprovedJob_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_DeleteUnapprovedJobPayload_unapprovedJob_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnapprovedJobFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOUnapprovedJobFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.UnapprovedJobFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteUnapprovedJobPayload_unapprovedJob_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnapprovedJobOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOUnapprovedJobOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.UnapprovedJobOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteUnapprovedJobPayload_unapprovedJob_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteUnapprovedJobPayload_unapprovedJob_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteUnapprovedJobPayload_unapprovedJob_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.UnapprovedJobGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOUnapprovedJobGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.UnapprovedJobGroup
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_DeleteUnverifiedAdminPayload_unverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5069,6 +5785,29 @@ func (ec *executionContext) field_Mutation_addStudent_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_addUnapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_addUnapprovedJob_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_addUnapprovedJob_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.UnapprovedJobInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNUnapprovedJobInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.UnapprovedJobInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_addUnverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5230,6 +5969,29 @@ func (ec *executionContext) field_Mutation_createSchool_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_createUnapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_createUnapprovedJob_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_createUnapprovedJob_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.NewJob, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNNewJob2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewJob(ctx, tmp)
+	}
+
+	var zeroVal model.NewJob
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5319,6 +6081,29 @@ func (ec *executionContext) field_Mutation_deleteStudent_argsFilter(
 	}
 
 	var zeroVal model.StudentFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteUnapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_deleteUnapprovedJob_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_deleteUnapprovedJob_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.UnapprovedJobFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalNUnapprovedJobFiltersInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal model.UnapprovedJobFiltersInput
 	return zeroVal, nil
 }
 
@@ -5831,6 +6616,29 @@ func (ec *executionContext) field_Mutation_updateStudent_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_updateUnapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_updateUnapprovedJob_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_updateUnapprovedJob_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.UpdateUnapprovedJobInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNUpdateUnapprovedJobInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnapprovedJobInput(ctx, tmp)
+	}
+
+	var zeroVal model.UpdateUnapprovedJobInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_updateUnverifiedAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6072,6 +6880,29 @@ func (ec *executionContext) field_Query_getStudent_args(ctx context.Context, raw
 	return args, nil
 }
 func (ec *executionContext) field_Query_getStudent_argsID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getUnapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getUnapprovedJob_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getUnapprovedJob_argsID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (int, error) {
@@ -6507,6 +7338,101 @@ func (ec *executionContext) field_Query_queryStudent_argsGroup(
 	}
 
 	var zeroVal []model.StudentGroup
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryUnapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_queryUnapprovedJob_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_Query_queryUnapprovedJob_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_Query_queryUnapprovedJob_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_Query_queryUnapprovedJob_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_Query_queryUnapprovedJob_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_Query_queryUnapprovedJob_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnapprovedJobFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOUnapprovedJobFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.UnapprovedJobFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryUnapprovedJob_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnapprovedJobOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOUnapprovedJobOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.UnapprovedJobOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryUnapprovedJob_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryUnapprovedJob_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryUnapprovedJob_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.UnapprovedJobGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOUnapprovedJobGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.UnapprovedJobGroup
 	return zeroVal, nil
 }
 
@@ -7100,6 +8026,101 @@ func (ec *executionContext) field_UpdateStudentPayload_student_argsGroup(
 	}
 
 	var zeroVal []model.StudentGroup
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateUnapprovedJobPayload_unapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_UpdateUnapprovedJobPayload_unapprovedJob_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_UpdateUnapprovedJobPayload_unapprovedJob_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_UpdateUnapprovedJobPayload_unapprovedJob_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_UpdateUnapprovedJobPayload_unapprovedJob_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_UpdateUnapprovedJobPayload_unapprovedJob_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_UpdateUnapprovedJobPayload_unapprovedJob_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnapprovedJobFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOUnapprovedJobFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.UnapprovedJobFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateUnapprovedJobPayload_unapprovedJob_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.UnapprovedJobOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOUnapprovedJobOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.UnapprovedJobOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateUnapprovedJobPayload_unapprovedJob_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateUnapprovedJobPayload_unapprovedJob_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateUnapprovedJobPayload_unapprovedJob_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.UnapprovedJobGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOUnapprovedJobGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.UnapprovedJobGroup
 	return zeroVal, nil
 }
 
@@ -7862,6 +8883,145 @@ func (ec *executionContext) fieldContext_AddStudentPayload_affected(_ context.Co
 				return ec.fieldContext_Student_profile_picture(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Student", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddUnapprovedJobPayload_unapprovedJob(ctx context.Context, field graphql.CollectedField, obj *model.AddUnapprovedJobPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddUnapprovedJobPayload_unapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.AddUnapprovedJobPayload().UnapprovedJob(rctx, obj, fc.Args["filter"].(*model.UnapprovedJobFiltersInput), fc.Args["order"].(*model.UnapprovedJobOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.UnapprovedJobGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnapprovedJobQueryResult)
+	fc.Result = res
+	return ec.marshalNUnapprovedJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddUnapprovedJobPayload_unapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddUnapprovedJobPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_UnapprovedJobQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_UnapprovedJobQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_UnapprovedJobQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJobQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_AddUnapprovedJobPayload_unapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddUnapprovedJobPayload_affected(ctx context.Context, field graphql.CollectedField, obj *model.AddUnapprovedJobPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddUnapprovedJobPayload_affected(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Affected, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UnapprovedJob)
+	fc.Result = res
+	return ec.marshalNUnapprovedJob2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddUnapprovedJobPayload_affected(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddUnapprovedJobPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnapprovedJob_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnapprovedJob_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnapprovedJob_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnapprovedJob_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_UnapprovedJob_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_UnapprovedJob_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_UnapprovedJob_description(ctx, field)
+			case "level":
+				return ec.fieldContext_UnapprovedJob_level(ctx, field)
+			case "location":
+				return ec.fieldContext_UnapprovedJob_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_UnapprovedJob_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_UnapprovedJob_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_UnapprovedJob_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_UnapprovedJob_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_UnapprovedJob_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_UnapprovedJob_requirements(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJob", field.Name)
 		},
 	}
 	return fc, nil
@@ -9372,6 +10532,154 @@ func (ec *executionContext) _DeleteStudentPayload_msg(ctx context.Context, field
 func (ec *executionContext) fieldContext_DeleteStudentPayload_msg(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "DeleteStudentPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteUnapprovedJobPayload_unapprovedJob(ctx context.Context, field graphql.CollectedField, obj *model.DeleteUnapprovedJobPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteUnapprovedJobPayload_unapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.DeleteUnapprovedJobPayload().UnapprovedJob(rctx, obj, fc.Args["filter"].(*model.UnapprovedJobFiltersInput), fc.Args["order"].(*model.UnapprovedJobOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.UnapprovedJobGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnapprovedJobQueryResult)
+	fc.Result = res
+	return ec.marshalNUnapprovedJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteUnapprovedJobPayload_unapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteUnapprovedJobPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_UnapprovedJobQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_UnapprovedJobQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_UnapprovedJobQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJobQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_DeleteUnapprovedJobPayload_unapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteUnapprovedJobPayload_count(ctx context.Context, field graphql.CollectedField, obj *model.DeleteUnapprovedJobPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteUnapprovedJobPayload_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteUnapprovedJobPayload_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteUnapprovedJobPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteUnapprovedJobPayload_msg(ctx context.Context, field graphql.CollectedField, obj *model.DeleteUnapprovedJobPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteUnapprovedJobPayload_msg(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Msg, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteUnapprovedJobPayload_msg(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteUnapprovedJobPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -11701,6 +13009,93 @@ func (ec *executionContext) fieldContext_Mutation_createJob(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createUnapprovedJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createUnapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateUnapprovedJob(rctx, fc.Args["input"].(model.NewJob))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobProfile)
+	fc.Result = res
+	return ec.marshalNJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_JobProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_JobProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_JobProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_JobProfile_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_JobProfile_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_JobProfile_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_JobProfile_description(ctx, field)
+			case "level":
+				return ec.fieldContext_JobProfile_level(ctx, field)
+			case "location":
+				return ec.fieldContext_JobProfile_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_JobProfile_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_JobProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_JobProfile_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_JobProfile_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createUnapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createSchool(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createSchool(ctx, field)
 	if err != nil {
@@ -13215,6 +14610,184 @@ func (ec *executionContext) fieldContext_Mutation_deleteStudent(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_addUnapprovedJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addUnapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddUnapprovedJob(rctx, fc.Args["input"].([]*model.UnapprovedJobInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.AddUnapprovedJobPayload)
+	fc.Result = res
+	return ec.marshalOAddUnapprovedJobPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddUnapprovedJobPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "unapprovedJob":
+				return ec.fieldContext_AddUnapprovedJobPayload_unapprovedJob(ctx, field)
+			case "affected":
+				return ec.fieldContext_AddUnapprovedJobPayload_affected(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AddUnapprovedJobPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addUnapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateUnapprovedJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateUnapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateUnapprovedJob(rctx, fc.Args["input"].(model.UpdateUnapprovedJobInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UpdateUnapprovedJobPayload)
+	fc.Result = res
+	return ec.marshalOUpdateUnapprovedJobPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnapprovedJobPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "unapprovedJob":
+				return ec.fieldContext_UpdateUnapprovedJobPayload_unapprovedJob(ctx, field)
+			case "count":
+				return ec.fieldContext_UpdateUnapprovedJobPayload_count(ctx, field)
+			case "affected":
+				return ec.fieldContext_UpdateUnapprovedJobPayload_affected(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UpdateUnapprovedJobPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateUnapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteUnapprovedJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteUnapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteUnapprovedJob(rctx, fc.Args["filter"].(model.UnapprovedJobFiltersInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DeleteUnapprovedJobPayload)
+	fc.Result = res
+	return ec.marshalODeleteUnapprovedJobPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteUnapprovedJobPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "unapprovedJob":
+				return ec.fieldContext_DeleteUnapprovedJobPayload_unapprovedJob(ctx, field)
+			case "count":
+				return ec.fieldContext_DeleteUnapprovedJobPayload_count(ctx, field)
+			case "msg":
+				return ec.fieldContext_DeleteUnapprovedJobPayload_msg(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DeleteUnapprovedJobPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteUnapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_addUnverifiedAdmin(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_addUnverifiedAdmin(ctx, field)
 	if err != nil {
@@ -13916,6 +15489,79 @@ func (ec *executionContext) _Query_getJobs(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_Query_getJobs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_JobProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_JobProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_JobProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_JobProfile_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_JobProfile_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_JobProfile_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_JobProfile_description(ctx, field)
+			case "level":
+				return ec.fieldContext_JobProfile_level(ctx, field)
+			case "location":
+				return ec.fieldContext_JobProfile_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_JobProfile_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_JobProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_JobProfile_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_JobProfile_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getUnapprovedJobs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getUnapprovedJobs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUnapprovedJobs(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.JobProfile)
+	fc.Result = res
+	return ec.marshalOJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getUnapprovedJobs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -14740,6 +16386,150 @@ func (ec *executionContext) fieldContext_Query_queryStudent(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_queryStudent_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getUnapprovedJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getUnapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetUnapprovedJob(rctx, fc.Args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnapprovedJob)
+	fc.Result = res
+	return ec.marshalOUnapprovedJob2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJob(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnapprovedJob_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnapprovedJob_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnapprovedJob_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnapprovedJob_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_UnapprovedJob_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_UnapprovedJob_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_UnapprovedJob_description(ctx, field)
+			case "level":
+				return ec.fieldContext_UnapprovedJob_level(ctx, field)
+			case "location":
+				return ec.fieldContext_UnapprovedJob_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_UnapprovedJob_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_UnapprovedJob_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_UnapprovedJob_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_UnapprovedJob_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_UnapprovedJob_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_UnapprovedJob_requirements(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJob", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getUnapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_queryUnapprovedJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_queryUnapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().QueryUnapprovedJob(rctx, fc.Args["filter"].(*model.UnapprovedJobFiltersInput), fc.Args["order"].(*model.UnapprovedJobOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.UnapprovedJobGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnapprovedJobQueryResult)
+	fc.Result = res
+	return ec.marshalOUnapprovedJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_queryUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_UnapprovedJobQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_UnapprovedJobQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_UnapprovedJobQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJobQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_queryUnapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -17293,6 +19083,800 @@ func (ec *executionContext) fieldContext_StudentQueryResult_totalCount(_ context
 	return fc, nil
 }
 
+func (ec *executionContext) _UnapprovedJob_id(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_updatedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_deletedAt(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_deletedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*runtimehelper.SoftDelete)
+	fc.Result = res
+	return ec.marshalOSoftDelete2ᚖgithubᚗcomᚋfasibioᚋautogqlᚋruntimehelperᚐSoftDelete(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_deletedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type SoftDelete does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_title(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_title(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_industry(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_industry(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Industry, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_industry(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_description(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_description(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_level(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_level(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Level, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_level(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_location(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_location(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Location, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_location(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_deadline(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_deadline(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Deadline, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_deadline(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_educationLevel(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_educationLevel(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EducationLevel, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_educationLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_experience(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_experience(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Experience, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_experience(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_minSalary(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_minSalary(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MinSalary, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_minSalary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_maxSalary(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_maxSalary(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MaxSalary, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_maxSalary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJob_requirements(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_requirements(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Requirements, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_requirements(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobQueryResult_data(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobQueryResult_data(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UnapprovedJob)
+	fc.Result = res
+	return ec.marshalNUnapprovedJob2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobQueryResult_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnapprovedJob_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnapprovedJob_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnapprovedJob_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnapprovedJob_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_UnapprovedJob_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_UnapprovedJob_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_UnapprovedJob_description(ctx, field)
+			case "level":
+				return ec.fieldContext_UnapprovedJob_level(ctx, field)
+			case "location":
+				return ec.fieldContext_UnapprovedJob_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_UnapprovedJob_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_UnapprovedJob_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_UnapprovedJob_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_UnapprovedJob_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_UnapprovedJob_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_UnapprovedJob_requirements(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJob", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobQueryResult_count(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobQueryResult_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobQueryResult_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobQueryResult_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobQueryResult_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobQueryResult_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UnverifiedAdmin_id(ctx context.Context, field graphql.CollectedField, obj *model.UnverifiedAdmin) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UnverifiedAdmin_id(ctx, field)
 	if err != nil {
@@ -18976,6 +21560,189 @@ func (ec *executionContext) fieldContext_UpdateStudentPayload_affected(_ context
 				return ec.fieldContext_Student_profile_picture(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Student", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateUnapprovedJobPayload_unapprovedJob(ctx context.Context, field graphql.CollectedField, obj *model.UpdateUnapprovedJobPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateUnapprovedJobPayload_unapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UpdateUnapprovedJobPayload().UnapprovedJob(rctx, obj, fc.Args["filter"].(*model.UnapprovedJobFiltersInput), fc.Args["order"].(*model.UnapprovedJobOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.UnapprovedJobGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnapprovedJobQueryResult)
+	fc.Result = res
+	return ec.marshalNUnapprovedJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateUnapprovedJobPayload_unapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateUnapprovedJobPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_UnapprovedJobQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_UnapprovedJobQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_UnapprovedJobQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJobQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_UpdateUnapprovedJobPayload_unapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateUnapprovedJobPayload_count(ctx context.Context, field graphql.CollectedField, obj *model.UpdateUnapprovedJobPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateUnapprovedJobPayload_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateUnapprovedJobPayload_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateUnapprovedJobPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateUnapprovedJobPayload_affected(ctx context.Context, field graphql.CollectedField, obj *model.UpdateUnapprovedJobPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateUnapprovedJobPayload_affected(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Affected, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UnapprovedJob)
+	fc.Result = res
+	return ec.marshalNUnapprovedJob2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateUnapprovedJobPayload_affected(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateUnapprovedJobPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnapprovedJob_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnapprovedJob_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnapprovedJob_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnapprovedJob_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_UnapprovedJob_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_UnapprovedJob_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_UnapprovedJob_description(ctx, field)
+			case "level":
+				return ec.fieldContext_UnapprovedJob_level(ctx, field)
+			case "location":
+				return ec.fieldContext_UnapprovedJob_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_UnapprovedJob_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_UnapprovedJob_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_UnapprovedJob_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_UnapprovedJob_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_UnapprovedJob_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_UnapprovedJob_requirements(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJob", field.Name)
 		},
 	}
 	return fc, nil
@@ -23554,6 +26321,373 @@ func (ec *executionContext) unmarshalInputTimeFilterInput(ctx context.Context, o
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUnapprovedJobFiltersInput(ctx context.Context, obj interface{}) (model.UnapprovedJobFiltersInput, error) {
+	var it model.UnapprovedJobFiltersInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "createdAt", "updatedAt", "title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "and", "or", "not"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOIntFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐIntFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "createdAt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdAt"))
+			data, err := ec.unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐTimeFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CreatedAt = data
+		case "updatedAt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedAt"))
+			data, err := ec.unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐTimeFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UpdatedAt = data
+		case "title":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Title = data
+		case "industry":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("industry"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Industry = data
+		case "description":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Description = data
+		case "level":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("level"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Level = data
+		case "location":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Location = data
+		case "deadline":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deadline"))
+			data, err := ec.unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐTimeFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Deadline = data
+		case "educationLevel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("educationLevel"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EducationLevel = data
+		case "experience":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("experience"))
+			data, err := ec.unmarshalOIntFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐIntFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Experience = data
+		case "minSalary":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("minSalary"))
+			data, err := ec.unmarshalOIntFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐIntFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MinSalary = data
+		case "maxSalary":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maxSalary"))
+			data, err := ec.unmarshalOIntFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐIntFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MaxSalary = data
+		case "requirements":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("requirements"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Requirements = data
+		case "and":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
+			data, err := ec.unmarshalOUnapprovedJobFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.And = data
+		case "or":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
+			data, err := ec.unmarshalOUnapprovedJobFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Or = data
+		case "not":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
+			data, err := ec.unmarshalOUnapprovedJobFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Not = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUnapprovedJobInput(ctx context.Context, obj interface{}) (model.UnapprovedJobInput, error) {
+	var it model.UnapprovedJobInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "title":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Title = data
+		case "industry":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("industry"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Industry = data
+		case "description":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Description = data
+		case "level":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("level"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Level = data
+		case "location":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Location = data
+		case "deadline":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deadline"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Deadline = data
+		case "educationLevel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("educationLevel"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EducationLevel = data
+		case "experience":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("experience"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Experience = data
+		case "minSalary":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("minSalary"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MinSalary = data
+		case "maxSalary":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maxSalary"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MaxSalary = data
+		case "requirements":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("requirements"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Requirements = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUnapprovedJobOrder(ctx context.Context, obj interface{}) (model.UnapprovedJobOrder, error) {
+	var it model.UnapprovedJobOrder
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"asc", "desc"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "asc":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("asc"))
+			data, err := ec.unmarshalOUnapprovedJobOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobOrderable(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Asc = data
+		case "desc":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("desc"))
+			data, err := ec.unmarshalOUnapprovedJobOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobOrderable(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Desc = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUnapprovedJobPatch(ctx context.Context, obj interface{}) (model.UnapprovedJobPatch, error) {
+	var it model.UnapprovedJobPatch
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "title":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Title = data
+		case "industry":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("industry"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Industry = data
+		case "description":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Description = data
+		case "level":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("level"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Level = data
+		case "location":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Location = data
+		case "deadline":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deadline"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Deadline = data
+		case "educationLevel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("educationLevel"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EducationLevel = data
+		case "experience":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("experience"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Experience = data
+		case "minSalary":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("minSalary"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MinSalary = data
+		case "maxSalary":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maxSalary"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MaxSalary = data
+		case "requirements":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("requirements"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Requirements = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUnverifiedAdminFiltersInput(ctx context.Context, obj interface{}) (model.UnverifiedAdminFiltersInput, error) {
 	var it model.UnverifiedAdminFiltersInput
 	asMap := map[string]interface{}{}
@@ -24130,6 +27264,40 @@ func (ec *executionContext) unmarshalInputUpdateStudentInput(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateUnapprovedJobInput(ctx context.Context, obj interface{}) (model.UpdateUnapprovedJobInput, error) {
+	var it model.UpdateUnapprovedJobInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"filter", "set"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "filter":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+			data, err := ec.unmarshalNUnapprovedJobFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Filter = data
+		case "set":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("set"))
+			data, err := ec.unmarshalNUnapprovedJobPatch2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobPatch(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Set = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateUnverifiedAdminInput(ctx context.Context, obj interface{}) (model.UpdateUnverifiedAdminInput, error) {
 	var it model.UpdateUnverifiedAdminInput
 	asMap := map[string]interface{}{}
@@ -24514,6 +27682,81 @@ func (ec *executionContext) _AddStudentPayload(ctx context.Context, sel ast.Sele
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "affected":
 			out.Values[i] = ec._AddStudentPayload_affected(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var addUnapprovedJobPayloadImplementors = []string{"AddUnapprovedJobPayload"}
+
+func (ec *executionContext) _AddUnapprovedJobPayload(ctx context.Context, sel ast.SelectionSet, obj *model.AddUnapprovedJobPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addUnapprovedJobPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddUnapprovedJobPayload")
+		case "unapprovedJob":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AddUnapprovedJobPayload_unapprovedJob(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "affected":
+			out.Values[i] = ec._AddUnapprovedJobPayload_affected(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -25172,6 +28415,83 @@ func (ec *executionContext) _DeleteStudentPayload(ctx context.Context, sel ast.S
 	return out
 }
 
+var deleteUnapprovedJobPayloadImplementors = []string{"DeleteUnapprovedJobPayload"}
+
+func (ec *executionContext) _DeleteUnapprovedJobPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteUnapprovedJobPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deleteUnapprovedJobPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeleteUnapprovedJobPayload")
+		case "unapprovedJob":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._DeleteUnapprovedJobPayload_unapprovedJob(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "count":
+			out.Values[i] = ec._DeleteUnapprovedJobPayload_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "msg":
+			out.Values[i] = ec._DeleteUnapprovedJobPayload_msg(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var deleteUnverifiedAdminPayloadImplementors = []string{"DeleteUnverifiedAdminPayload"}
 
 func (ec *executionContext) _DeleteUnverifiedAdminPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteUnverifiedAdminPayload) graphql.Marshaler {
@@ -25631,6 +28951,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "createUnapprovedJob":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createUnapprovedJob(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createSchool":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createSchool(ctx, field)
@@ -25730,6 +29057,18 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteStudent":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteStudent(ctx, field)
+			})
+		case "addUnapprovedJob":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addUnapprovedJob(ctx, field)
+			})
+		case "updateUnapprovedJob":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateUnapprovedJob(ctx, field)
+			})
+		case "deleteUnapprovedJob":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteUnapprovedJob(ctx, field)
 			})
 		case "addUnverifiedAdmin":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -25933,6 +29272,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getJobs(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getUnapprovedJobs":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUnapprovedJobs(ctx, field)
 				return res
 			}
 
@@ -26164,6 +29522,44 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_queryStudent(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getUnapprovedJob":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getUnapprovedJob(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "queryUnapprovedJob":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_queryUnapprovedJob(ctx, field)
 				return res
 			}
 
@@ -26778,6 +30174,134 @@ func (ec *executionContext) _StudentQueryResult(ctx context.Context, sel ast.Sel
 	return out
 }
 
+var unapprovedJobImplementors = []string{"UnapprovedJob"}
+
+func (ec *executionContext) _UnapprovedJob(ctx context.Context, sel ast.SelectionSet, obj *model.UnapprovedJob) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, unapprovedJobImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UnapprovedJob")
+		case "id":
+			out.Values[i] = ec._UnapprovedJob_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._UnapprovedJob_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._UnapprovedJob_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deletedAt":
+			out.Values[i] = ec._UnapprovedJob_deletedAt(ctx, field, obj)
+		case "title":
+			out.Values[i] = ec._UnapprovedJob_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "industry":
+			out.Values[i] = ec._UnapprovedJob_industry(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._UnapprovedJob_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "level":
+			out.Values[i] = ec._UnapprovedJob_level(ctx, field, obj)
+		case "location":
+			out.Values[i] = ec._UnapprovedJob_location(ctx, field, obj)
+		case "deadline":
+			out.Values[i] = ec._UnapprovedJob_deadline(ctx, field, obj)
+		case "educationLevel":
+			out.Values[i] = ec._UnapprovedJob_educationLevel(ctx, field, obj)
+		case "experience":
+			out.Values[i] = ec._UnapprovedJob_experience(ctx, field, obj)
+		case "minSalary":
+			out.Values[i] = ec._UnapprovedJob_minSalary(ctx, field, obj)
+		case "maxSalary":
+			out.Values[i] = ec._UnapprovedJob_maxSalary(ctx, field, obj)
+		case "requirements":
+			out.Values[i] = ec._UnapprovedJob_requirements(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var unapprovedJobQueryResultImplementors = []string{"UnapprovedJobQueryResult"}
+
+func (ec *executionContext) _UnapprovedJobQueryResult(ctx context.Context, sel ast.SelectionSet, obj *model.UnapprovedJobQueryResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, unapprovedJobQueryResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UnapprovedJobQueryResult")
+		case "data":
+			out.Values[i] = ec._UnapprovedJobQueryResult_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._UnapprovedJobQueryResult_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._UnapprovedJobQueryResult_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var unverifiedAdminImplementors = []string{"UnverifiedAdmin"}
 
 func (ec *executionContext) _UnverifiedAdmin(ctx context.Context, sel ast.SelectionSet, obj *model.UnverifiedAdmin) graphql.Marshaler {
@@ -27306,6 +30830,86 @@ func (ec *executionContext) _UpdateStudentPayload(ctx context.Context, sel ast.S
 			}
 		case "affected":
 			out.Values[i] = ec._UpdateStudentPayload_affected(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var updateUnapprovedJobPayloadImplementors = []string{"UpdateUnapprovedJobPayload"}
+
+func (ec *executionContext) _UpdateUnapprovedJobPayload(ctx context.Context, sel ast.SelectionSet, obj *model.UpdateUnapprovedJobPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updateUnapprovedJobPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UpdateUnapprovedJobPayload")
+		case "unapprovedJob":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UpdateUnapprovedJobPayload_unapprovedJob(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "count":
+			out.Values[i] = ec._UpdateUnapprovedJobPayload_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "affected":
+			out.Values[i] = ec._UpdateUnapprovedJobPayload_affected(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -28485,6 +32089,121 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	return res
 }
 
+func (ec *executionContext) marshalNUnapprovedJob2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UnapprovedJob) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUnapprovedJob2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJob(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNUnapprovedJob2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJob(ctx context.Context, sel ast.SelectionSet, v *model.UnapprovedJob) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UnapprovedJob(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNUnapprovedJobFiltersInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx context.Context, v interface{}) (model.UnapprovedJobFiltersInput, error) {
+	res, err := ec.unmarshalInputUnapprovedJobFiltersInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUnapprovedJobFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx context.Context, v interface{}) (*model.UnapprovedJobFiltersInput, error) {
+	res, err := ec.unmarshalInputUnapprovedJobFiltersInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUnapprovedJobGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobGroup(ctx context.Context, v interface{}) (model.UnapprovedJobGroup, error) {
+	var res model.UnapprovedJobGroup
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUnapprovedJobGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobGroup(ctx context.Context, sel ast.SelectionSet, v model.UnapprovedJobGroup) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNUnapprovedJobInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobInputᚄ(ctx context.Context, v interface{}) ([]*model.UnapprovedJobInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.UnapprovedJobInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNUnapprovedJobInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNUnapprovedJobInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobInput(ctx context.Context, v interface{}) (*model.UnapprovedJobInput, error) {
+	res, err := ec.unmarshalInputUnapprovedJobInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUnapprovedJobPatch2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobPatch(ctx context.Context, v interface{}) (*model.UnapprovedJobPatch, error) {
+	res, err := ec.unmarshalInputUnapprovedJobPatch(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUnapprovedJobQueryResult2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobQueryResult(ctx context.Context, sel ast.SelectionSet, v model.UnapprovedJobQueryResult) graphql.Marshaler {
+	return ec._UnapprovedJobQueryResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUnapprovedJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobQueryResult(ctx context.Context, sel ast.SelectionSet, v *model.UnapprovedJobQueryResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UnapprovedJobQueryResult(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNUnverifiedAdmin2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdminᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UnverifiedAdmin) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -28732,6 +32451,11 @@ func (ec *executionContext) unmarshalNUpdateSchoolInput2githubᚗcomᚋGigaDesk�
 
 func (ec *executionContext) unmarshalNUpdateStudentInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateStudentInput(ctx context.Context, v interface{}) (model.UpdateStudentInput, error) {
 	res, err := ec.unmarshalInputUpdateStudentInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdateUnapprovedJobInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnapprovedJobInput(ctx context.Context, v interface{}) (model.UpdateUnapprovedJobInput, error) {
+	res, err := ec.unmarshalInputUpdateUnapprovedJobInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -29031,6 +32755,13 @@ func (ec *executionContext) marshalOAddStudentPayload2ᚖgithubᚗcomᚋGigaDesk
 	return ec._AddStudentPayload(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOAddUnapprovedJobPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddUnapprovedJobPayload(ctx context.Context, sel ast.SelectionSet, v *model.AddUnapprovedJobPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AddUnapprovedJobPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOAddUnverifiedAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddUnverifiedAdminPayload(ctx context.Context, sel ast.SelectionSet, v *model.AddUnverifiedAdminPayload) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -29270,6 +33001,13 @@ func (ec *executionContext) marshalODeleteStudentPayload2ᚖgithubᚗcomᚋGigaD
 		return graphql.Null
 	}
 	return ec._DeleteStudentPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODeleteUnapprovedJobPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteUnapprovedJobPayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteUnapprovedJobPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DeleteUnapprovedJobPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalODeleteUnverifiedAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteUnverifiedAdminPayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteUnverifiedAdminPayload) graphql.Marshaler {
@@ -30293,6 +34031,139 @@ func (ec *executionContext) unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDesk
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalOUnapprovedJob2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJob(ctx context.Context, sel ast.SelectionSet, v *model.UnapprovedJob) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UnapprovedJob(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOUnapprovedJobFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx context.Context, v interface{}) ([]*model.UnapprovedJobFiltersInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.UnapprovedJobFiltersInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOUnapprovedJobFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOUnapprovedJobFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx context.Context, v interface{}) (*model.UnapprovedJobFiltersInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUnapprovedJobFiltersInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUnapprovedJobGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobGroupᚄ(ctx context.Context, v interface{}) ([]model.UnapprovedJobGroup, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]model.UnapprovedJobGroup, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNUnapprovedJobGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobGroup(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOUnapprovedJobGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []model.UnapprovedJobGroup) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUnapprovedJobGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobGroup(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOUnapprovedJobOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobOrder(ctx context.Context, v interface{}) (*model.UnapprovedJobOrder, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUnapprovedJobOrder(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOUnapprovedJobOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobOrderable(ctx context.Context, v interface{}) (*model.UnapprovedJobOrderable, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.UnapprovedJobOrderable)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUnapprovedJobOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobOrderable(ctx context.Context, sel ast.SelectionSet, v *model.UnapprovedJobOrderable) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) marshalOUnapprovedJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobQueryResult(ctx context.Context, sel ast.SelectionSet, v *model.UnapprovedJobQueryResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UnapprovedJobQueryResult(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOUnverifiedAdmin2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnverifiedAdmin(ctx context.Context, sel ast.SelectionSet, v *model.UnverifiedAdmin) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -30585,6 +34456,13 @@ func (ec *executionContext) marshalOUpdateStudentPayload2ᚖgithubᚗcomᚋGigaD
 		return graphql.Null
 	}
 	return ec._UpdateStudentPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOUpdateUnapprovedJobPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnapprovedJobPayload(ctx context.Context, sel ast.SelectionSet, v *model.UpdateUnapprovedJobPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UpdateUnapprovedJobPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOUpdateUnverifiedAdminPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnverifiedAdminPayload(ctx context.Context, sel ast.SelectionSet, v *model.UpdateUnverifiedAdminPayload) graphql.Marshaler {

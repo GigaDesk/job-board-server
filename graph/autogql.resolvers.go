@@ -1106,6 +1106,279 @@ func (r *mutationResolver) DeleteStudent(ctx context.Context, filter model.Stude
 	return res, db.Error
 }
 
+// GetUnapprovedJob is the resolver for the getUnapprovedJob field.
+func (r *queryResolver) GetUnapprovedJob(ctx context.Context, id int) (*model.UnapprovedJob, error) {
+	v, okHook := r.Sql.Hooks[string(db.GetUnapprovedJob)].(db.AutoGqlHookGet[model.UnapprovedJob, int])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, err = v.Received(ctx, r.Sql, id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = runtimehelper.GetPreloadSelection(ctx, db, runtimehelper.GetPreloadsMap(ctx, "UnapprovedJob"))
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res model.UnapprovedJob
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnapprovedJob")
+	db = db.First(&res, tableName+".id = ?", id)
+	if okHook {
+		r, err := v.AfterCallDb(ctx, &res)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+		r, err = v.BeforeReturn(ctx, &res, db)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+	}
+	return &res, db.Error
+}
+
+// QueryUnapprovedJob is the resolver for the queryUnapprovedJob field.
+func (r *queryResolver) QueryUnapprovedJob(ctx context.Context, filter *model.UnapprovedJobFiltersInput, order *model.UnapprovedJobOrder, first *int, offset *int, group []model.UnapprovedJobGroup) (*model.UnapprovedJobQueryResult, error) {
+	v, okHook := r.Sql.Hooks[string(db.QueryUnapprovedJob)].(db.AutoGqlHookQuery[model.UnapprovedJob, model.UnapprovedJobFiltersInput, model.UnapprovedJobOrder])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, order, first, offset, err = v.Received(ctx, r.Sql, filter, order, first, offset)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res []*model.UnapprovedJob
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnapprovedJob")
+	preloadSubTables := runtimehelper.GetPreloadsMap(ctx, "data").SubTables
+	if len(preloadSubTables) > 0 {
+		db = runtimehelper.GetPreloadSelection(ctx, db, preloadSubTables[0])
+	}
+	if filter != nil {
+		blackList := make(map[string]struct{})
+		sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(db, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+		db.Where(sql, arguments...)
+	}
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if order != nil {
+		if order.Asc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s asc", runtimehelper.GetQuoteChar(db), tableName, order.Asc))
+		}
+		if order.Desc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s desc", runtimehelper.GetQuoteChar(db), tableName, order.Desc))
+		}
+	}
+	var total int64
+	db.Model(res).Count(&total)
+	if first != nil {
+		db = db.Limit(*first)
+	}
+	if offset != nil {
+		db = db.Offset(*offset)
+	}
+	if len(group) > 0 {
+		garr := make([]string, len(group))
+		for i, g := range group {
+			garr[i] = fmt.Sprintf("%s.%s", tableName, xstrings.ToSnakeCase(string(g)))
+		}
+		db = db.Group(strings.Join(garr, ","))
+	}
+	db = db.Find(&res)
+	if okHook {
+		var err error
+		res, err = v.AfterCallDb(ctx, res)
+		if err != nil {
+			return nil, err
+		}
+		res, err = v.BeforeReturn(ctx, res, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &model.UnapprovedJobQueryResult{
+		Data:       res,
+		Count:      len(res),
+		TotalCount: int(total),
+	}, db.Error
+}
+func (r *Resolver) AddUnapprovedJobPayload() AddUnapprovedJobPayloadResolver {
+	return &unapprovedJobPayloadResolver[*model.AddUnapprovedJobPayload]{r}
+}
+func (r *Resolver) DeleteUnapprovedJobPayload() DeleteUnapprovedJobPayloadResolver {
+	return &unapprovedJobPayloadResolver[*model.DeleteUnapprovedJobPayload]{r}
+}
+func (r *Resolver) UpdateUnapprovedJobPayload() UpdateUnapprovedJobPayloadResolver {
+	return &unapprovedJobPayloadResolver[*model.UpdateUnapprovedJobPayload]{r}
+}
+
+type unapprovedJobPayload interface {
+	*model.AddUnapprovedJobPayload | *model.DeleteUnapprovedJobPayload | *model.UpdateUnapprovedJobPayload
+}
+
+type unapprovedJobPayloadResolver[T unapprovedJobPayload] struct {
+	*Resolver
+}
+
+func (r *unapprovedJobPayloadResolver[T]) UnapprovedJob(ctx context.Context, obj T, filter *model.UnapprovedJobFiltersInput, order *model.UnapprovedJobOrder, first *int, offset *int, group []model.UnapprovedJobGroup) (*model.UnapprovedJobQueryResult, error) {
+	q := r.Query().(*queryResolver)
+	return q.QueryUnapprovedJob(ctx, filter, order, first, offset, group)
+}
+
+// AddUnapprovedJob is the resolver for the addUnapprovedJob field.
+func (r *mutationResolver) AddUnapprovedJob(ctx context.Context, input []*model.UnapprovedJobInput) (*model.AddUnapprovedJobPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.AddUnapprovedJob)].(db.AutoGqlHookAdd[model.UnapprovedJob, model.UnapprovedJobInput, model.AddUnapprovedJobPayload])
+	res := &model.AddUnapprovedJobPayload{}
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	obj := make([]model.UnapprovedJob, len(input))
+	for i, v := range input {
+		obj[i] = v.MergeToType()
+	}
+	db = db.Omit(clause.Associations)
+	if okHook {
+		var err error
+		db, obj, err = v.BeforeCallDb(ctx, db, obj)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = db.Create(&obj)
+	affectedRes := make([]*model.UnapprovedJob, len(obj))
+	for i, v := range obj {
+		tmp := v
+		affectedRes[i] = &tmp
+	}
+	res.Affected = affectedRes
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, obj, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// UpdateUnapprovedJob is the resolver for the updateUnapprovedJob field.
+func (r *mutationResolver) UpdateUnapprovedJob(ctx context.Context, input model.UpdateUnapprovedJobInput) (*model.UpdateUnapprovedJobPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.UpdateUnapprovedJob)].(db.AutoGqlHookUpdate[model.UpdateUnapprovedJobInput, model.UpdateUnapprovedJobPayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, &input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnapprovedJob")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(input.Filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.UnapprovedJob{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.UnapprovedJob
+	queryDb.Find(&toChange)
+	update := input.Set.MergeToType()
+	if okHook {
+		var err error
+		db, update, err = v.BeforeCallDb(ctx, db, update)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Updates(update)
+	affectedRes := make([]*model.UnapprovedJob, 0)
+	subTables := runtimehelper.GetPreloadsMap(ctx, "affected").SubTables
+	if len(subTables) > 0 {
+		if preloadMap := subTables[0]; len(preloadMap.Fields) > 0 {
+			affectedDb := runtimehelper.GetPreloadSelection(ctx, db, preloadMap)
+			affectedDb = affectedDb.Model(&obj)
+			affectedDb.Find(&affectedRes)
+		}
+	}
+
+	res := &model.UpdateUnapprovedJobPayload{
+		Count:    int(db.RowsAffected),
+		Affected: affectedRes,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// DeleteUnapprovedJob is the resolver for the deleteUnapprovedJob field.
+func (r *mutationResolver) DeleteUnapprovedJob(ctx context.Context, filter model.UnapprovedJobFiltersInput) (*model.DeleteUnapprovedJobPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.DeleteUnapprovedJob)].(db.AutoGqlHookDelete[model.UnapprovedJobFiltersInput, model.DeleteUnapprovedJobPayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, err = v.Received(ctx, r.Sql, &filter)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnapprovedJob")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.UnapprovedJob{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.UnapprovedJob
+	queryDb.Find(&toChange)
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Delete(&obj)
+	msg := fmt.Sprintf("%d rows deleted", db.RowsAffected)
+	res := &model.DeleteUnapprovedJobPayload{
+		Count: int(db.RowsAffected),
+		Msg:   &msg,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
 // GetUnverifiedAdmin is the resolver for the getUnverifiedAdmin field.
 func (r *queryResolver) GetUnverifiedAdmin(ctx context.Context, id int) (*model.UnverifiedAdmin, error) {
 	v, okHook := r.Sql.Hooks[string(db.GetUnverifiedAdmin)].(db.AutoGqlHookGet[model.UnverifiedAdmin, int])

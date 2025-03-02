@@ -38,6 +38,8 @@ func GetInputStruct(name string, obj map[string]interface{}) (interface{}, error
 		return SchoolInputFromMap(obj)
 	case "StudentInput":
 		return StudentInputFromMap(obj)
+	case "UnapprovedJobInput":
+		return UnapprovedJobInputFromMap(obj)
 	case "UnverifiedAdminInput":
 		return UnverifiedAdminInputFromMap(obj)
 	case "UnverifiedSchoolInput":
@@ -321,6 +323,119 @@ func (d *StudentInput) MergeToType() Student {
 		DateOfAdmission:    tmpDateOfAdmission,
 		DateOfBirth:        tmpDateOfBirth,
 		ProfilePicture:     tmpProfilePicture,
+	}
+}
+
+// UnapprovedJobInputFromMap return a UnapprovedJobInput from data map
+// use github.com/mitchellh/mapstructure with reflaction
+func UnapprovedJobInputFromMap(data map[string]interface{}) (UnapprovedJobInput, error) {
+	model := UnapprovedJobInput{}
+	err := mapstructure.Decode(data, &model)
+	return model, err
+}
+
+// MergeToType returns a map with all values set to UnapprovedJobPatch
+func (d *UnapprovedJobPatch) MergeToType() map[string]interface{} {
+	res := make(map[string]interface{})
+	if d.Title != nil {
+		res["title"] = *d.Title
+	}
+	if d.Industry != nil {
+		res["industry"] = d.Industry
+	}
+	if d.Description != nil {
+		res["description"] = *d.Description
+	}
+	if d.Level != nil {
+		res["level"] = d.Level
+	}
+	if d.Location != nil {
+		res["location"] = d.Location
+	}
+	if d.Deadline != nil {
+		res["deadline"] = d.Deadline
+	}
+	if d.EducationLevel != nil {
+		res["education_level"] = d.EducationLevel
+	}
+	if d.Experience != nil {
+		res["experience"] = d.Experience
+	}
+	if d.MinSalary != nil {
+		res["min_salary"] = d.MinSalary
+	}
+	if d.MaxSalary != nil {
+		res["max_salary"] = d.MaxSalary
+	}
+	if d.Requirements != nil {
+		res["requirements"] = d.Requirements
+	}
+	return res
+}
+
+// MergeToType retuns a UnapprovedJob filled from UnapprovedJobInput
+func (d *UnapprovedJobInput) MergeToType() UnapprovedJob {
+
+	tmpTitle := d.Title
+
+	var tmpIndustry *string
+	if d.Industry != nil {
+		tmpIndustry = d.Industry
+	}
+
+	tmpDescription := d.Description
+
+	var tmpLevel *string
+	if d.Level != nil {
+		tmpLevel = d.Level
+	}
+
+	var tmpLocation *string
+	if d.Location != nil {
+		tmpLocation = d.Location
+	}
+
+	var tmpDeadline *time.Time
+	if d.Deadline != nil {
+		tmpDeadline = d.Deadline
+	}
+
+	var tmpEducationLevel *string
+	if d.EducationLevel != nil {
+		tmpEducationLevel = d.EducationLevel
+	}
+
+	var tmpExperience *int
+	if d.Experience != nil {
+		tmpExperience = d.Experience
+	}
+
+	var tmpMinSalary *int
+	if d.MinSalary != nil {
+		tmpMinSalary = d.MinSalary
+	}
+
+	var tmpMaxSalary *int
+	if d.MaxSalary != nil {
+		tmpMaxSalary = d.MaxSalary
+	}
+
+	var tmpRequirements *string
+	if d.Requirements != nil {
+		tmpRequirements = d.Requirements
+	}
+	return UnapprovedJob{
+		Title:          tmpTitle,
+		Industry:       tmpIndustry,
+		Description:    tmpDescription,
+		Level:          tmpLevel,
+		Location:       tmpLocation,
+		Deadline:       tmpDeadline,
+		EducationLevel: tmpEducationLevel,
+		Experience:     tmpExperience,
+		MinSalary:      tmpMinSalary,
+		MaxSalary:      tmpMaxSalary,
+		Requirements:   tmpRequirements,
 	}
 }
 

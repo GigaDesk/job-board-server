@@ -35,6 +35,12 @@ type AddStudentPayload struct {
 	Affected []*Student          `json:"affected"`
 }
 
+// AddUnapprovedJob result with filterable data and affected rows
+type AddUnapprovedJobPayload struct {
+	UnapprovedJob *UnapprovedJobQueryResult `json:"unapprovedJob"`
+	Affected      []*UnapprovedJob          `json:"affected"`
+}
+
 // AddUnverifiedAdmin result with filterable data and affected rows
 type AddUnverifiedAdminPayload struct {
 	UnverifiedAdmin *UnverifiedAdminQueryResult `json:"unverifiedAdmin"`
@@ -149,6 +155,14 @@ type DeleteSchoolPayload struct {
 type DeleteStudentPayload struct {
 	Student *StudentQueryResult `json:"student"`
 	// Count of deleted Student entities
+	Count int     `json:"count"`
+	Msg   *string `json:"msg,omitempty"`
+}
+
+// DeleteUnapprovedJob result with filterable data and count of affected entries
+type DeleteUnapprovedJobPayload struct {
+	UnapprovedJob *UnapprovedJobQueryResult `json:"unapprovedJob"`
+	// Count of deleted UnapprovedJob entities
 	Count int     `json:"count"`
 	Msg   *string `json:"msg,omitempty"`
 }
@@ -637,6 +651,89 @@ type TimeFilterInput struct {
 	Between *TimeFilterBetween `json:"between,omitempty"`
 }
 
+type UnapprovedJob struct {
+	ID             int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
+	CreatedAt      time.Time                 `json:"createdAt"`
+	UpdatedAt      time.Time                 `json:"updatedAt"`
+	DeletedAt      *runtimehelper.SoftDelete `json:"deletedAt,omitempty" gorm:"index;"`
+	Title          string                    `json:"title"`
+	Industry       *string                   `json:"industry,omitempty"`
+	Description    string                    `json:"description"`
+	Level          *string                   `json:"level,omitempty"`
+	Location       *string                   `json:"location,omitempty"`
+	Deadline       *time.Time                `json:"deadline,omitempty"`
+	EducationLevel *string                   `json:"educationLevel,omitempty"`
+	Experience     *int                      `json:"experience,omitempty"`
+	MinSalary      *int                      `json:"minSalary,omitempty"`
+	MaxSalary      *int                      `json:"maxSalary,omitempty"`
+	Requirements   *string                   `json:"requirements,omitempty"`
+}
+
+// Filter input selection for UnapprovedJob
+// Can be used f.e.: by queryUnapprovedJob
+type UnapprovedJobFiltersInput struct {
+	ID             *IntFilterInput              `json:"id,omitempty"`
+	CreatedAt      *TimeFilterInput             `json:"createdAt,omitempty"`
+	UpdatedAt      *TimeFilterInput             `json:"updatedAt,omitempty"`
+	Title          *StringFilterInput           `json:"title,omitempty"`
+	Industry       *StringFilterInput           `json:"industry,omitempty"`
+	Description    *StringFilterInput           `json:"description,omitempty"`
+	Level          *StringFilterInput           `json:"level,omitempty"`
+	Location       *StringFilterInput           `json:"location,omitempty"`
+	Deadline       *TimeFilterInput             `json:"deadline,omitempty"`
+	EducationLevel *StringFilterInput           `json:"educationLevel,omitempty"`
+	Experience     *IntFilterInput              `json:"experience,omitempty"`
+	MinSalary      *IntFilterInput              `json:"minSalary,omitempty"`
+	MaxSalary      *IntFilterInput              `json:"maxSalary,omitempty"`
+	Requirements   *StringFilterInput           `json:"requirements,omitempty"`
+	And            []*UnapprovedJobFiltersInput `json:"and,omitempty"`
+	Or             []*UnapprovedJobFiltersInput `json:"or,omitempty"`
+	Not            *UnapprovedJobFiltersInput   `json:"not,omitempty"`
+}
+
+// UnapprovedJob Input value to add new UnapprovedJob
+type UnapprovedJobInput struct {
+	Title          string     `json:"title"`
+	Industry       *string    `json:"industry,omitempty"`
+	Description    string     `json:"description"`
+	Level          *string    `json:"level,omitempty"`
+	Location       *string    `json:"location,omitempty"`
+	Deadline       *time.Time `json:"deadline,omitempty"`
+	EducationLevel *string    `json:"educationLevel,omitempty"`
+	Experience     *int       `json:"experience,omitempty"`
+	MinSalary      *int       `json:"minSalary,omitempty"`
+	MaxSalary      *int       `json:"maxSalary,omitempty"`
+	Requirements   *string    `json:"requirements,omitempty"`
+}
+
+// Order UnapprovedJob by asc or desc
+type UnapprovedJobOrder struct {
+	Asc  *UnapprovedJobOrderable `json:"asc,omitempty"`
+	Desc *UnapprovedJobOrderable `json:"desc,omitempty"`
+}
+
+// UnapprovedJob Patch value all values are optional to update UnapprovedJob entities
+type UnapprovedJobPatch struct {
+	Title          *string    `json:"title,omitempty"`
+	Industry       *string    `json:"industry,omitempty"`
+	Description    *string    `json:"description,omitempty"`
+	Level          *string    `json:"level,omitempty"`
+	Location       *string    `json:"location,omitempty"`
+	Deadline       *time.Time `json:"deadline,omitempty"`
+	EducationLevel *string    `json:"educationLevel,omitempty"`
+	Experience     *int       `json:"experience,omitempty"`
+	MinSalary      *int       `json:"minSalary,omitempty"`
+	MaxSalary      *int       `json:"maxSalary,omitempty"`
+	Requirements   *string    `json:"requirements,omitempty"`
+}
+
+// UnapprovedJob result
+type UnapprovedJobQueryResult struct {
+	Data       []*UnapprovedJob `json:"data"`
+	Count      int              `json:"count"`
+	TotalCount int              `json:"totalCount"`
+}
+
 type UnverifiedAdmin struct {
 	ID          int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
 	CreatedAt   time.Time                 `json:"createdAt"`
@@ -801,6 +898,20 @@ type UpdateStudentPayload struct {
 	// Count of affected updates
 	Count    int        `json:"count"`
 	Affected []*Student `json:"affected"`
+}
+
+// Update rules for UnapprovedJob multiupdates simple possible by global filtervalue
+type UpdateUnapprovedJobInput struct {
+	Filter *UnapprovedJobFiltersInput `json:"filter"`
+	Set    *UnapprovedJobPatch        `json:"set"`
+}
+
+// UpdateUnapprovedJob result with filterable data and affected rows
+type UpdateUnapprovedJobPayload struct {
+	UnapprovedJob *UnapprovedJobQueryResult `json:"unapprovedJob"`
+	// Count of affected updates
+	Count    int              `json:"count"`
+	Affected []*UnapprovedJob `json:"affected"`
 }
 
 // Update rules for UnverifiedAdmin multiupdates simple possible by global filtervalue
@@ -1275,6 +1386,134 @@ func (e *StudentOrderable) UnmarshalGQL(v interface{}) error {
 }
 
 func (e StudentOrderable) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Groupable data for  UnapprovedJob
+// Can be used f.e.: by queryUnapprovedJob
+type UnapprovedJobGroup string
+
+const (
+	UnapprovedJobGroupID             UnapprovedJobGroup = "id"
+	UnapprovedJobGroupCreatedAt      UnapprovedJobGroup = "createdAt"
+	UnapprovedJobGroupUpdatedAt      UnapprovedJobGroup = "updatedAt"
+	UnapprovedJobGroupTitle          UnapprovedJobGroup = "title"
+	UnapprovedJobGroupIndustry       UnapprovedJobGroup = "industry"
+	UnapprovedJobGroupDescription    UnapprovedJobGroup = "description"
+	UnapprovedJobGroupLevel          UnapprovedJobGroup = "level"
+	UnapprovedJobGroupLocation       UnapprovedJobGroup = "location"
+	UnapprovedJobGroupDeadline       UnapprovedJobGroup = "deadline"
+	UnapprovedJobGroupEducationLevel UnapprovedJobGroup = "educationLevel"
+	UnapprovedJobGroupExperience     UnapprovedJobGroup = "experience"
+	UnapprovedJobGroupMinSalary      UnapprovedJobGroup = "minSalary"
+	UnapprovedJobGroupMaxSalary      UnapprovedJobGroup = "maxSalary"
+	UnapprovedJobGroupRequirements   UnapprovedJobGroup = "requirements"
+)
+
+var AllUnapprovedJobGroup = []UnapprovedJobGroup{
+	UnapprovedJobGroupID,
+	UnapprovedJobGroupCreatedAt,
+	UnapprovedJobGroupUpdatedAt,
+	UnapprovedJobGroupTitle,
+	UnapprovedJobGroupIndustry,
+	UnapprovedJobGroupDescription,
+	UnapprovedJobGroupLevel,
+	UnapprovedJobGroupLocation,
+	UnapprovedJobGroupDeadline,
+	UnapprovedJobGroupEducationLevel,
+	UnapprovedJobGroupExperience,
+	UnapprovedJobGroupMinSalary,
+	UnapprovedJobGroupMaxSalary,
+	UnapprovedJobGroupRequirements,
+}
+
+func (e UnapprovedJobGroup) IsValid() bool {
+	switch e {
+	case UnapprovedJobGroupID, UnapprovedJobGroupCreatedAt, UnapprovedJobGroupUpdatedAt, UnapprovedJobGroupTitle, UnapprovedJobGroupIndustry, UnapprovedJobGroupDescription, UnapprovedJobGroupLevel, UnapprovedJobGroupLocation, UnapprovedJobGroupDeadline, UnapprovedJobGroupEducationLevel, UnapprovedJobGroupExperience, UnapprovedJobGroupMinSalary, UnapprovedJobGroupMaxSalary, UnapprovedJobGroupRequirements:
+		return true
+	}
+	return false
+}
+
+func (e UnapprovedJobGroup) String() string {
+	return string(e)
+}
+
+func (e *UnapprovedJobGroup) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UnapprovedJobGroup(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UnapprovedJobGroup", str)
+	}
+	return nil
+}
+
+func (e UnapprovedJobGroup) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// for UnapprovedJob a enum of all orderable entities
+// can be used f.e.: queryUnapprovedJob
+type UnapprovedJobOrderable string
+
+const (
+	UnapprovedJobOrderableID             UnapprovedJobOrderable = "id"
+	UnapprovedJobOrderableTitle          UnapprovedJobOrderable = "title"
+	UnapprovedJobOrderableIndustry       UnapprovedJobOrderable = "industry"
+	UnapprovedJobOrderableDescription    UnapprovedJobOrderable = "description"
+	UnapprovedJobOrderableLevel          UnapprovedJobOrderable = "level"
+	UnapprovedJobOrderableLocation       UnapprovedJobOrderable = "location"
+	UnapprovedJobOrderableEducationLevel UnapprovedJobOrderable = "educationLevel"
+	UnapprovedJobOrderableExperience     UnapprovedJobOrderable = "experience"
+	UnapprovedJobOrderableMinSalary      UnapprovedJobOrderable = "minSalary"
+	UnapprovedJobOrderableMaxSalary      UnapprovedJobOrderable = "maxSalary"
+	UnapprovedJobOrderableRequirements   UnapprovedJobOrderable = "requirements"
+)
+
+var AllUnapprovedJobOrderable = []UnapprovedJobOrderable{
+	UnapprovedJobOrderableID,
+	UnapprovedJobOrderableTitle,
+	UnapprovedJobOrderableIndustry,
+	UnapprovedJobOrderableDescription,
+	UnapprovedJobOrderableLevel,
+	UnapprovedJobOrderableLocation,
+	UnapprovedJobOrderableEducationLevel,
+	UnapprovedJobOrderableExperience,
+	UnapprovedJobOrderableMinSalary,
+	UnapprovedJobOrderableMaxSalary,
+	UnapprovedJobOrderableRequirements,
+}
+
+func (e UnapprovedJobOrderable) IsValid() bool {
+	switch e {
+	case UnapprovedJobOrderableID, UnapprovedJobOrderableTitle, UnapprovedJobOrderableIndustry, UnapprovedJobOrderableDescription, UnapprovedJobOrderableLevel, UnapprovedJobOrderableLocation, UnapprovedJobOrderableEducationLevel, UnapprovedJobOrderableExperience, UnapprovedJobOrderableMinSalary, UnapprovedJobOrderableMaxSalary, UnapprovedJobOrderableRequirements:
+		return true
+	}
+	return false
+}
+
+func (e UnapprovedJobOrderable) String() string {
+	return string(e)
+}
+
+func (e *UnapprovedJobOrderable) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UnapprovedJobOrderable(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UnapprovedJobOrderable", str)
+	}
+	return nil
+}
+
+func (e UnapprovedJobOrderable) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
