@@ -102,6 +102,9 @@ func (d *JobFiltersInput) ExtendsDatabaseQuery(db *gorm.DB, alias string, deep b
 	if d.Title != nil {
 		res = append(res, d.Title.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "title"), true, blackList)...)
 	}
+	if d.Industry != nil {
+		res = append(res, d.Industry.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "industry"), true, blackList)...)
+	}
 	if d.Description != nil {
 		res = append(res, d.Description.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "description"), true, blackList)...)
 	}
@@ -119,6 +122,12 @@ func (d *JobFiltersInput) ExtendsDatabaseQuery(db *gorm.DB, alias string, deep b
 	}
 	if d.Experience != nil {
 		res = append(res, d.Experience.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "experience"), true, blackList)...)
+	}
+	if d.MinSalary != nil {
+		res = append(res, d.MinSalary.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "min_salary"), true, blackList)...)
+	}
+	if d.MaxSalary != nil {
+		res = append(res, d.MaxSalary.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "max_salary"), true, blackList)...)
 	}
 	if d.Requirements != nil {
 		res = append(res, d.Requirements.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "requirements"), true, blackList)...)
