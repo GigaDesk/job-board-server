@@ -4,12 +4,15 @@ type Job @SQL {
   updatedAt: Time!
   deletedAt: SoftDelete #activate softdelete
   title: String!
+  industry: String
   description: String!
   level: String
   location: String
   deadline: Time
   educationLevel: String
   experience: Int
+  minSalary: Int
+  maxSalary: Int
   requirements: String
 }
 
@@ -19,12 +22,15 @@ type JobProfile{
   updatedAt: Time!
   deletedAt: SoftDelete #activate softdelete
   title: String!
+  industry: String
   description: String!
   level: String
   location: String
   deadline: Time
   educationLevel: String
   experience: Int
+  minSalary: Int
+  maxSalary: Int
   requirements: [String!]
 }
 
@@ -37,6 +43,8 @@ input NewJob {
   deadline: Time
   educationLevel: String
   experience: Int
+  minSalary: Int
+  maxSalary: Int
   requirements: [String!]
 }
 
