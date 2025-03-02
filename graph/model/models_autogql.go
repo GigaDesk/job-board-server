@@ -98,6 +98,9 @@ func (d *JobPatch) MergeToType() map[string]interface{} {
 	if d.Title != nil {
 		res["title"] = *d.Title
 	}
+	if d.Industry != nil {
+		res["industry"] = d.Industry
+	}
 	if d.Description != nil {
 		res["description"] = *d.Description
 	}
@@ -116,6 +119,12 @@ func (d *JobPatch) MergeToType() map[string]interface{} {
 	if d.Experience != nil {
 		res["experience"] = d.Experience
 	}
+	if d.MinSalary != nil {
+		res["min_salary"] = d.MinSalary
+	}
+	if d.MaxSalary != nil {
+		res["max_salary"] = d.MaxSalary
+	}
 	if d.Requirements != nil {
 		res["requirements"] = d.Requirements
 	}
@@ -126,6 +135,11 @@ func (d *JobPatch) MergeToType() map[string]interface{} {
 func (d *JobInput) MergeToType() Job {
 
 	tmpTitle := d.Title
+
+	var tmpIndustry *string
+	if d.Industry != nil {
+		tmpIndustry = d.Industry
+	}
 
 	tmpDescription := d.Description
 
@@ -154,18 +168,31 @@ func (d *JobInput) MergeToType() Job {
 		tmpExperience = d.Experience
 	}
 
+	var tmpMinSalary *int
+	if d.MinSalary != nil {
+		tmpMinSalary = d.MinSalary
+	}
+
+	var tmpMaxSalary *int
+	if d.MaxSalary != nil {
+		tmpMaxSalary = d.MaxSalary
+	}
+
 	var tmpRequirements *string
 	if d.Requirements != nil {
 		tmpRequirements = d.Requirements
 	}
 	return Job{
 		Title:          tmpTitle,
+		Industry:       tmpIndustry,
 		Description:    tmpDescription,
 		Level:          tmpLevel,
 		Location:       tmpLocation,
 		Deadline:       tmpDeadline,
 		EducationLevel: tmpEducationLevel,
 		Experience:     tmpExperience,
+		MinSalary:      tmpMinSalary,
+		MaxSalary:      tmpMaxSalary,
 		Requirements:   tmpRequirements,
 	}
 }

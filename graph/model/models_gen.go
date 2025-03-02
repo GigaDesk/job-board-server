@@ -241,12 +241,15 @@ type Job struct {
 	UpdatedAt      time.Time                 `json:"updatedAt"`
 	DeletedAt      *runtimehelper.SoftDelete `json:"deletedAt,omitempty" gorm:"index;"`
 	Title          string                    `json:"title"`
+	Industry       *string                   `json:"industry,omitempty"`
 	Description    string                    `json:"description"`
 	Level          *string                   `json:"level,omitempty"`
 	Location       *string                   `json:"location,omitempty"`
 	Deadline       *time.Time                `json:"deadline,omitempty"`
 	EducationLevel *string                   `json:"educationLevel,omitempty"`
 	Experience     *int                      `json:"experience,omitempty"`
+	MinSalary      *int                      `json:"minSalary,omitempty"`
+	MaxSalary      *int                      `json:"maxSalary,omitempty"`
 	Requirements   *string                   `json:"requirements,omitempty"`
 }
 
@@ -257,12 +260,15 @@ type JobFiltersInput struct {
 	CreatedAt      *TimeFilterInput   `json:"createdAt,omitempty"`
 	UpdatedAt      *TimeFilterInput   `json:"updatedAt,omitempty"`
 	Title          *StringFilterInput `json:"title,omitempty"`
+	Industry       *StringFilterInput `json:"industry,omitempty"`
 	Description    *StringFilterInput `json:"description,omitempty"`
 	Level          *StringFilterInput `json:"level,omitempty"`
 	Location       *StringFilterInput `json:"location,omitempty"`
 	Deadline       *TimeFilterInput   `json:"deadline,omitempty"`
 	EducationLevel *StringFilterInput `json:"educationLevel,omitempty"`
 	Experience     *IntFilterInput    `json:"experience,omitempty"`
+	MinSalary      *IntFilterInput    `json:"minSalary,omitempty"`
+	MaxSalary      *IntFilterInput    `json:"maxSalary,omitempty"`
 	Requirements   *StringFilterInput `json:"requirements,omitempty"`
 	And            []*JobFiltersInput `json:"and,omitempty"`
 	Or             []*JobFiltersInput `json:"or,omitempty"`
@@ -272,12 +278,15 @@ type JobFiltersInput struct {
 // Job Input value to add new Job
 type JobInput struct {
 	Title          string     `json:"title"`
+	Industry       *string    `json:"industry,omitempty"`
 	Description    string     `json:"description"`
 	Level          *string    `json:"level,omitempty"`
 	Location       *string    `json:"location,omitempty"`
 	Deadline       *time.Time `json:"deadline,omitempty"`
 	EducationLevel *string    `json:"educationLevel,omitempty"`
 	Experience     *int       `json:"experience,omitempty"`
+	MinSalary      *int       `json:"minSalary,omitempty"`
+	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   *string    `json:"requirements,omitempty"`
 }
 
@@ -290,12 +299,15 @@ type JobOrder struct {
 // Job Patch value all values are optional to update Job entities
 type JobPatch struct {
 	Title          *string    `json:"title,omitempty"`
+	Industry       *string    `json:"industry,omitempty"`
 	Description    *string    `json:"description,omitempty"`
 	Level          *string    `json:"level,omitempty"`
 	Location       *string    `json:"location,omitempty"`
 	Deadline       *time.Time `json:"deadline,omitempty"`
 	EducationLevel *string    `json:"educationLevel,omitempty"`
 	Experience     *int       `json:"experience,omitempty"`
+	MinSalary      *int       `json:"minSalary,omitempty"`
+	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   *string    `json:"requirements,omitempty"`
 }
 
@@ -305,12 +317,15 @@ type JobProfile struct {
 	UpdatedAt      time.Time                 `json:"updatedAt"`
 	DeletedAt      *runtimehelper.SoftDelete `json:"deletedAt,omitempty"`
 	Title          string                    `json:"title"`
+	Industry       *string                   `json:"industry,omitempty"`
 	Description    string                    `json:"description"`
 	Level          *string                   `json:"level,omitempty"`
 	Location       *string                   `json:"location,omitempty"`
 	Deadline       *time.Time                `json:"deadline,omitempty"`
 	EducationLevel *string                   `json:"educationLevel,omitempty"`
 	Experience     *int                      `json:"experience,omitempty"`
+	MinSalary      *int                      `json:"minSalary,omitempty"`
+	MaxSalary      *int                      `json:"maxSalary,omitempty"`
 	Requirements   []string                  `json:"requirements,omitempty"`
 }
 
@@ -339,6 +354,8 @@ type NewJob struct {
 	Deadline       *time.Time `json:"deadline,omitempty"`
 	EducationLevel *string    `json:"educationLevel,omitempty"`
 	Experience     *int       `json:"experience,omitempty"`
+	MinSalary      *int       `json:"minSalary,omitempty"`
+	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   []string   `json:"requirements,omitempty"`
 }
 
@@ -926,12 +943,15 @@ const (
 	JobGroupCreatedAt      JobGroup = "createdAt"
 	JobGroupUpdatedAt      JobGroup = "updatedAt"
 	JobGroupTitle          JobGroup = "title"
+	JobGroupIndustry       JobGroup = "industry"
 	JobGroupDescription    JobGroup = "description"
 	JobGroupLevel          JobGroup = "level"
 	JobGroupLocation       JobGroup = "location"
 	JobGroupDeadline       JobGroup = "deadline"
 	JobGroupEducationLevel JobGroup = "educationLevel"
 	JobGroupExperience     JobGroup = "experience"
+	JobGroupMinSalary      JobGroup = "minSalary"
+	JobGroupMaxSalary      JobGroup = "maxSalary"
 	JobGroupRequirements   JobGroup = "requirements"
 )
 
@@ -940,18 +960,21 @@ var AllJobGroup = []JobGroup{
 	JobGroupCreatedAt,
 	JobGroupUpdatedAt,
 	JobGroupTitle,
+	JobGroupIndustry,
 	JobGroupDescription,
 	JobGroupLevel,
 	JobGroupLocation,
 	JobGroupDeadline,
 	JobGroupEducationLevel,
 	JobGroupExperience,
+	JobGroupMinSalary,
+	JobGroupMaxSalary,
 	JobGroupRequirements,
 }
 
 func (e JobGroup) IsValid() bool {
 	switch e {
-	case JobGroupID, JobGroupCreatedAt, JobGroupUpdatedAt, JobGroupTitle, JobGroupDescription, JobGroupLevel, JobGroupLocation, JobGroupDeadline, JobGroupEducationLevel, JobGroupExperience, JobGroupRequirements:
+	case JobGroupID, JobGroupCreatedAt, JobGroupUpdatedAt, JobGroupTitle, JobGroupIndustry, JobGroupDescription, JobGroupLevel, JobGroupLocation, JobGroupDeadline, JobGroupEducationLevel, JobGroupExperience, JobGroupMinSalary, JobGroupMaxSalary, JobGroupRequirements:
 		return true
 	}
 	return false
@@ -985,28 +1008,34 @@ type JobOrderable string
 const (
 	JobOrderableID             JobOrderable = "id"
 	JobOrderableTitle          JobOrderable = "title"
+	JobOrderableIndustry       JobOrderable = "industry"
 	JobOrderableDescription    JobOrderable = "description"
 	JobOrderableLevel          JobOrderable = "level"
 	JobOrderableLocation       JobOrderable = "location"
 	JobOrderableEducationLevel JobOrderable = "educationLevel"
 	JobOrderableExperience     JobOrderable = "experience"
+	JobOrderableMinSalary      JobOrderable = "minSalary"
+	JobOrderableMaxSalary      JobOrderable = "maxSalary"
 	JobOrderableRequirements   JobOrderable = "requirements"
 )
 
 var AllJobOrderable = []JobOrderable{
 	JobOrderableID,
 	JobOrderableTitle,
+	JobOrderableIndustry,
 	JobOrderableDescription,
 	JobOrderableLevel,
 	JobOrderableLocation,
 	JobOrderableEducationLevel,
 	JobOrderableExperience,
+	JobOrderableMinSalary,
+	JobOrderableMaxSalary,
 	JobOrderableRequirements,
 }
 
 func (e JobOrderable) IsValid() bool {
 	switch e {
-	case JobOrderableID, JobOrderableTitle, JobOrderableDescription, JobOrderableLevel, JobOrderableLocation, JobOrderableEducationLevel, JobOrderableExperience, JobOrderableRequirements:
+	case JobOrderableID, JobOrderableTitle, JobOrderableIndustry, JobOrderableDescription, JobOrderableLevel, JobOrderableLocation, JobOrderableEducationLevel, JobOrderableExperience, JobOrderableMinSalary, JobOrderableMaxSalary, JobOrderableRequirements:
 		return true
 	}
 	return false
