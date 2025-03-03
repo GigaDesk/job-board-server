@@ -249,6 +249,7 @@ type ComplexityRoot struct {
 		ForgotStudentPassword       func(childComplexity int, schoolid int, registrationNumber string) int
 		RefreshToken                func(childComplexity int, input *model.RefreshTokenInput) int
 		RemoveJob                   func(childComplexity int, id int) int
+		RemoveUnapprovedJob         func(childComplexity int, id int) int
 		RequestAdminPasswordReset   func(childComplexity int, input *model.Verificationinfo) int
 		RequestSchoolPasswordReset  func(childComplexity int, input *model.Verificationinfo) int
 		RequestStudentPasswordReset func(childComplexity int, schoolid int, registrationNumber string, phoneNumber string, otp string) int
@@ -526,6 +527,7 @@ type MutationResolver interface {
 	ApproveJob(ctx context.Context, id int) (*model.JobProfile, error)
 	EditJob(ctx context.Context, id int, input model.NewJob) (*model.JobProfile, error)
 	RemoveJob(ctx context.Context, id int) (*model.JobProfile, error)
+	RemoveUnapprovedJob(ctx context.Context, id int) (*model.JobProfile, error)
 	CreateSchool(ctx context.Context, input model.NewSchool) (*model.UnverifiedSchool, error)
 	VerifySchool(ctx context.Context, input model.Verificationinfo) (*model.School, error)
 	SendCode(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error)
@@ -1634,6 +1636,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RemoveJob(childComplexity, args["id"].(int)), true
+
+	case "Mutation.removeUnapprovedJob":
+		if e.complexity.Mutation.RemoveUnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeUnapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveUnapprovedJob(childComplexity, args["id"].(int)), true
 
 	case "Mutation.requestAdminPasswordReset":
 		if e.complexity.Mutation.RequestAdminPasswordReset == nil {
@@ -6380,6 +6394,29 @@ func (ec *executionContext) field_Mutation_removeJob_args(ctx context.Context, r
 	return args, nil
 }
 func (ec *executionContext) field_Mutation_removeJob_argsID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_removeUnapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_removeUnapprovedJob_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_removeUnapprovedJob_argsID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (int, error) {
@@ -13480,6 +13517,93 @@ func (ec *executionContext) fieldContext_Mutation_removeJob(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_removeJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeUnapprovedJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_removeUnapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RemoveUnapprovedJob(rctx, fc.Args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobProfile)
+	fc.Result = res
+	return ec.marshalNJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_JobProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_JobProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_JobProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_JobProfile_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_JobProfile_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_JobProfile_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_JobProfile_description(ctx, field)
+			case "level":
+				return ec.fieldContext_JobProfile_level(ctx, field)
+			case "location":
+				return ec.fieldContext_JobProfile_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_JobProfile_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_JobProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_JobProfile_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_JobProfile_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeUnapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -29365,6 +29489,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "removeJob":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_removeJob(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "removeUnapprovedJob":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeUnapprovedJob(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

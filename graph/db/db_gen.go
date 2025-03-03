@@ -22,5 +22,5 @@ func NewAutoGqlDB(db *gorm.DB) AutoGqlDB {
 
 // execute Gorm AutoMigrate with all @SQL Graphql Types
 func (db *AutoGqlDB) Init() error {
-	return db.Db.AutoMigrate(&model.UnverifiedAdmin{}, &model.Job{}, &model.Admin{}, &model.UnverifiedSchool{}, &model.School{}, &model.Student{}, &model.UnapprovedJob{})
+	return db.Db.AutoMigrate(&model.UnverifiedAdmin{}, &model.UnverifiedSchool{}, &model.UnapprovedJob{}, &model.Student{}, &model.School{}, &model.Admin{}, &model.Job{})
 }
