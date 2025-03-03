@@ -142,6 +142,31 @@ func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.
 
 // ApproveJob is the resolver for the approveJob field.
 func (r *mutationResolver) ApproveJob(ctx context.Context, id int) (*model.JobProfile, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("access to approve job denied!")
+	}
+	role := user.GetRole()
+	if role != "admin" {
+		return nil, errors.New("access to approve job denied. Only available for registered and logged in admins. To fix check access token!")
+	}
+
+	Id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access admin's id!")
+	}
+
+	log.Info().Str("role", role).Int("id", Id).Str("path", "ApproveJob").Msg("approving job")
+
 	//declare an unapprovedjob variable
 	var unapprovedjob *model.UnapprovedJob
 
@@ -454,25 +479,6 @@ func (r *queryResolver) FindJob(ctx context.Context, id int) (*model.JobProfile,
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
-	user, err := auth.ForContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if user == nil {
-		return nil, errors.New("access to job denied!")
-	}
-	role := user.GetRole()
-	if role != "admin" {
-		return nil, errors.New("access to job denied. Only available for registered and logged in admins. To fix check access token!")
-	}
-
-	Id, err := user.GetID()
-
-	if err != nil {
-		errors.New("could not access admin's id!")
-	}
-
-	log.Info().Str("role", role).Int("id", Id).Str("path", "FindJob").Msg("finding job")
 
 	//declare a job variable
 	var job *model.Job
@@ -550,25 +556,6 @@ func (r *queryResolver) FindUnapprovedJob(ctx context.Context, id int) (*model.J
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
-	user, err := auth.ForContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if user == nil {
-		return nil, errors.New("access to unapproved job denied!")
-	}
-	role := user.GetRole()
-	if role != "admin" {
-		return nil, errors.New("access to unapproved job denied. Only available for registered and logged in admins. To fix check access token!")
-	}
-
-	Id, err := user.GetID()
-
-	if err != nil {
-		errors.New("could not access admin's id!")
-	}
-
-	log.Info().Str("role", role).Int("id", Id).Str("path", "FindUnapprovedJob").Msg("finding unapproved job")
 
 	//declare an unapproved job variable
 	var unapprovedjob *model.UnapprovedJob
