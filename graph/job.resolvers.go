@@ -348,64 +348,64 @@ func (r *mutationResolver) RemoveJob(ctx context.Context, id int) (*model.JobPro
 
 // RemoveUnapprovedJob is the resolver for the removeUnapprovedJob field.
 func (r *mutationResolver) RemoveUnapprovedJob(ctx context.Context, id int) (*model.JobProfile, error) {
-		//check if system is in shutdown mode
-		if *shutdown.IsShutdown {
-			return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
-		}
-		user, err := auth.ForContext(ctx)
-		if err != nil {
-			return nil, err
-		}
-		if user == nil {
-			return nil, errors.New("access to remove unapproved job denied!")
-		}
-		role := user.GetRole()
-		if role != "admin" {
-			return nil, errors.New("access to remove unapproved job denied. Only available for registered and logged in admins. To fix check access token!")
-		}
-	
-		Id, err := user.GetID()
-	
-		if err != nil {
-			errors.New("could not access admin's id!")
-		}
-	
-		log.Info().Str("role", role).Int("id", Id).Str("path", "RemoveUnapprovedJob").Msg("removing unapproved job")
-	
-		//declare an unapproved job variable
-		var unapprovedjob *model.UnapprovedJob
-	
-		// Find the first unapproved job that matches the input id from the unapproved job table
-		if err := r.Sql.Db.Where("id = ?", id).First(&unapprovedjob).Error; err != nil {
-			log.Info().Int("id", id).Str("path", "RemoveUnapprovedJob").Msg("id does not exist")
-			return nil, errors.New("error finding unapproved job with id: " + strconv.Itoa(id))
-		}
-	
-		// delete the unapproved job from the unapproved job table
-		if err := r.Sql.Db.Delete(unapprovedjob).Error; err != nil {
-			log.Error().Str("path", "RemoveUnapprovedJob").Int("record_id", unapprovedjob.ID).Msg(err.Error())
-			return nil, errors.New("Failed to complete unapproved job removal. please try again later or contact support")
-		}
-	
-		jobprofile := &model.JobProfile{
-			ID:             unapprovedjob.ID,
-			CreatedAt:      unapprovedjob.CreatedAt,
-			UpdatedAt:      unapprovedjob.UpdatedAt,
-			DeletedAt:      unapprovedjob.DeletedAt,
-			Title:          unapprovedjob.Title,
-			Industry:       unapprovedjob.Industry,
-			Description:    unapprovedjob.Description,
-			Level:          unapprovedjob.Level,
-			Location:       unapprovedjob.Location,
-			Deadline:       unapprovedjob.Deadline,
-			EducationLevel: unapprovedjob.EducationLevel,
-			MinSalary:      unapprovedjob.MinSalary,
-			MaxSalary:      unapprovedjob.MaxSalary,
-			Experience:     unapprovedjob.Experience,
-			Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
-		}
-	
-		return jobprofile, nil
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("access to remove unapproved job denied!")
+	}
+	role := user.GetRole()
+	if role != "admin" {
+		return nil, errors.New("access to remove unapproved job denied. Only available for registered and logged in admins. To fix check access token!")
+	}
+
+	Id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access admin's id!")
+	}
+
+	log.Info().Str("role", role).Int("id", Id).Str("path", "RemoveUnapprovedJob").Msg("removing unapproved job")
+
+	//declare an unapproved job variable
+	var unapprovedjob *model.UnapprovedJob
+
+	// Find the first unapproved job that matches the input id from the unapproved job table
+	if err := r.Sql.Db.Where("id = ?", id).First(&unapprovedjob).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "RemoveUnapprovedJob").Msg("id does not exist")
+		return nil, errors.New("error finding unapproved job with id: " + strconv.Itoa(id))
+	}
+
+	// delete the unapproved job from the unapproved job table
+	if err := r.Sql.Db.Delete(unapprovedjob).Error; err != nil {
+		log.Error().Str("path", "RemoveUnapprovedJob").Int("record_id", unapprovedjob.ID).Msg(err.Error())
+		return nil, errors.New("Failed to complete unapproved job removal. please try again later or contact support")
+	}
+
+	jobprofile := &model.JobProfile{
+		ID:             unapprovedjob.ID,
+		CreatedAt:      unapprovedjob.CreatedAt,
+		UpdatedAt:      unapprovedjob.UpdatedAt,
+		DeletedAt:      unapprovedjob.DeletedAt,
+		Title:          unapprovedjob.Title,
+		Industry:       unapprovedjob.Industry,
+		Description:    unapprovedjob.Description,
+		Level:          unapprovedjob.Level,
+		Location:       unapprovedjob.Location,
+		Deadline:       unapprovedjob.Deadline,
+		EducationLevel: unapprovedjob.EducationLevel,
+		MinSalary:      unapprovedjob.MinSalary,
+		MaxSalary:      unapprovedjob.MaxSalary,
+		Experience:     unapprovedjob.Experience,
+		Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
+	}
+
+	return jobprofile, nil
 }
 
 // GetJobs is the resolver for the getJobs field.
@@ -446,6 +446,62 @@ func (r *queryResolver) GetJobs(ctx context.Context) ([]*model.JobProfile, error
 	}
 
 	return jobprofiles, nil
+}
+
+// FindJob is the resolver for the findJob field.
+func (r *queryResolver) FindJob(ctx context.Context, id int) (*model.JobProfile, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("access to job denied!")
+	}
+	role := user.GetRole()
+	if role != "admin" {
+		return nil, errors.New("access to job denied. Only available for registered and logged in admins. To fix check access token!")
+	}
+
+	Id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access admin's id!")
+	}
+
+	log.Info().Str("role", role).Int("id", Id).Str("path", "FindJob").Msg("finding job")
+
+	//declare a job variable
+	var job *model.Job
+
+	// Find the first job that matches the input id from the job table
+	if err := r.Sql.Db.Where("id = ?", id).First(&job).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "FindJob").Msg("id does not exist")
+		return nil, errors.New("error finding job with id: " + strconv.Itoa(id))
+	}
+
+	jobprofile := &model.JobProfile{
+		ID:             job.ID,
+		CreatedAt:      job.CreatedAt,
+		UpdatedAt:      job.UpdatedAt,
+		DeletedAt:      job.DeletedAt,
+		Title:          job.Title,
+		Industry:       job.Industry,
+		Description:    job.Description,
+		Level:          job.Level,
+		Location:       job.Location,
+		Deadline:       job.Deadline,
+		EducationLevel: job.EducationLevel,
+		MinSalary:      job.MinSalary,
+		MaxSalary:      job.MaxSalary,
+		Experience:     job.Experience,
+		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
+	}
+
+	return jobprofile, nil
 }
 
 // GetUnapprovedJobs is the resolver for the getUnapprovedJobs field.
