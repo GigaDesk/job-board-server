@@ -284,6 +284,69 @@ func (r *mutationResolver) EditJob(ctx context.Context, id int, input model.NewJ
 	return jobprofile, nil
 }
 
+// RemoveJob is the resolver for the removeJob field.
+func (r *mutationResolver) RemoveJob(ctx context.Context, id int) (*model.JobProfile, error) {
+
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("access to remove job denied!")
+	}
+	role := user.GetRole()
+	if role != "admin" {
+		return nil, errors.New("access to remove job denied. Only available for registered and logged in admins. To fix check access token!")
+	}
+
+	Id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access admin's id!")
+	}
+
+	log.Info().Str("role", role).Int("id", Id).Str("path", "RemoveJob").Msg("removing job")
+
+	//declare a job variable
+	var job *model.Job
+
+	// Find the first job that matches the input id from the job table
+	if err := r.Sql.Db.Where("id = ?", id).First(&job).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "RemoveJob").Msg("id does not exist")
+		return nil, errors.New("error finding job with id: " + strconv.Itoa(id))
+	}
+
+	// delete the job from the job table
+	if err := r.Sql.Db.Delete(job).Error; err != nil {
+		log.Error().Str("path", "RemoveJob").Int("record_id", job.ID).Msg(err.Error())
+		return nil, errors.New("Failed to complete job removal. please try again later or contact support")
+	}
+
+	jobprofile := &model.JobProfile{
+		ID:             job.ID,
+		CreatedAt:      job.CreatedAt,
+		UpdatedAt:      job.UpdatedAt,
+		DeletedAt:      job.DeletedAt,
+		Title:          job.Title,
+		Industry:       job.Industry,
+		Description:    job.Description,
+		Level:          job.Level,
+		Location:       job.Location,
+		Deadline:       job.Deadline,
+		EducationLevel: job.EducationLevel,
+		MinSalary:      job.MinSalary,
+		MaxSalary:      job.MaxSalary,
+		Experience:     job.Experience,
+		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
+	}
+
+	return jobprofile, nil
+}
+
 // GetJobs is the resolver for the getJobs field.
 func (r *queryResolver) GetJobs(ctx context.Context) ([]*model.JobProfile, error) {
 	//check if system is in shutdown mode
