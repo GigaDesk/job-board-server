@@ -41,7 +41,7 @@ func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*
 		errors.New("could not access admin's id!")
 	}
 
-	log.Info().Str("role", role).Int("id", id).Str("path", "AddStudents").Msg("adding students")
+	log.Info().Str("role", role).Int("id", id).Str("path", "CreateJob").Msg("creating job")
 
 	//Join input.Requiremets with "||" separator
 
@@ -179,6 +179,89 @@ func (r *mutationResolver) ApproveJob(ctx context.Context, id int) (*model.JobPr
 	}
 
 	log.Info().Int("initial_record_id", unapprovedjob.ID).Int("final_record_id", unapprovedjob.ID).Str("path", "ApproveJob").Msg("completed unapproved job to job data transaction")
+
+	jobprofile := &model.JobProfile{
+		ID:             job.ID,
+		CreatedAt:      job.CreatedAt,
+		UpdatedAt:      job.UpdatedAt,
+		DeletedAt:      job.DeletedAt,
+		Title:          job.Title,
+		Industry:       job.Industry,
+		Description:    job.Description,
+		Level:          job.Level,
+		Location:       job.Location,
+		Deadline:       job.Deadline,
+		EducationLevel: job.EducationLevel,
+		MinSalary:      job.MinSalary,
+		MaxSalary:      job.MaxSalary,
+		Experience:     job.Experience,
+		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
+	}
+
+	return jobprofile, nil
+}
+
+// EditJob is the resolver for the editJob field.
+func (r *mutationResolver) EditJob(ctx context.Context, id int, input model.NewJob) (*model.JobProfile, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("access to edit job denied!")
+	}
+	role := user.GetRole()
+	if role != "admin" {
+		return nil, errors.New("access to edit job denied. Only available for registered and logged in admins. To fix check access token!")
+	}
+
+	Id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access admin's id!")
+	}
+
+	log.Info().Str("role", role).Int("id", Id).Str("path", "EditJob").Msg("editing job")
+
+	//declare a job variable
+	var job *model.Job
+
+	//Find the first job that matches the input id
+	if err := r.Sql.Db.Where("id = ?", id).First(&job).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "EditJob").Msg("id does not exist")
+		return nil, errors.New("error finding job with id: " + strconv.Itoa(id))
+	}
+
+	//Join input.Requiremets with "||" separator
+	requirements := strings.Join(input.Requirements, "||")
+
+	job.Title = input.Title
+	job.Industry = input.Industry
+	job.Description = input.Description
+	job.Level = input.Level
+	job.Location = input.Location
+	job.Deadline = input.Deadline
+	job.EducationLevel = input.EducationLevel
+	job.MinSalary = input.MinSalary
+	job.MaxSalary = input.MaxSalary
+	job.Experience = input.Experience
+	job.Requirements = &requirements
+
+	// Update job record
+	if err := r.Sql.Db.Save(&job).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "EditJob").Msg("failed to update job")
+		return nil, errors.New("error updating job with id: " + strconv.Itoa(id))
+	}
+
+	// Find the first job that matches the input id again
+	if err := r.Sql.Db.Where("id = ?", id).First(&job).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "EditJob").Msg("id does not exist")
+		return nil, errors.New("error finding job with id: " + strconv.Itoa(id))
+	}
 
 	jobprofile := &model.JobProfile{
 		ID:             job.ID,
