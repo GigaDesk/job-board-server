@@ -278,6 +278,7 @@ type ComplexityRoot struct {
 	Query struct {
 		AdminPhoneNumberExists  func(childComplexity int, phoneNumber string) int
 		FindJob                 func(childComplexity int, id int) int
+		FindUnapprovedJob       func(childComplexity int, id int) int
 		GetAdmin                func(childComplexity int, id int) int
 		GetDummy                func(childComplexity int, id *int) int
 		GetDummys               func(childComplexity int) int
@@ -572,6 +573,7 @@ type QueryResolver interface {
 	GetJobs(ctx context.Context) ([]*model.JobProfile, error)
 	FindJob(ctx context.Context, id int) (*model.JobProfile, error)
 	GetUnapprovedJobs(ctx context.Context) ([]*model.JobProfile, error)
+	FindUnapprovedJob(ctx context.Context, id int) (*model.JobProfile, error)
 	SchoolPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error)
 	GetSchoolProfile(ctx context.Context) (*model.SchoolProfile, error)
 	GetSchoolsProfile(ctx context.Context) ([]*model.SchoolProfile, error)
@@ -1904,6 +1906,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.FindJob(childComplexity, args["id"].(int)), true
+
+	case "Query.findUnapprovedJob":
+		if e.complexity.Query.FindUnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_Query_findUnapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FindUnapprovedJob(childComplexity, args["id"].(int)), true
 
 	case "Query.getAdmin":
 		if e.complexity.Query.GetAdmin == nil {
@@ -6968,6 +6982,29 @@ func (ec *executionContext) field_Query_findJob_args(ctx context.Context, rawArg
 	return args, nil
 }
 func (ec *executionContext) field_Query_findJob_argsID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_findUnapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_findUnapprovedJob_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_findUnapprovedJob_argsID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (int, error) {
@@ -16240,6 +16277,93 @@ func (ec *executionContext) fieldContext_Query_getUnapprovedJobs(_ context.Conte
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_findUnapprovedJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_findUnapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().FindUnapprovedJob(rctx, fc.Args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobProfile)
+	fc.Result = res
+	return ec.marshalNJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_findUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_JobProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_JobProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_JobProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_JobProfile_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_JobProfile_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_JobProfile_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_JobProfile_description(ctx, field)
+			case "level":
+				return ec.fieldContext_JobProfile_level(ctx, field)
+			case "location":
+				return ec.fieldContext_JobProfile_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_JobProfile_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_JobProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_JobProfile_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_JobProfile_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_findUnapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -29979,6 +30103,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getUnapprovedJobs(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "findUnapprovedJob":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_findUnapprovedJob(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
