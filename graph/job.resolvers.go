@@ -543,3 +543,59 @@ func (r *queryResolver) GetUnapprovedJobs(ctx context.Context) ([]*model.JobProf
 
 	return jobprofiles, nil
 }
+
+// FindUnapprovedJob is the resolver for the findUnapprovedJob field.
+func (r *queryResolver) FindUnapprovedJob(ctx context.Context, id int) (*model.JobProfile, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+	user, err := auth.ForContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("access to unapproved job denied!")
+	}
+	role := user.GetRole()
+	if role != "admin" {
+		return nil, errors.New("access to unapproved job denied. Only available for registered and logged in admins. To fix check access token!")
+	}
+
+	Id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access admin's id!")
+	}
+
+	log.Info().Str("role", role).Int("id", Id).Str("path", "FindUnapprovedJob").Msg("finding unapproved job")
+
+	//declare an unapproved job variable
+	var unapprovedjob *model.UnapprovedJob
+
+	// Find the first unapproved job that matches the input id from the unapproved job table
+	if err := r.Sql.Db.Where("id = ?", id).First(&unapprovedjob).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "FindUnapprovedJob").Msg("id does not exist")
+		return nil, errors.New("error finding unapproved job with id: " + strconv.Itoa(id))
+	}
+
+	jobprofile := &model.JobProfile{
+		ID:             unapprovedjob.ID,
+		CreatedAt:      unapprovedjob.CreatedAt,
+		UpdatedAt:      unapprovedjob.UpdatedAt,
+		DeletedAt:      unapprovedjob.DeletedAt,
+		Title:          unapprovedjob.Title,
+		Industry:       unapprovedjob.Industry,
+		Description:    unapprovedjob.Description,
+		Level:          unapprovedjob.Level,
+		Location:       unapprovedjob.Location,
+		Deadline:       unapprovedjob.Deadline,
+		EducationLevel: unapprovedjob.EducationLevel,
+		MinSalary:      unapprovedjob.MinSalary,
+		MaxSalary:      unapprovedjob.MaxSalary,
+		Experience:     unapprovedjob.Experience,
+		Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
+	}
+
+	return jobprofile, nil
+}
