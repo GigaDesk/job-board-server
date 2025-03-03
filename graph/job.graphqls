@@ -70,6 +70,7 @@ extend type Query {
   getJobs: [JobProfile!]
   findJob(id: Int!): JobProfile!
   getUnapprovedJobs: [JobProfile!]
+  findUnapprovedJob(id: Int!): JobProfile!
 }
 
 extend type Mutation {
