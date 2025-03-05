@@ -15,7 +15,6 @@ import (
 	"github.com/GigaDesk/eardrum-server/pkg/jwt"
 	"github.com/GigaDesk/eardrum-server/shutdown"
 	"github.com/go-chi/chi"
-	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 )
@@ -27,12 +26,6 @@ var (
 
 
 func main() {
-
-	// Find .env file
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal().Msg(fmt.Sprintf("Error loading .env file: %s", err))
-	}
 
 	go phoneutils.InitializeTwilio()
 	go jwt.InitializeJwtSecretKey()
