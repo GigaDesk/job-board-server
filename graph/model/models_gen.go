@@ -17,6 +17,12 @@ type AddAdminPayload struct {
 	Affected []*Admin          `json:"affected"`
 }
 
+// AddEmployee result with filterable data and affected rows
+type AddEmployeePayload struct {
+	Employee *EmployeeQueryResult `json:"employee"`
+	Affected []*Employee          `json:"affected"`
+}
+
 // AddEmployer result with filterable data and affected rows
 type AddEmployerPayload struct {
 	Employer *EmployerQueryResult `json:"employer"`
@@ -39,6 +45,12 @@ type AddUnapprovedJobPayload struct {
 type AddUnverifiedAdminPayload struct {
 	UnverifiedAdmin *UnverifiedAdminQueryResult `json:"unverifiedAdmin"`
 	Affected        []*UnverifiedAdmin          `json:"affected"`
+}
+
+// AddUnverifiedEmployee result with filterable data and affected rows
+type AddUnverifiedEmployeePayload struct {
+	UnverifiedEmployee *UnverifiedEmployeeQueryResult `json:"unverifiedEmployee"`
+	Affected           []*UnverifiedEmployee          `json:"affected"`
 }
 
 // AddUnverifiedEmployer result with filterable data and affected rows
@@ -129,6 +141,14 @@ type DeleteAdminPayload struct {
 	Msg   *string `json:"msg,omitempty"`
 }
 
+// DeleteEmployee result with filterable data and count of affected entries
+type DeleteEmployeePayload struct {
+	Employee *EmployeeQueryResult `json:"employee"`
+	// Count of deleted Employee entities
+	Count int     `json:"count"`
+	Msg   *string `json:"msg,omitempty"`
+}
+
 // DeleteEmployer result with filterable data and count of affected entries
 type DeleteEmployerPayload struct {
 	Employer *EmployerQueryResult `json:"employer"`
@@ -161,6 +181,14 @@ type DeleteUnverifiedAdminPayload struct {
 	Msg   *string `json:"msg,omitempty"`
 }
 
+// DeleteUnverifiedEmployee result with filterable data and count of affected entries
+type DeleteUnverifiedEmployeePayload struct {
+	UnverifiedEmployee *UnverifiedEmployeeQueryResult `json:"unverifiedEmployee"`
+	// Count of deleted UnverifiedEmployee entities
+	Count int     `json:"count"`
+	Msg   *string `json:"msg,omitempty"`
+}
+
 // DeleteUnverifiedEmployer result with filterable data and count of affected entries
 type DeleteUnverifiedEmployerPayload struct {
 	UnverifiedEmployer *UnverifiedEmployerQueryResult `json:"unverifiedEmployer"`
@@ -172,6 +200,75 @@ type DeleteUnverifiedEmployerPayload struct {
 type Dummy struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
+}
+
+type Employee struct {
+	ID             int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
+	CreatedAt      time.Time                 `json:"createdAt"`
+	UpdatedAt      time.Time                 `json:"updatedAt"`
+	DeletedAt      *runtimehelper.SoftDelete `json:"deletedAt,omitempty" gorm:"index;"`
+	Name           string                    `json:"name"`
+	PhoneNumber    string                    `json:"phone_number"`
+	Password       string                    `json:"password"`
+	Profilepicture *string                   `json:"profilepicture,omitempty"`
+}
+
+// Filter input selection for Employee
+// Can be used f.e.: by queryEmployee
+type EmployeeFiltersInput struct {
+	ID             *IntFilterInput         `json:"id,omitempty"`
+	CreatedAt      *TimeFilterInput        `json:"createdAt,omitempty"`
+	UpdatedAt      *TimeFilterInput        `json:"updatedAt,omitempty"`
+	Name           *StringFilterInput      `json:"name,omitempty"`
+	PhoneNumber    *StringFilterInput      `json:"phone_number,omitempty"`
+	Password       *StringFilterInput      `json:"password,omitempty"`
+	Profilepicture *StringFilterInput      `json:"profilepicture,omitempty"`
+	And            []*EmployeeFiltersInput `json:"and,omitempty"`
+	Or             []*EmployeeFiltersInput `json:"or,omitempty"`
+	Not            *EmployeeFiltersInput   `json:"not,omitempty"`
+}
+
+// Employee Input value to add new Employee
+type EmployeeInput struct {
+	Name           string  `json:"name"`
+	PhoneNumber    string  `json:"phone_number"`
+	Password       string  `json:"password"`
+	Profilepicture *string `json:"profilepicture,omitempty"`
+}
+
+type EmployeeLogin struct {
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
+}
+
+// Order Employee by asc or desc
+type EmployeeOrder struct {
+	Asc  *EmployeeOrderable `json:"asc,omitempty"`
+	Desc *EmployeeOrderable `json:"desc,omitempty"`
+}
+
+// Employee Patch value all values are optional to update Employee entities
+type EmployeePatch struct {
+	Name           *string `json:"name,omitempty"`
+	PhoneNumber    *string `json:"phone_number,omitempty"`
+	Password       *string `json:"password,omitempty"`
+	Profilepicture *string `json:"profilepicture,omitempty"`
+}
+
+type EmployeeProfile struct {
+	ID             int       `json:"id"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
+	Name           string    `json:"name"`
+	PhoneNumber    string    `json:"phone_number"`
+	Profilepicture *string   `json:"profilepicture,omitempty"`
+}
+
+// Employee result
+type EmployeeQueryResult struct {
+	Data       []*Employee `json:"data"`
+	Count      int         `json:"count"`
+	TotalCount int         `json:"totalCount"`
 }
 
 type Employer struct {
@@ -417,6 +514,13 @@ type NewAdmin struct {
 	Name        string `json:"name"`
 	PhoneNumber string `json:"phone_number"`
 	Password    string `json:"password"`
+}
+
+type NewEmployee struct {
+	Name           string  `json:"name"`
+	PhoneNumber    string  `json:"phone_number"`
+	Password       string  `json:"password"`
+	Profilepicture *string `json:"profilepicture,omitempty"`
 }
 
 type NewEmployer struct {
@@ -672,6 +776,61 @@ type UnverifiedAdminQueryResult struct {
 	TotalCount int                `json:"totalCount"`
 }
 
+type UnverifiedEmployee struct {
+	ID             int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
+	CreatedAt      time.Time                 `json:"createdAt"`
+	UpdatedAt      time.Time                 `json:"updatedAt"`
+	DeletedAt      *runtimehelper.SoftDelete `json:"deletedAt,omitempty" gorm:"index;"`
+	Name           string                    `json:"name"`
+	PhoneNumber    string                    `json:"phone_number"`
+	Password       string                    `json:"password"`
+	Profilepicture *string                   `json:"profilepicture,omitempty"`
+}
+
+// Filter input selection for UnverifiedEmployee
+// Can be used f.e.: by queryUnverifiedEmployee
+type UnverifiedEmployeeFiltersInput struct {
+	ID             *IntFilterInput                   `json:"id,omitempty"`
+	CreatedAt      *TimeFilterInput                  `json:"createdAt,omitempty"`
+	UpdatedAt      *TimeFilterInput                  `json:"updatedAt,omitempty"`
+	Name           *StringFilterInput                `json:"name,omitempty"`
+	PhoneNumber    *StringFilterInput                `json:"phone_number,omitempty"`
+	Password       *StringFilterInput                `json:"password,omitempty"`
+	Profilepicture *StringFilterInput                `json:"profilepicture,omitempty"`
+	And            []*UnverifiedEmployeeFiltersInput `json:"and,omitempty"`
+	Or             []*UnverifiedEmployeeFiltersInput `json:"or,omitempty"`
+	Not            *UnverifiedEmployeeFiltersInput   `json:"not,omitempty"`
+}
+
+// UnverifiedEmployee Input value to add new UnverifiedEmployee
+type UnverifiedEmployeeInput struct {
+	Name           string  `json:"name"`
+	PhoneNumber    string  `json:"phone_number"`
+	Password       string  `json:"password"`
+	Profilepicture *string `json:"profilepicture,omitempty"`
+}
+
+// Order UnverifiedEmployee by asc or desc
+type UnverifiedEmployeeOrder struct {
+	Asc  *UnverifiedEmployeeOrderable `json:"asc,omitempty"`
+	Desc *UnverifiedEmployeeOrderable `json:"desc,omitempty"`
+}
+
+// UnverifiedEmployee Patch value all values are optional to update UnverifiedEmployee entities
+type UnverifiedEmployeePatch struct {
+	Name           *string `json:"name,omitempty"`
+	PhoneNumber    *string `json:"phone_number,omitempty"`
+	Password       *string `json:"password,omitempty"`
+	Profilepicture *string `json:"profilepicture,omitempty"`
+}
+
+// UnverifiedEmployee result
+type UnverifiedEmployeeQueryResult struct {
+	Data       []*UnverifiedEmployee `json:"data"`
+	Count      int                   `json:"count"`
+	TotalCount int                   `json:"totalCount"`
+}
+
 type UnverifiedEmployer struct {
 	ID          int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
 	CreatedAt   time.Time                 `json:"createdAt"`
@@ -745,6 +904,20 @@ type UpdateAdminPayload struct {
 	Affected []*Admin `json:"affected"`
 }
 
+// Update rules for Employee multiupdates simple possible by global filtervalue
+type UpdateEmployeeInput struct {
+	Filter *EmployeeFiltersInput `json:"filter"`
+	Set    *EmployeePatch        `json:"set"`
+}
+
+// UpdateEmployee result with filterable data and affected rows
+type UpdateEmployeePayload struct {
+	Employee *EmployeeQueryResult `json:"employee"`
+	// Count of affected updates
+	Count    int         `json:"count"`
+	Affected []*Employee `json:"affected"`
+}
+
 // Update rules for Employer multiupdates simple possible by global filtervalue
 type UpdateEmployerInput struct {
 	Filter *EmployerFiltersInput `json:"filter"`
@@ -799,6 +972,20 @@ type UpdateUnverifiedAdminPayload struct {
 	// Count of affected updates
 	Count    int                `json:"count"`
 	Affected []*UnverifiedAdmin `json:"affected"`
+}
+
+// Update rules for UnverifiedEmployee multiupdates simple possible by global filtervalue
+type UpdateUnverifiedEmployeeInput struct {
+	Filter *UnverifiedEmployeeFiltersInput `json:"filter"`
+	Set    *UnverifiedEmployeePatch        `json:"set"`
+}
+
+// UpdateUnverifiedEmployee result with filterable data and affected rows
+type UpdateUnverifiedEmployeePayload struct {
+	UnverifiedEmployee *UnverifiedEmployeeQueryResult `json:"unverifiedEmployee"`
+	// Count of affected updates
+	Count    int                   `json:"count"`
+	Affected []*UnverifiedEmployee `json:"affected"`
 }
 
 // Update rules for UnverifiedEmployer multiupdates simple possible by global filtervalue
@@ -915,6 +1102,108 @@ func (e *AdminOrderable) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AdminOrderable) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Groupable data for  Employee
+// Can be used f.e.: by queryEmployee
+type EmployeeGroup string
+
+const (
+	EmployeeGroupID             EmployeeGroup = "id"
+	EmployeeGroupCreatedAt      EmployeeGroup = "createdAt"
+	EmployeeGroupUpdatedAt      EmployeeGroup = "updatedAt"
+	EmployeeGroupName           EmployeeGroup = "name"
+	EmployeeGroupPhoneNumber    EmployeeGroup = "phone_number"
+	EmployeeGroupPassword       EmployeeGroup = "password"
+	EmployeeGroupProfilepicture EmployeeGroup = "profilepicture"
+)
+
+var AllEmployeeGroup = []EmployeeGroup{
+	EmployeeGroupID,
+	EmployeeGroupCreatedAt,
+	EmployeeGroupUpdatedAt,
+	EmployeeGroupName,
+	EmployeeGroupPhoneNumber,
+	EmployeeGroupPassword,
+	EmployeeGroupProfilepicture,
+}
+
+func (e EmployeeGroup) IsValid() bool {
+	switch e {
+	case EmployeeGroupID, EmployeeGroupCreatedAt, EmployeeGroupUpdatedAt, EmployeeGroupName, EmployeeGroupPhoneNumber, EmployeeGroupPassword, EmployeeGroupProfilepicture:
+		return true
+	}
+	return false
+}
+
+func (e EmployeeGroup) String() string {
+	return string(e)
+}
+
+func (e *EmployeeGroup) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EmployeeGroup(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EmployeeGroup", str)
+	}
+	return nil
+}
+
+func (e EmployeeGroup) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// for Employee a enum of all orderable entities
+// can be used f.e.: queryEmployee
+type EmployeeOrderable string
+
+const (
+	EmployeeOrderableID             EmployeeOrderable = "id"
+	EmployeeOrderableName           EmployeeOrderable = "name"
+	EmployeeOrderablePhoneNumber    EmployeeOrderable = "phone_number"
+	EmployeeOrderablePassword       EmployeeOrderable = "password"
+	EmployeeOrderableProfilepicture EmployeeOrderable = "profilepicture"
+)
+
+var AllEmployeeOrderable = []EmployeeOrderable{
+	EmployeeOrderableID,
+	EmployeeOrderableName,
+	EmployeeOrderablePhoneNumber,
+	EmployeeOrderablePassword,
+	EmployeeOrderableProfilepicture,
+}
+
+func (e EmployeeOrderable) IsValid() bool {
+	switch e {
+	case EmployeeOrderableID, EmployeeOrderableName, EmployeeOrderablePhoneNumber, EmployeeOrderablePassword, EmployeeOrderableProfilepicture:
+		return true
+	}
+	return false
+}
+
+func (e EmployeeOrderable) String() string {
+	return string(e)
+}
+
+func (e *EmployeeOrderable) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EmployeeOrderable(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EmployeeOrderable", str)
+	}
+	return nil
+}
+
+func (e EmployeeOrderable) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -1375,6 +1664,108 @@ func (e *UnverifiedAdminOrderable) UnmarshalGQL(v interface{}) error {
 }
 
 func (e UnverifiedAdminOrderable) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Groupable data for  UnverifiedEmployee
+// Can be used f.e.: by queryUnverifiedEmployee
+type UnverifiedEmployeeGroup string
+
+const (
+	UnverifiedEmployeeGroupID             UnverifiedEmployeeGroup = "id"
+	UnverifiedEmployeeGroupCreatedAt      UnverifiedEmployeeGroup = "createdAt"
+	UnverifiedEmployeeGroupUpdatedAt      UnverifiedEmployeeGroup = "updatedAt"
+	UnverifiedEmployeeGroupName           UnverifiedEmployeeGroup = "name"
+	UnverifiedEmployeeGroupPhoneNumber    UnverifiedEmployeeGroup = "phone_number"
+	UnverifiedEmployeeGroupPassword       UnverifiedEmployeeGroup = "password"
+	UnverifiedEmployeeGroupProfilepicture UnverifiedEmployeeGroup = "profilepicture"
+)
+
+var AllUnverifiedEmployeeGroup = []UnverifiedEmployeeGroup{
+	UnverifiedEmployeeGroupID,
+	UnverifiedEmployeeGroupCreatedAt,
+	UnverifiedEmployeeGroupUpdatedAt,
+	UnverifiedEmployeeGroupName,
+	UnverifiedEmployeeGroupPhoneNumber,
+	UnverifiedEmployeeGroupPassword,
+	UnverifiedEmployeeGroupProfilepicture,
+}
+
+func (e UnverifiedEmployeeGroup) IsValid() bool {
+	switch e {
+	case UnverifiedEmployeeGroupID, UnverifiedEmployeeGroupCreatedAt, UnverifiedEmployeeGroupUpdatedAt, UnverifiedEmployeeGroupName, UnverifiedEmployeeGroupPhoneNumber, UnverifiedEmployeeGroupPassword, UnverifiedEmployeeGroupProfilepicture:
+		return true
+	}
+	return false
+}
+
+func (e UnverifiedEmployeeGroup) String() string {
+	return string(e)
+}
+
+func (e *UnverifiedEmployeeGroup) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UnverifiedEmployeeGroup(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UnverifiedEmployeeGroup", str)
+	}
+	return nil
+}
+
+func (e UnverifiedEmployeeGroup) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// for UnverifiedEmployee a enum of all orderable entities
+// can be used f.e.: queryUnverifiedEmployee
+type UnverifiedEmployeeOrderable string
+
+const (
+	UnverifiedEmployeeOrderableID             UnverifiedEmployeeOrderable = "id"
+	UnverifiedEmployeeOrderableName           UnverifiedEmployeeOrderable = "name"
+	UnverifiedEmployeeOrderablePhoneNumber    UnverifiedEmployeeOrderable = "phone_number"
+	UnverifiedEmployeeOrderablePassword       UnverifiedEmployeeOrderable = "password"
+	UnverifiedEmployeeOrderableProfilepicture UnverifiedEmployeeOrderable = "profilepicture"
+)
+
+var AllUnverifiedEmployeeOrderable = []UnverifiedEmployeeOrderable{
+	UnverifiedEmployeeOrderableID,
+	UnverifiedEmployeeOrderableName,
+	UnverifiedEmployeeOrderablePhoneNumber,
+	UnverifiedEmployeeOrderablePassword,
+	UnverifiedEmployeeOrderableProfilepicture,
+}
+
+func (e UnverifiedEmployeeOrderable) IsValid() bool {
+	switch e {
+	case UnverifiedEmployeeOrderableID, UnverifiedEmployeeOrderableName, UnverifiedEmployeeOrderablePhoneNumber, UnverifiedEmployeeOrderablePassword, UnverifiedEmployeeOrderableProfilepicture:
+		return true
+	}
+	return false
+}
+
+func (e UnverifiedEmployeeOrderable) String() string {
+	return string(e)
+}
+
+func (e *UnverifiedEmployeeOrderable) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UnverifiedEmployeeOrderable(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UnverifiedEmployeeOrderable", str)
+	}
+	return nil
+}
+
+func (e UnverifiedEmployeeOrderable) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

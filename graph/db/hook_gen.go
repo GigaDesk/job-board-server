@@ -23,6 +23,11 @@ const (
 	AddAdmin                 AddName    = "AddAdmin"
 	UpdateAdmin              UpdateName = "UpdateAdmin"
 	DeleteAdmin              DeleteName = "DeleteAdmin"
+	GetEmployee              GetName    = "GetEmployee"
+	QueryEmployee            QueryName  = "QueryEmployee"
+	AddEmployee              AddName    = "AddEmployee"
+	UpdateEmployee           UpdateName = "UpdateEmployee"
+	DeleteEmployee           DeleteName = "DeleteEmployee"
 	GetEmployer              GetName    = "GetEmployer"
 	QueryEmployer            QueryName  = "QueryEmployer"
 	AddEmployer              AddName    = "AddEmployer"
@@ -43,6 +48,11 @@ const (
 	AddUnverifiedAdmin       AddName    = "AddUnverifiedAdmin"
 	UpdateUnverifiedAdmin    UpdateName = "UpdateUnverifiedAdmin"
 	DeleteUnverifiedAdmin    DeleteName = "DeleteUnverifiedAdmin"
+	GetUnverifiedEmployee    GetName    = "GetUnverifiedEmployee"
+	QueryUnverifiedEmployee  QueryName  = "QueryUnverifiedEmployee"
+	AddUnverifiedEmployee    AddName    = "AddUnverifiedEmployee"
+	UpdateUnverifiedEmployee UpdateName = "UpdateUnverifiedEmployee"
+	DeleteUnverifiedEmployee DeleteName = "DeleteUnverifiedEmployee"
 	GetUnverifiedEmployer    GetName    = "GetUnverifiedEmployer"
 	QueryUnverifiedEmployer  QueryName  = "QueryUnverifiedEmployer"
 	AddUnverifiedEmployer    AddName    = "AddUnverifiedEmployer"
@@ -52,12 +62,12 @@ const (
 
 // Modelhooks
 type AutoGqlHookM interface {
-	model.Admin | model.Employer | model.Job | model.UnapprovedJob | model.UnverifiedAdmin | model.UnverifiedEmployer
+	model.Admin | model.Employee | model.Employer | model.Job | model.UnapprovedJob | model.UnverifiedAdmin | model.UnverifiedEmployee | model.UnverifiedEmployer
 }
 
 // Filter Hooks
 type AutoGqlHookF interface {
-	model.AdminFiltersInput | model.EmployerFiltersInput | model.JobFiltersInput | model.UnapprovedJobFiltersInput | model.UnverifiedAdminFiltersInput | model.UnverifiedEmployerFiltersInput
+	model.AdminFiltersInput | model.EmployeeFiltersInput | model.EmployerFiltersInput | model.JobFiltersInput | model.UnapprovedJobFiltersInput | model.UnverifiedAdminFiltersInput | model.UnverifiedEmployeeFiltersInput | model.UnverifiedEmployerFiltersInput
 }
 
 // Many2Many Hooks
@@ -66,41 +76,43 @@ type AutoGqlHookM2M interface {
 
 // Order Hooks
 type AutoGqlHookQueryO interface {
-	model.AdminOrder | model.EmployerOrder | model.JobOrder | model.UnapprovedJobOrder | model.UnverifiedAdminOrder | model.UnverifiedEmployerOrder
+	model.AdminOrder | model.EmployeeOrder | model.EmployerOrder | model.JobOrder | model.UnapprovedJobOrder | model.UnverifiedAdminOrder | model.UnverifiedEmployeeOrder | model.UnverifiedEmployerOrder
 }
 
 // Input Hooks
 type AutoGqlHookI interface {
-	model.AdminInput | model.EmployerInput | model.JobInput | model.UnapprovedJobInput | model.UnverifiedAdminInput | model.UnverifiedEmployerInput
+	model.AdminInput | model.EmployeeInput | model.EmployerInput | model.JobInput | model.UnapprovedJobInput | model.UnverifiedAdminInput | model.UnverifiedEmployeeInput | model.UnverifiedEmployerInput
 }
 
 // Update Hooks
 type AutoGqlHookU interface {
-	model.UpdateAdminInput | model.UpdateEmployerInput | model.UpdateJobInput | model.UpdateUnapprovedJobInput | model.UpdateUnverifiedAdminInput | model.UpdateUnverifiedEmployerInput
+	model.UpdateAdminInput | model.UpdateEmployeeInput | model.UpdateEmployerInput | model.UpdateJobInput | model.UpdateUnapprovedJobInput | model.UpdateUnverifiedAdminInput | model.UpdateUnverifiedEmployeeInput | model.UpdateUnverifiedEmployerInput
 }
 
 // Update Payload Hooks
 type AutoGqlHookUP interface {
-	model.UpdateAdminPayload | model.UpdateEmployerPayload | model.UpdateJobPayload | model.UpdateUnapprovedJobPayload | model.UpdateUnverifiedAdminPayload | model.UpdateUnverifiedEmployerPayload
+	model.UpdateAdminPayload | model.UpdateEmployeePayload | model.UpdateEmployerPayload | model.UpdateJobPayload | model.UpdateUnapprovedJobPayload | model.UpdateUnverifiedAdminPayload | model.UpdateUnverifiedEmployeePayload | model.UpdateUnverifiedEmployerPayload
 }
 
 // Delete Payload Hooks
 type AutoGqlHookDP interface {
-	model.DeleteAdminPayload | model.DeleteEmployerPayload | model.DeleteJobPayload | model.DeleteUnapprovedJobPayload | model.DeleteUnverifiedAdminPayload | model.DeleteUnverifiedEmployerPayload
+	model.DeleteAdminPayload | model.DeleteEmployeePayload | model.DeleteEmployerPayload | model.DeleteJobPayload | model.DeleteUnapprovedJobPayload | model.DeleteUnverifiedAdminPayload | model.DeleteUnverifiedEmployeePayload | model.DeleteUnverifiedEmployerPayload
 }
 
 // Add Payload Hooks
 type AutoGqlHookAP interface {
-	model.AddAdminPayload | model.AddEmployerPayload | model.AddJobPayload | model.AddUnapprovedJobPayload | model.AddUnverifiedAdminPayload | model.AddUnverifiedEmployerPayload
+	model.AddAdminPayload | model.AddEmployeePayload | model.AddEmployerPayload | model.AddJobPayload | model.AddUnapprovedJobPayload | model.AddUnverifiedAdminPayload | model.AddUnverifiedEmployeePayload | model.AddUnverifiedEmployerPayload
 }
 
 // Add a getHook
 // useable for
 //   - GetAdmin
+//   - GetEmployee
 //   - GetEmployer
 //   - GetJob
 //   - GetUnapprovedJob
 //   - GetUnverifiedAdmin
+//   - GetUnverifiedEmployee
 //   - GetUnverifiedEmployer
 func AddGetHook[T AutoGqlHookM, I any](db *AutoGqlDB, name GetName, implementation AutoGqlHookGet[T, I]) {
 	db.Hooks[string(name)] = implementation
@@ -109,10 +121,12 @@ func AddGetHook[T AutoGqlHookM, I any](db *AutoGqlDB, name GetName, implementati
 // Add a queryHook
 // useable for
 //   - QueryAdmin
+//   - QueryEmployee
 //   - QueryEmployer
 //   - QueryJob
 //   - QueryUnapprovedJob
 //   - QueryUnverifiedAdmin
+//   - QueryUnverifiedEmployee
 //   - QueryUnverifiedEmployer
 func AddQueryHook[M AutoGqlHookM, F AutoGqlHookF, O AutoGqlHookQueryO](db *AutoGqlDB, name QueryName, implementation AutoGqlHookQuery[M, F, O]) {
 	db.Hooks[string(name)] = implementation
@@ -121,10 +135,12 @@ func AddQueryHook[M AutoGqlHookM, F AutoGqlHookF, O AutoGqlHookQueryO](db *AutoG
 // Add a addHook
 // useable for
 //   - AddAdmin
+//   - AddEmployee
 //   - AddEmployer
 //   - AddJob
 //   - AddUnapprovedJob
 //   - AddUnverifiedAdmin
+//   - AddUnverifiedEmployee
 //   - AddUnverifiedEmployer
 func AddAddHook[M AutoGqlHookM, I AutoGqlHookI, AP AutoGqlHookAP](db *AutoGqlDB, name AddName, implementation AutoGqlHookAdd[M, I, AP]) {
 	db.Hooks[string(name)] = implementation
@@ -133,10 +149,12 @@ func AddAddHook[M AutoGqlHookM, I AutoGqlHookI, AP AutoGqlHookAP](db *AutoGqlDB,
 // Add a updateHook
 // useable for
 //   - UpdateAdmin
+//   - UpdateEmployee
 //   - UpdateEmployer
 //   - UpdateJob
 //   - UpdateUnapprovedJob
 //   - UpdateUnverifiedAdmin
+//   - UpdateUnverifiedEmployee
 //   - UpdateUnverifiedEmployer
 func AddUpdateHook[M AutoGqlHookM, U AutoGqlHookU, UP AutoGqlHookUP](db *AutoGqlDB, name UpdateName, implementation AutoGqlHookUpdate[U, UP]) {
 	db.Hooks[string(name)] = implementation
@@ -157,10 +175,12 @@ func AddMany2ManyDeleteHook[U AutoGqlHookM2M, DP AutoGqlHookDP](db *AutoGqlDB, n
 // Add a updateHook
 // useable for
 //   - DeleteAdmin
+//   - DeleteEmployee
 //   - DeleteEmployer
 //   - DeleteJob
 //   - DeleteUnapprovedJob
 //   - DeleteUnverifiedAdmin
+//   - DeleteUnverifiedEmployee
 //   - DeleteUnverifiedEmployer
 func AddDeleteHook[F AutoGqlHookF, DP AutoGqlHookDP](db *AutoGqlDB, name DeleteName, implementation AutoGqlHookDelete[F, DP]) {
 	db.Hooks[string(name)] = implementation
