@@ -8,17 +8,17 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// checks if phone number exists in both the unverified school table and the school table.
+// checks if phone number exists in both the unverified employer table and the employer table.
 // Takes database instance and phone number as arguments
-func CheckSchoolPhoneNumber(db *gorm.DB, phone string) (*model.PhoneNumberExists, error) {
+func CheckEmployerPhoneNumber(db *gorm.DB, phone string) (*model.PhoneNumberExists, error) {
 	var verifiedcount int64
 	var unverifiedcount int64
 
-	if err := db.Model(&model.School{}).Where("phone_number = ?", phone).Count(&verifiedcount).Error; err != nil {
+	if err := db.Model(&model.Employer{}).Where("phone_number = ?", phone).Count(&verifiedcount).Error; err != nil {
 		log.Error().Str("phone_number", phone).Msg(err.Error())
 		return nil, errors.New("error checking verified phone number existence")
 	} 
-	if err := db.Model(&model.UnverifiedSchool{}).Where("phone_number = ?", phone).Count(&unverifiedcount).Error; err != nil {
+	if err := db.Model(&model.UnverifiedEmployer{}).Where("phone_number = ?", phone).Count(&unverifiedcount).Error; err != nil {
 		log.Error().Str("phone_number", phone).Msg(err.Error())
 		return nil, errors.New("error checking unverified phone number existence")
 	} 
