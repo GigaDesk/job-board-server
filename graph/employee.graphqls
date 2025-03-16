@@ -1,0 +1,68 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+#employee data model, only includes properties that cannot be shared
+
+type Employee @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  name: String!
+  phone_number: String!
+  password: String!
+  profilepicture: String
+}
+
+# Unverified employee data model, used to store data for newly registered employees that have not verified their phone numbers
+type UnverifiedEmployee @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  name: String!
+  phone_number: String!
+  password: String!
+  profilepicture: String
+}
+
+
+#returns the an employee's profile data
+type EmployeeProfile {
+  id: Int!
+  createdAt: Time!
+  updatedAt: Time!
+  name: String!
+  phone_number: String!
+  profilepicture: String
+}
+
+#fields required by an employee to log into the system
+input EmployeeLogin {
+  phone_number: String!
+  password: String!
+}
+
+#fields required during an employee signup process(mandatory and non-mandatory)
+input NewEmployee {
+  name: String!
+  phone_number: String!
+  password: String!
+  profilepicture: String
+}
+
+extend type Query {
+  employeePhoneNumberExists(phone_number: String!): PhoneNumberExists!
+  getEmployeeProfile: EmployeeProfile
+  getEmployeesProfile: [EmployeeProfile!]
+}
+
+extend type Mutation {
+  createEmployee(input: NewEmployee!): UnverifiedEmployee
+  verifyEmployee(input: verificationinfo!): Employee
+  employeeLogin(input: EmployeeLogin!): String
+  forgotEmployeePassword(phone_number: String!): SendCodeStatus
+  requestEmployeePasswordReset(input: verificationinfo): String
+  resetEmployeePassword(new_password: String!): Employee
+}
