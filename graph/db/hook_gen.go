@@ -18,51 +18,46 @@ type Many2ManyAddName string
 type Many2ManyDeleteName string
 
 const (
-	GetAdmin               GetName    = "GetAdmin"
-	QueryAdmin             QueryName  = "QueryAdmin"
-	AddAdmin               AddName    = "AddAdmin"
-	UpdateAdmin            UpdateName = "UpdateAdmin"
-	DeleteAdmin            DeleteName = "DeleteAdmin"
-	GetJob                 GetName    = "GetJob"
-	QueryJob               QueryName  = "QueryJob"
-	AddJob                 AddName    = "AddJob"
-	UpdateJob              UpdateName = "UpdateJob"
-	DeleteJob              DeleteName = "DeleteJob"
-	GetSchool              GetName    = "GetSchool"
-	QuerySchool            QueryName  = "QuerySchool"
-	AddSchool              AddName    = "AddSchool"
-	UpdateSchool           UpdateName = "UpdateSchool"
-	DeleteSchool           DeleteName = "DeleteSchool"
-	GetStudent             GetName    = "GetStudent"
-	QueryStudent           QueryName  = "QueryStudent"
-	AddStudent             AddName    = "AddStudent"
-	UpdateStudent          UpdateName = "UpdateStudent"
-	DeleteStudent          DeleteName = "DeleteStudent"
-	GetUnapprovedJob       GetName    = "GetUnapprovedJob"
-	QueryUnapprovedJob     QueryName  = "QueryUnapprovedJob"
-	AddUnapprovedJob       AddName    = "AddUnapprovedJob"
-	UpdateUnapprovedJob    UpdateName = "UpdateUnapprovedJob"
-	DeleteUnapprovedJob    DeleteName = "DeleteUnapprovedJob"
-	GetUnverifiedAdmin     GetName    = "GetUnverifiedAdmin"
-	QueryUnverifiedAdmin   QueryName  = "QueryUnverifiedAdmin"
-	AddUnverifiedAdmin     AddName    = "AddUnverifiedAdmin"
-	UpdateUnverifiedAdmin  UpdateName = "UpdateUnverifiedAdmin"
-	DeleteUnverifiedAdmin  DeleteName = "DeleteUnverifiedAdmin"
-	GetUnverifiedSchool    GetName    = "GetUnverifiedSchool"
-	QueryUnverifiedSchool  QueryName  = "QueryUnverifiedSchool"
-	AddUnverifiedSchool    AddName    = "AddUnverifiedSchool"
-	UpdateUnverifiedSchool UpdateName = "UpdateUnverifiedSchool"
-	DeleteUnverifiedSchool DeleteName = "DeleteUnverifiedSchool"
+	GetAdmin                 GetName    = "GetAdmin"
+	QueryAdmin               QueryName  = "QueryAdmin"
+	AddAdmin                 AddName    = "AddAdmin"
+	UpdateAdmin              UpdateName = "UpdateAdmin"
+	DeleteAdmin              DeleteName = "DeleteAdmin"
+	GetEmployer              GetName    = "GetEmployer"
+	QueryEmployer            QueryName  = "QueryEmployer"
+	AddEmployer              AddName    = "AddEmployer"
+	UpdateEmployer           UpdateName = "UpdateEmployer"
+	DeleteEmployer           DeleteName = "DeleteEmployer"
+	GetJob                   GetName    = "GetJob"
+	QueryJob                 QueryName  = "QueryJob"
+	AddJob                   AddName    = "AddJob"
+	UpdateJob                UpdateName = "UpdateJob"
+	DeleteJob                DeleteName = "DeleteJob"
+	GetUnapprovedJob         GetName    = "GetUnapprovedJob"
+	QueryUnapprovedJob       QueryName  = "QueryUnapprovedJob"
+	AddUnapprovedJob         AddName    = "AddUnapprovedJob"
+	UpdateUnapprovedJob      UpdateName = "UpdateUnapprovedJob"
+	DeleteUnapprovedJob      DeleteName = "DeleteUnapprovedJob"
+	GetUnverifiedAdmin       GetName    = "GetUnverifiedAdmin"
+	QueryUnverifiedAdmin     QueryName  = "QueryUnverifiedAdmin"
+	AddUnverifiedAdmin       AddName    = "AddUnverifiedAdmin"
+	UpdateUnverifiedAdmin    UpdateName = "UpdateUnverifiedAdmin"
+	DeleteUnverifiedAdmin    DeleteName = "DeleteUnverifiedAdmin"
+	GetUnverifiedEmployer    GetName    = "GetUnverifiedEmployer"
+	QueryUnverifiedEmployer  QueryName  = "QueryUnverifiedEmployer"
+	AddUnverifiedEmployer    AddName    = "AddUnverifiedEmployer"
+	UpdateUnverifiedEmployer UpdateName = "UpdateUnverifiedEmployer"
+	DeleteUnverifiedEmployer DeleteName = "DeleteUnverifiedEmployer"
 )
 
 // Modelhooks
 type AutoGqlHookM interface {
-	model.Admin | model.Job | model.School | model.Student | model.UnapprovedJob | model.UnverifiedAdmin | model.UnverifiedSchool
+	model.Admin | model.Employer | model.Job | model.UnapprovedJob | model.UnverifiedAdmin | model.UnverifiedEmployer
 }
 
 // Filter Hooks
 type AutoGqlHookF interface {
-	model.AdminFiltersInput | model.JobFiltersInput | model.SchoolFiltersInput | model.StudentFiltersInput | model.UnapprovedJobFiltersInput | model.UnverifiedAdminFiltersInput | model.UnverifiedSchoolFiltersInput
+	model.AdminFiltersInput | model.EmployerFiltersInput | model.JobFiltersInput | model.UnapprovedJobFiltersInput | model.UnverifiedAdminFiltersInput | model.UnverifiedEmployerFiltersInput
 }
 
 // Many2Many Hooks
@@ -71,43 +66,42 @@ type AutoGqlHookM2M interface {
 
 // Order Hooks
 type AutoGqlHookQueryO interface {
-	model.AdminOrder | model.JobOrder | model.SchoolOrder | model.StudentOrder | model.UnapprovedJobOrder | model.UnverifiedAdminOrder | model.UnverifiedSchoolOrder
+	model.AdminOrder | model.EmployerOrder | model.JobOrder | model.UnapprovedJobOrder | model.UnverifiedAdminOrder | model.UnverifiedEmployerOrder
 }
 
 // Input Hooks
 type AutoGqlHookI interface {
-	model.AdminInput | model.JobInput | model.SchoolInput | model.StudentInput | model.UnapprovedJobInput | model.UnverifiedAdminInput | model.UnverifiedSchoolInput
+	model.AdminInput | model.EmployerInput | model.JobInput | model.UnapprovedJobInput | model.UnverifiedAdminInput | model.UnverifiedEmployerInput
 }
 
 // Update Hooks
 type AutoGqlHookU interface {
-	model.UpdateAdminInput | model.UpdateJobInput | model.UpdateSchoolInput | model.UpdateStudentInput | model.UpdateUnapprovedJobInput | model.UpdateUnverifiedAdminInput | model.UpdateUnverifiedSchoolInput
+	model.UpdateAdminInput | model.UpdateEmployerInput | model.UpdateJobInput | model.UpdateUnapprovedJobInput | model.UpdateUnverifiedAdminInput | model.UpdateUnverifiedEmployerInput
 }
 
 // Update Payload Hooks
 type AutoGqlHookUP interface {
-	model.UpdateAdminPayload | model.UpdateJobPayload | model.UpdateSchoolPayload | model.UpdateStudentPayload | model.UpdateUnapprovedJobPayload | model.UpdateUnverifiedAdminPayload | model.UpdateUnverifiedSchoolPayload
+	model.UpdateAdminPayload | model.UpdateEmployerPayload | model.UpdateJobPayload | model.UpdateUnapprovedJobPayload | model.UpdateUnverifiedAdminPayload | model.UpdateUnverifiedEmployerPayload
 }
 
 // Delete Payload Hooks
 type AutoGqlHookDP interface {
-	model.DeleteAdminPayload | model.DeleteJobPayload | model.DeleteSchoolPayload | model.DeleteStudentPayload | model.DeleteUnapprovedJobPayload | model.DeleteUnverifiedAdminPayload | model.DeleteUnverifiedSchoolPayload
+	model.DeleteAdminPayload | model.DeleteEmployerPayload | model.DeleteJobPayload | model.DeleteUnapprovedJobPayload | model.DeleteUnverifiedAdminPayload | model.DeleteUnverifiedEmployerPayload
 }
 
 // Add Payload Hooks
 type AutoGqlHookAP interface {
-	model.AddAdminPayload | model.AddJobPayload | model.AddSchoolPayload | model.AddStudentPayload | model.AddUnapprovedJobPayload | model.AddUnverifiedAdminPayload | model.AddUnverifiedSchoolPayload
+	model.AddAdminPayload | model.AddEmployerPayload | model.AddJobPayload | model.AddUnapprovedJobPayload | model.AddUnverifiedAdminPayload | model.AddUnverifiedEmployerPayload
 }
 
 // Add a getHook
 // useable for
 //   - GetAdmin
+//   - GetEmployer
 //   - GetJob
-//   - GetSchool
-//   - GetStudent
 //   - GetUnapprovedJob
 //   - GetUnverifiedAdmin
-//   - GetUnverifiedSchool
+//   - GetUnverifiedEmployer
 func AddGetHook[T AutoGqlHookM, I any](db *AutoGqlDB, name GetName, implementation AutoGqlHookGet[T, I]) {
 	db.Hooks[string(name)] = implementation
 }
@@ -115,12 +109,11 @@ func AddGetHook[T AutoGqlHookM, I any](db *AutoGqlDB, name GetName, implementati
 // Add a queryHook
 // useable for
 //   - QueryAdmin
+//   - QueryEmployer
 //   - QueryJob
-//   - QuerySchool
-//   - QueryStudent
 //   - QueryUnapprovedJob
 //   - QueryUnverifiedAdmin
-//   - QueryUnverifiedSchool
+//   - QueryUnverifiedEmployer
 func AddQueryHook[M AutoGqlHookM, F AutoGqlHookF, O AutoGqlHookQueryO](db *AutoGqlDB, name QueryName, implementation AutoGqlHookQuery[M, F, O]) {
 	db.Hooks[string(name)] = implementation
 }
@@ -128,12 +121,11 @@ func AddQueryHook[M AutoGqlHookM, F AutoGqlHookF, O AutoGqlHookQueryO](db *AutoG
 // Add a addHook
 // useable for
 //   - AddAdmin
+//   - AddEmployer
 //   - AddJob
-//   - AddSchool
-//   - AddStudent
 //   - AddUnapprovedJob
 //   - AddUnverifiedAdmin
-//   - AddUnverifiedSchool
+//   - AddUnverifiedEmployer
 func AddAddHook[M AutoGqlHookM, I AutoGqlHookI, AP AutoGqlHookAP](db *AutoGqlDB, name AddName, implementation AutoGqlHookAdd[M, I, AP]) {
 	db.Hooks[string(name)] = implementation
 }
@@ -141,12 +133,11 @@ func AddAddHook[M AutoGqlHookM, I AutoGqlHookI, AP AutoGqlHookAP](db *AutoGqlDB,
 // Add a updateHook
 // useable for
 //   - UpdateAdmin
+//   - UpdateEmployer
 //   - UpdateJob
-//   - UpdateSchool
-//   - UpdateStudent
 //   - UpdateUnapprovedJob
 //   - UpdateUnverifiedAdmin
-//   - UpdateUnverifiedSchool
+//   - UpdateUnverifiedEmployer
 func AddUpdateHook[M AutoGqlHookM, U AutoGqlHookU, UP AutoGqlHookUP](db *AutoGqlDB, name UpdateName, implementation AutoGqlHookUpdate[U, UP]) {
 	db.Hooks[string(name)] = implementation
 }
@@ -166,12 +157,11 @@ func AddMany2ManyDeleteHook[U AutoGqlHookM2M, DP AutoGqlHookDP](db *AutoGqlDB, n
 // Add a updateHook
 // useable for
 //   - DeleteAdmin
+//   - DeleteEmployer
 //   - DeleteJob
-//   - DeleteSchool
-//   - DeleteStudent
 //   - DeleteUnapprovedJob
 //   - DeleteUnverifiedAdmin
-//   - DeleteUnverifiedSchool
+//   - DeleteUnverifiedEmployer
 func AddDeleteHook[F AutoGqlHookF, DP AutoGqlHookDP](db *AutoGqlDB, name DeleteName, implementation AutoGqlHookDelete[F, DP]) {
 	db.Hooks[string(name)] = implementation
 }
