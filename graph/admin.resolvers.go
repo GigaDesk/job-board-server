@@ -211,7 +211,7 @@ func (r *mutationResolver) RequestAdminPasswordReset(ctx context.Context, input 
 		return nil, err
 	}
 	//declare an admin variable
-	var admin *model.School
+	var admin *model.Admin
 
 	// Find the first admin that matches the input phone number from the admin table
 
@@ -302,9 +302,4 @@ func (r *queryResolver) AdminPhoneNumberExists(ctx context.Context, phoneNumber 
 	}
 
 	return phoneexists, nil
-}
-
-// GetadminProfile is the resolver for the getadminProfile field.
-func (r *queryResolver) GetadminProfile(ctx context.Context) (*model.SchoolProfile, error) {
-	panic(fmt.Errorf("not implemented: GetadminProfile - getadminProfile"))
 }
