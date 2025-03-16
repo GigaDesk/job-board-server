@@ -109,7 +109,7 @@ func (r *mutationResolver) VerifyEmployer(ctx context.Context, input model.Verif
 		return nil, errors.New("Failed to verify employer account. please try again later or contact support")
 	}
 
-	// delete the unverified school from the unverified school table
+	// delete the unverified employer from the unverified employer table
 	if err := r.Sql.Db.Delete(unverifiedemployer).Error; err != nil {
 		log.Error().Str("path", "VerifyEmployer").Int("record_id", unverifiedemployer.ID).Msg(err.Error())
 		return nil, errors.New("Failed to complete employer account verification. please try again later or contact support")
@@ -273,7 +273,7 @@ func (r *mutationResolver) ResetEmployerPassword(ctx context.Context, newPasswor
 	}
 	role := user.GetRole()
 	if role != "employer" {
-		return nil, errors.New("access to reset employer password denied. Only available for registered and logged in schools. To fix check access token!")
+		return nil, errors.New("access to reset employer password denied. Only available for registered and logged in employers. To fix check access token!")
 	}
 	id, err := user.GetID()
 
@@ -362,13 +362,13 @@ func (r *queryResolver) GetEmployerProfile(ctx context.Context) (*model.Employer
 		return nil, errors.New("access to getEmployer profile denied!")
 	}
 	role := user.GetRole()
-	if role != "employer" && role != "admin" {
-		return nil, errors.New("access to getEmployer profile denied. Only available for registered and logged in employers or administrators. To fix check access token!")
+	if role != "employer" {
+		return nil, errors.New("access to getEmployer profile denied. Only available for registered and logged in employers. To fix check access token!")
 	}
 	id, err := user.GetID()
 
 	if err != nil {
-		errors.New("could not access employer's or administrators id!")
+		errors.New("could not access employer's id!")
 	}
 
 	var employer *model.Employer
