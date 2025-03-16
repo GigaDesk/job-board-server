@@ -287,6 +287,279 @@ func (r *mutationResolver) DeleteAdmin(ctx context.Context, filter model.AdminFi
 	return res, db.Error
 }
 
+// GetEmployee is the resolver for the getEmployee field.
+func (r *queryResolver) GetEmployee(ctx context.Context, id int) (*model.Employee, error) {
+	v, okHook := r.Sql.Hooks[string(db.GetEmployee)].(db.AutoGqlHookGet[model.Employee, int])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, err = v.Received(ctx, r.Sql, id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = runtimehelper.GetPreloadSelection(ctx, db, runtimehelper.GetPreloadsMap(ctx, "Employee"))
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res model.Employee
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Employee")
+	db = db.First(&res, tableName+".id = ?", id)
+	if okHook {
+		r, err := v.AfterCallDb(ctx, &res)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+		r, err = v.BeforeReturn(ctx, &res, db)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+	}
+	return &res, db.Error
+}
+
+// QueryEmployee is the resolver for the queryEmployee field.
+func (r *queryResolver) QueryEmployee(ctx context.Context, filter *model.EmployeeFiltersInput, order *model.EmployeeOrder, first *int, offset *int, group []model.EmployeeGroup) (*model.EmployeeQueryResult, error) {
+	v, okHook := r.Sql.Hooks[string(db.QueryEmployee)].(db.AutoGqlHookQuery[model.Employee, model.EmployeeFiltersInput, model.EmployeeOrder])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, order, first, offset, err = v.Received(ctx, r.Sql, filter, order, first, offset)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res []*model.Employee
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Employee")
+	preloadSubTables := runtimehelper.GetPreloadsMap(ctx, "data").SubTables
+	if len(preloadSubTables) > 0 {
+		db = runtimehelper.GetPreloadSelection(ctx, db, preloadSubTables[0])
+	}
+	if filter != nil {
+		blackList := make(map[string]struct{})
+		sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(db, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+		db.Where(sql, arguments...)
+	}
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if order != nil {
+		if order.Asc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s asc", runtimehelper.GetQuoteChar(db), tableName, order.Asc))
+		}
+		if order.Desc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s desc", runtimehelper.GetQuoteChar(db), tableName, order.Desc))
+		}
+	}
+	var total int64
+	db.Model(res).Count(&total)
+	if first != nil {
+		db = db.Limit(*first)
+	}
+	if offset != nil {
+		db = db.Offset(*offset)
+	}
+	if len(group) > 0 {
+		garr := make([]string, len(group))
+		for i, g := range group {
+			garr[i] = fmt.Sprintf("%s.%s", tableName, xstrings.ToSnakeCase(string(g)))
+		}
+		db = db.Group(strings.Join(garr, ","))
+	}
+	db = db.Find(&res)
+	if okHook {
+		var err error
+		res, err = v.AfterCallDb(ctx, res)
+		if err != nil {
+			return nil, err
+		}
+		res, err = v.BeforeReturn(ctx, res, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &model.EmployeeQueryResult{
+		Data:       res,
+		Count:      len(res),
+		TotalCount: int(total),
+	}, db.Error
+}
+func (r *Resolver) AddEmployeePayload() AddEmployeePayloadResolver {
+	return &employeePayloadResolver[*model.AddEmployeePayload]{r}
+}
+func (r *Resolver) DeleteEmployeePayload() DeleteEmployeePayloadResolver {
+	return &employeePayloadResolver[*model.DeleteEmployeePayload]{r}
+}
+func (r *Resolver) UpdateEmployeePayload() UpdateEmployeePayloadResolver {
+	return &employeePayloadResolver[*model.UpdateEmployeePayload]{r}
+}
+
+type employeePayload interface {
+	*model.AddEmployeePayload | *model.DeleteEmployeePayload | *model.UpdateEmployeePayload
+}
+
+type employeePayloadResolver[T employeePayload] struct {
+	*Resolver
+}
+
+func (r *employeePayloadResolver[T]) Employee(ctx context.Context, obj T, filter *model.EmployeeFiltersInput, order *model.EmployeeOrder, first *int, offset *int, group []model.EmployeeGroup) (*model.EmployeeQueryResult, error) {
+	q := r.Query().(*queryResolver)
+	return q.QueryEmployee(ctx, filter, order, first, offset, group)
+}
+
+// AddEmployee is the resolver for the addEmployee field.
+func (r *mutationResolver) AddEmployee(ctx context.Context, input []*model.EmployeeInput) (*model.AddEmployeePayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.AddEmployee)].(db.AutoGqlHookAdd[model.Employee, model.EmployeeInput, model.AddEmployeePayload])
+	res := &model.AddEmployeePayload{}
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	obj := make([]model.Employee, len(input))
+	for i, v := range input {
+		obj[i] = v.MergeToType()
+	}
+	db = db.Omit(clause.Associations)
+	if okHook {
+		var err error
+		db, obj, err = v.BeforeCallDb(ctx, db, obj)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = db.Create(&obj)
+	affectedRes := make([]*model.Employee, len(obj))
+	for i, v := range obj {
+		tmp := v
+		affectedRes[i] = &tmp
+	}
+	res.Affected = affectedRes
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, obj, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// UpdateEmployee is the resolver for the updateEmployee field.
+func (r *mutationResolver) UpdateEmployee(ctx context.Context, input model.UpdateEmployeeInput) (*model.UpdateEmployeePayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.UpdateEmployee)].(db.AutoGqlHookUpdate[model.UpdateEmployeeInput, model.UpdateEmployeePayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, &input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Employee")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(input.Filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.Employee{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.Employee
+	queryDb.Find(&toChange)
+	update := input.Set.MergeToType()
+	if okHook {
+		var err error
+		db, update, err = v.BeforeCallDb(ctx, db, update)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Updates(update)
+	affectedRes := make([]*model.Employee, 0)
+	subTables := runtimehelper.GetPreloadsMap(ctx, "affected").SubTables
+	if len(subTables) > 0 {
+		if preloadMap := subTables[0]; len(preloadMap.Fields) > 0 {
+			affectedDb := runtimehelper.GetPreloadSelection(ctx, db, preloadMap)
+			affectedDb = affectedDb.Model(&obj)
+			affectedDb.Find(&affectedRes)
+		}
+	}
+
+	res := &model.UpdateEmployeePayload{
+		Count:    int(db.RowsAffected),
+		Affected: affectedRes,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// DeleteEmployee is the resolver for the deleteEmployee field.
+func (r *mutationResolver) DeleteEmployee(ctx context.Context, filter model.EmployeeFiltersInput) (*model.DeleteEmployeePayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.DeleteEmployee)].(db.AutoGqlHookDelete[model.EmployeeFiltersInput, model.DeleteEmployeePayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, err = v.Received(ctx, r.Sql, &filter)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Employee")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.Employee{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.Employee
+	queryDb.Find(&toChange)
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Delete(&obj)
+	msg := fmt.Sprintf("%d rows deleted", db.RowsAffected)
+	res := &model.DeleteEmployeePayload{
+		Count: int(db.RowsAffected),
+		Msg:   &msg,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
 // GetEmployer is the resolver for the getEmployer field.
 func (r *queryResolver) GetEmployer(ctx context.Context, id int) (*model.Employer, error) {
 	v, okHook := r.Sql.Hooks[string(db.GetEmployer)].(db.AutoGqlHookGet[model.Employer, int])
@@ -1366,6 +1639,279 @@ func (r *mutationResolver) DeleteUnverifiedAdmin(ctx context.Context, filter mod
 	db = db.Model(&obj).Where("id IN ?", ids).Delete(&obj)
 	msg := fmt.Sprintf("%d rows deleted", db.RowsAffected)
 	res := &model.DeleteUnverifiedAdminPayload{
+		Count: int(db.RowsAffected),
+		Msg:   &msg,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// GetUnverifiedEmployee is the resolver for the getUnverifiedEmployee field.
+func (r *queryResolver) GetUnverifiedEmployee(ctx context.Context, id int) (*model.UnverifiedEmployee, error) {
+	v, okHook := r.Sql.Hooks[string(db.GetUnverifiedEmployee)].(db.AutoGqlHookGet[model.UnverifiedEmployee, int])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, err = v.Received(ctx, r.Sql, id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = runtimehelper.GetPreloadSelection(ctx, db, runtimehelper.GetPreloadsMap(ctx, "UnverifiedEmployee"))
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res model.UnverifiedEmployee
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnverifiedEmployee")
+	db = db.First(&res, tableName+".id = ?", id)
+	if okHook {
+		r, err := v.AfterCallDb(ctx, &res)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+		r, err = v.BeforeReturn(ctx, &res, db)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+	}
+	return &res, db.Error
+}
+
+// QueryUnverifiedEmployee is the resolver for the queryUnverifiedEmployee field.
+func (r *queryResolver) QueryUnverifiedEmployee(ctx context.Context, filter *model.UnverifiedEmployeeFiltersInput, order *model.UnverifiedEmployeeOrder, first *int, offset *int, group []model.UnverifiedEmployeeGroup) (*model.UnverifiedEmployeeQueryResult, error) {
+	v, okHook := r.Sql.Hooks[string(db.QueryUnverifiedEmployee)].(db.AutoGqlHookQuery[model.UnverifiedEmployee, model.UnverifiedEmployeeFiltersInput, model.UnverifiedEmployeeOrder])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, order, first, offset, err = v.Received(ctx, r.Sql, filter, order, first, offset)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res []*model.UnverifiedEmployee
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnverifiedEmployee")
+	preloadSubTables := runtimehelper.GetPreloadsMap(ctx, "data").SubTables
+	if len(preloadSubTables) > 0 {
+		db = runtimehelper.GetPreloadSelection(ctx, db, preloadSubTables[0])
+	}
+	if filter != nil {
+		blackList := make(map[string]struct{})
+		sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(db, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+		db.Where(sql, arguments...)
+	}
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if order != nil {
+		if order.Asc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s asc", runtimehelper.GetQuoteChar(db), tableName, order.Asc))
+		}
+		if order.Desc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s desc", runtimehelper.GetQuoteChar(db), tableName, order.Desc))
+		}
+	}
+	var total int64
+	db.Model(res).Count(&total)
+	if first != nil {
+		db = db.Limit(*first)
+	}
+	if offset != nil {
+		db = db.Offset(*offset)
+	}
+	if len(group) > 0 {
+		garr := make([]string, len(group))
+		for i, g := range group {
+			garr[i] = fmt.Sprintf("%s.%s", tableName, xstrings.ToSnakeCase(string(g)))
+		}
+		db = db.Group(strings.Join(garr, ","))
+	}
+	db = db.Find(&res)
+	if okHook {
+		var err error
+		res, err = v.AfterCallDb(ctx, res)
+		if err != nil {
+			return nil, err
+		}
+		res, err = v.BeforeReturn(ctx, res, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &model.UnverifiedEmployeeQueryResult{
+		Data:       res,
+		Count:      len(res),
+		TotalCount: int(total),
+	}, db.Error
+}
+func (r *Resolver) AddUnverifiedEmployeePayload() AddUnverifiedEmployeePayloadResolver {
+	return &unverifiedEmployeePayloadResolver[*model.AddUnverifiedEmployeePayload]{r}
+}
+func (r *Resolver) DeleteUnverifiedEmployeePayload() DeleteUnverifiedEmployeePayloadResolver {
+	return &unverifiedEmployeePayloadResolver[*model.DeleteUnverifiedEmployeePayload]{r}
+}
+func (r *Resolver) UpdateUnverifiedEmployeePayload() UpdateUnverifiedEmployeePayloadResolver {
+	return &unverifiedEmployeePayloadResolver[*model.UpdateUnverifiedEmployeePayload]{r}
+}
+
+type unverifiedEmployeePayload interface {
+	*model.AddUnverifiedEmployeePayload | *model.DeleteUnverifiedEmployeePayload | *model.UpdateUnverifiedEmployeePayload
+}
+
+type unverifiedEmployeePayloadResolver[T unverifiedEmployeePayload] struct {
+	*Resolver
+}
+
+func (r *unverifiedEmployeePayloadResolver[T]) UnverifiedEmployee(ctx context.Context, obj T, filter *model.UnverifiedEmployeeFiltersInput, order *model.UnverifiedEmployeeOrder, first *int, offset *int, group []model.UnverifiedEmployeeGroup) (*model.UnverifiedEmployeeQueryResult, error) {
+	q := r.Query().(*queryResolver)
+	return q.QueryUnverifiedEmployee(ctx, filter, order, first, offset, group)
+}
+
+// AddUnverifiedEmployee is the resolver for the addUnverifiedEmployee field.
+func (r *mutationResolver) AddUnverifiedEmployee(ctx context.Context, input []*model.UnverifiedEmployeeInput) (*model.AddUnverifiedEmployeePayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.AddUnverifiedEmployee)].(db.AutoGqlHookAdd[model.UnverifiedEmployee, model.UnverifiedEmployeeInput, model.AddUnverifiedEmployeePayload])
+	res := &model.AddUnverifiedEmployeePayload{}
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	obj := make([]model.UnverifiedEmployee, len(input))
+	for i, v := range input {
+		obj[i] = v.MergeToType()
+	}
+	db = db.Omit(clause.Associations)
+	if okHook {
+		var err error
+		db, obj, err = v.BeforeCallDb(ctx, db, obj)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = db.Create(&obj)
+	affectedRes := make([]*model.UnverifiedEmployee, len(obj))
+	for i, v := range obj {
+		tmp := v
+		affectedRes[i] = &tmp
+	}
+	res.Affected = affectedRes
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, obj, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// UpdateUnverifiedEmployee is the resolver for the updateUnverifiedEmployee field.
+func (r *mutationResolver) UpdateUnverifiedEmployee(ctx context.Context, input model.UpdateUnverifiedEmployeeInput) (*model.UpdateUnverifiedEmployeePayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.UpdateUnverifiedEmployee)].(db.AutoGqlHookUpdate[model.UpdateUnverifiedEmployeeInput, model.UpdateUnverifiedEmployeePayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, &input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnverifiedEmployee")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(input.Filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.UnverifiedEmployee{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.UnverifiedEmployee
+	queryDb.Find(&toChange)
+	update := input.Set.MergeToType()
+	if okHook {
+		var err error
+		db, update, err = v.BeforeCallDb(ctx, db, update)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Updates(update)
+	affectedRes := make([]*model.UnverifiedEmployee, 0)
+	subTables := runtimehelper.GetPreloadsMap(ctx, "affected").SubTables
+	if len(subTables) > 0 {
+		if preloadMap := subTables[0]; len(preloadMap.Fields) > 0 {
+			affectedDb := runtimehelper.GetPreloadSelection(ctx, db, preloadMap)
+			affectedDb = affectedDb.Model(&obj)
+			affectedDb.Find(&affectedRes)
+		}
+	}
+
+	res := &model.UpdateUnverifiedEmployeePayload{
+		Count:    int(db.RowsAffected),
+		Affected: affectedRes,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// DeleteUnverifiedEmployee is the resolver for the deleteUnverifiedEmployee field.
+func (r *mutationResolver) DeleteUnverifiedEmployee(ctx context.Context, filter model.UnverifiedEmployeeFiltersInput) (*model.DeleteUnverifiedEmployeePayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.DeleteUnverifiedEmployee)].(db.AutoGqlHookDelete[model.UnverifiedEmployeeFiltersInput, model.DeleteUnverifiedEmployeePayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, err = v.Received(ctx, r.Sql, &filter)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("UnverifiedEmployee")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.UnverifiedEmployee{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.UnverifiedEmployee
+	queryDb.Find(&toChange)
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Delete(&obj)
+	msg := fmt.Sprintf("%d rows deleted", db.RowsAffected)
+	res := &model.DeleteUnverifiedEmployeePayload{
 		Count: int(db.RowsAffected),
 		Msg:   &msg,
 	}
