@@ -51,7 +51,6 @@ input NewAdmin {
 
 extend type Query {
   adminPhoneNumberExists(phone_number: String!): PhoneNumberExists!
-  getadminProfile: SchoolProfile
 }
 
 extend type Mutation {
