@@ -1,0 +1,91 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+#employer data model, only includes properties that cannot be shared
+
+type Employer @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  name: String!
+  phone_number: String!
+  password: String!
+  badge: String
+  Website: String
+}
+
+# Unverified employer data model, used to store data for newly registered employers that have not verified their phone numbers
+type UnverifiedEmployer @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  name: String!
+  phone_number: String!
+  password: String!
+  badge: String
+  Website: String
+}
+
+#Checks if an employer's phone number exists officially(completed the verification process) or temporarily (not completed the verification process)
+type PhoneNumberExists {
+  verified: Boolean!
+  unverified: Boolean!
+}
+
+#returns the status of sending an OTP code to a specific number
+type SendCodeStatus {
+  phone_number: String!
+  success: Boolean!
+}
+#returns the an employer's profile data
+type EmployerProfile {
+  id: Int!
+  createdAt: Time!
+  updatedAt: Time!
+  name: String!
+  phone_number: String!
+  badge: String
+  Website: String
+}
+#fields required by an employer to log into the system
+input EmployerLogin {
+  phone_number: String!
+  password: String!
+}
+#fields required during an employer signup process(mandatory and non-mandatory)
+input NewEmployer {
+  name: String!
+  phone_number: String!
+  password: String!
+  badge: String
+  Website: String
+}
+#fiels required when sending an OTP code
+input verificationinfo {
+  phone_number: String!
+  otp: String!
+}
+
+input RefreshTokenInput {
+  Token: String!
+}
+
+extend type Query {
+  employerPhoneNumberExists(phone_number: String!): PhoneNumberExists!
+  getEmployerProfile: EmployerProfile
+  getEmployersProfile: [EmployerProfile!]
+}
+
+extend type Mutation {
+  createEmployer(input: NewEmployer!): UnverifiedEmployer
+  verifyEmployer(input: verificationinfo!): Employer
+  sendCode(phone_number: String!): SendCodeStatus
+  employerLogin(input: EmployerLogin!): String
+  forgotEmployerPassword(phone_number: String!): SendCodeStatus
+  requestEmployerPasswordReset(input: verificationinfo): String
+  resetEmployerPassword(new_password: String!): Employer
+  refreshToken(input: RefreshTokenInput): String
+}
