@@ -111,6 +111,7 @@ func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.
 		MaxSalary:      input.MaxSalary,
 		Experience:     input.Experience,
 		Requirements:   &requirements,
+		EmployerID:     input.EmployerID,
 	}
 
 	//Create records in postgres
