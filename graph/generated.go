@@ -57,6 +57,8 @@ type ResolverRoot interface {
 	DeleteUnverifiedAdminPayload() DeleteUnverifiedAdminPayloadResolver
 	DeleteUnverifiedEmployeePayload() DeleteUnverifiedEmployeePayloadResolver
 	DeleteUnverifiedEmployerPayload() DeleteUnverifiedEmployerPayloadResolver
+	EmployerProfile() EmployerProfileResolver
+	JobProfile() JobProfileResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 	UpdateAdminPayload() UpdateAdminPayloadResolver
@@ -232,6 +234,7 @@ type ComplexityRoot struct {
 		Badge       func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
 		ID          func(childComplexity int) int
+		Jobs        func(childComplexity int) int
 		Name        func(childComplexity int) int
 		PhoneNumber func(childComplexity int) int
 		UpdatedAt   func(childComplexity int) int
@@ -269,6 +272,7 @@ type ComplexityRoot struct {
 		DeletedAt      func(childComplexity int) int
 		Description    func(childComplexity int) int
 		EducationLevel func(childComplexity int) int
+		Employer       func(childComplexity int) int
 		Experience     func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Industry       func(childComplexity int) int
@@ -556,6 +560,12 @@ type DeleteUnverifiedEmployeePayloadResolver interface {
 }
 type DeleteUnverifiedEmployerPayloadResolver interface {
 	UnverifiedEmployer(ctx context.Context, obj *model.DeleteUnverifiedEmployerPayload, filter *model.UnverifiedEmployerFiltersInput, order *model.UnverifiedEmployerOrder, first *int, offset *int, group []model.UnverifiedEmployerGroup) (*model.UnverifiedEmployerQueryResult, error)
+}
+type EmployerProfileResolver interface {
+	Jobs(ctx context.Context, obj *model.EmployerProfile) ([]*model.JobProfile, error)
+}
+type JobProfileResolver interface {
+	Employer(ctx context.Context, obj *model.JobProfile) (*model.EmployerProfile, error)
 }
 type MutationResolver interface {
 	CreateDummy(ctx context.Context, name string) (*model.Dummy, error)
@@ -1368,6 +1378,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EmployerProfile.ID(childComplexity), true
 
+	case "EmployerProfile.jobs":
+		if e.complexity.EmployerProfile.Jobs == nil {
+			break
+		}
+
+		return e.complexity.EmployerProfile.Jobs(childComplexity), true
+
 	case "EmployerProfile.name":
 		if e.complexity.EmployerProfile.Name == nil {
 			break
@@ -1563,6 +1580,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.JobProfile.EducationLevel(childComplexity), true
+
+	case "JobProfile.employer":
+		if e.complexity.JobProfile.Employer == nil {
+			break
+		}
+
+		return e.complexity.JobProfile.Employer(childComplexity), true
 
 	case "JobProfile.experience":
 		if e.complexity.JobProfile.Experience == nil {
@@ -13880,6 +13904,81 @@ func (ec *executionContext) fieldContext_EmployerProfile_Website(_ context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _EmployerProfile_jobs(ctx context.Context, field graphql.CollectedField, obj *model.EmployerProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EmployerProfile_jobs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.EmployerProfile().Jobs(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.JobProfile)
+	fc.Result = res
+	return ec.marshalOJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EmployerProfile_jobs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EmployerProfile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_JobProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_JobProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_JobProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_JobProfile_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_JobProfile_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_JobProfile_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_JobProfile_description(ctx, field)
+			case "level":
+				return ec.fieldContext_JobProfile_level(ctx, field)
+			case "location":
+				return ec.fieldContext_JobProfile_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_JobProfile_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_JobProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_JobProfile_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_JobProfile_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _EmployerQueryResult_data(ctx context.Context, field graphql.CollectedField, obj *model.EmployerQueryResult) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EmployerQueryResult_data(ctx, field)
 	if err != nil {
@@ -15328,6 +15427,65 @@ func (ec *executionContext) fieldContext_JobProfile_requirements(_ context.Conte
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _JobProfile_employer(ctx context.Context, field graphql.CollectedField, obj *model.JobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_JobProfile_employer(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.JobProfile().Employer(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.EmployerProfile)
+	fc.Result = res
+	return ec.marshalOEmployerProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐEmployerProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_JobProfile_employer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JobProfile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EmployerProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EmployerProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_EmployerProfile_updatedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_EmployerProfile_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_EmployerProfile_phone_number(ctx, field)
+			case "badge":
+				return ec.fieldContext_EmployerProfile_badge(ctx, field)
+			case "Website":
+				return ec.fieldContext_EmployerProfile_Website(ctx, field)
+			case "jobs":
+				return ec.fieldContext_EmployerProfile_jobs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EmployerProfile", field.Name)
 		},
 	}
 	return fc, nil
@@ -16852,6 +17010,8 @@ func (ec *executionContext) fieldContext_Mutation_createJob(ctx context.Context,
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -16939,6 +17099,8 @@ func (ec *executionContext) fieldContext_Mutation_createUnapprovedJob(ctx contex
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -17026,6 +17188,8 @@ func (ec *executionContext) fieldContext_Mutation_approveJob(ctx context.Context
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -17113,6 +17277,8 @@ func (ec *executionContext) fieldContext_Mutation_editJob(ctx context.Context, f
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -17200,6 +17366,8 @@ func (ec *executionContext) fieldContext_Mutation_removeJob(ctx context.Context,
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -17287,6 +17455,8 @@ func (ec *executionContext) fieldContext_Mutation_removeUnapprovedJob(ctx contex
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -19268,6 +19438,8 @@ func (ec *executionContext) fieldContext_Query_getEmployerProfile(_ context.Cont
 				return ec.fieldContext_EmployerProfile_badge(ctx, field)
 			case "Website":
 				return ec.fieldContext_EmployerProfile_Website(ctx, field)
+			case "jobs":
+				return ec.fieldContext_EmployerProfile_jobs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmployerProfile", field.Name)
 		},
@@ -19325,6 +19497,8 @@ func (ec *executionContext) fieldContext_Query_getEmployersProfile(_ context.Con
 				return ec.fieldContext_EmployerProfile_badge(ctx, field)
 			case "Website":
 				return ec.fieldContext_EmployerProfile_Website(ctx, field)
+			case "jobs":
+				return ec.fieldContext_EmployerProfile_jobs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmployerProfile", field.Name)
 		},
@@ -19385,6 +19559,8 @@ func (ec *executionContext) fieldContext_Query_findEmployer(ctx context.Context,
 				return ec.fieldContext_EmployerProfile_badge(ctx, field)
 			case "Website":
 				return ec.fieldContext_EmployerProfile_Website(ctx, field)
+			case "jobs":
+				return ec.fieldContext_EmployerProfile_jobs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmployerProfile", field.Name)
 		},
@@ -19469,6 +19645,8 @@ func (ec *executionContext) fieldContext_Query_getJobs(_ context.Context, field 
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -19545,6 +19723,8 @@ func (ec *executionContext) fieldContext_Query_findJob(ctx context.Context, fiel
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -19629,6 +19809,8 @@ func (ec *executionContext) fieldContext_Query_getUnapprovedJobs(_ context.Conte
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -19705,6 +19887,8 @@ func (ec *executionContext) fieldContext_Query_findUnapprovedJob(ctx context.Con
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -31951,32 +32135,65 @@ func (ec *executionContext) _EmployerProfile(ctx context.Context, sel ast.Select
 		case "id":
 			out.Values[i] = ec._EmployerProfile_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "createdAt":
 			out.Values[i] = ec._EmployerProfile_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "updatedAt":
 			out.Values[i] = ec._EmployerProfile_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._EmployerProfile_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "phone_number":
 			out.Values[i] = ec._EmployerProfile_phone_number(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "badge":
 			out.Values[i] = ec._EmployerProfile_badge(ctx, field, obj)
 		case "Website":
 			out.Values[i] = ec._EmployerProfile_Website(ctx, field, obj)
+		case "jobs":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EmployerProfile_jobs(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -32144,31 +32361,31 @@ func (ec *executionContext) _JobProfile(ctx context.Context, sel ast.SelectionSe
 		case "id":
 			out.Values[i] = ec._JobProfile_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "createdAt":
 			out.Values[i] = ec._JobProfile_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "updatedAt":
 			out.Values[i] = ec._JobProfile_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "deletedAt":
 			out.Values[i] = ec._JobProfile_deletedAt(ctx, field, obj)
 		case "title":
 			out.Values[i] = ec._JobProfile_title(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "industry":
 			out.Values[i] = ec._JobProfile_industry(ctx, field, obj)
 		case "description":
 			out.Values[i] = ec._JobProfile_description(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "level":
 			out.Values[i] = ec._JobProfile_level(ctx, field, obj)
@@ -32186,6 +32403,39 @@ func (ec *executionContext) _JobProfile(ctx context.Context, sel ast.SelectionSe
 			out.Values[i] = ec._JobProfile_maxSalary(ctx, field, obj)
 		case "requirements":
 			out.Values[i] = ec._JobProfile_requirements(ctx, field, obj)
+		case "employer":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._JobProfile_employer(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -37118,6 +37368,47 @@ func (ec *executionContext) marshalOJobOrderable2ᚖgithubᚗcomᚋGigaDeskᚋea
 	return v
 }
 
+func (ec *executionContext) marshalOJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx context.Context, sel ast.SelectionSet, v []*model.JobProfile) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
 func (ec *executionContext) marshalOJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.JobProfile) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -37163,6 +37454,13 @@ func (ec *executionContext) marshalOJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋe
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalOJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx context.Context, sel ast.SelectionSet, v *model.JobProfile) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._JobProfile(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobQueryResult(ctx context.Context, sel ast.SelectionSet, v *model.JobQueryResult) graphql.Marshaler {
