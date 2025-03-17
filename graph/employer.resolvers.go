@@ -420,3 +420,32 @@ func (r *queryResolver) GetEmployersProfile(ctx context.Context) ([]*model.Emplo
 
 	return employersprofile, nil
 }
+
+// FindEmployer is the resolver for the findEmployer field.
+func (r *queryResolver) FindEmployer(ctx context.Context, id int) (*model.EmployerProfile, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+
+	//declare an employer variable
+	var employer *model.Employer
+
+	// Find the first employer that matches the input id from the employer table
+	if err := r.Sql.Db.Where("id = ?", id).First(&employer).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "FindEmployer").Msg("id does not exist")
+		return nil, errors.New("error finding employer with id: " + strconv.Itoa(id))
+	}
+
+	employerprofile := &model.EmployerProfile{
+		ID:          employer.ID,
+		CreatedAt:   employer.CreatedAt,
+		UpdatedAt:   employer.UpdatedAt,
+		Name:        employer.Name,
+		PhoneNumber: employer.PhoneNumber,
+		Badge:       employer.Badge,
+		Website:     employer.Website,
+	}
+
+	return employerprofile, nil
+}
