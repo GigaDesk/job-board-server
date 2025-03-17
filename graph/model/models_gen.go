@@ -422,6 +422,7 @@ type Job struct {
 	MinSalary      *int                      `json:"minSalary,omitempty"`
 	MaxSalary      *int                      `json:"maxSalary,omitempty"`
 	Requirements   *string                   `json:"requirements,omitempty"`
+	EmployerID     *int                      `json:"employerID,omitempty"`
 }
 
 // Filter input selection for Job
@@ -441,6 +442,7 @@ type JobFiltersInput struct {
 	MinSalary      *IntFilterInput    `json:"minSalary,omitempty"`
 	MaxSalary      *IntFilterInput    `json:"maxSalary,omitempty"`
 	Requirements   *StringFilterInput `json:"requirements,omitempty"`
+	EmployerID     *IntFilterInput    `json:"employerID,omitempty"`
 	And            []*JobFiltersInput `json:"and,omitempty"`
 	Or             []*JobFiltersInput `json:"or,omitempty"`
 	Not            *JobFiltersInput   `json:"not,omitempty"`
@@ -459,6 +461,7 @@ type JobInput struct {
 	MinSalary      *int       `json:"minSalary,omitempty"`
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   *string    `json:"requirements,omitempty"`
+	EmployerID     *int       `json:"employerID,omitempty"`
 }
 
 // Order Job by asc or desc
@@ -480,6 +483,7 @@ type JobPatch struct {
 	MinSalary      *int       `json:"minSalary,omitempty"`
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   *string    `json:"requirements,omitempty"`
+	EmployerID     *int       `json:"employerID,omitempty"`
 }
 
 type JobProfile struct {
@@ -543,6 +547,7 @@ type NewJob struct {
 	MinSalary      *int       `json:"minSalary,omitempty"`
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   []string   `json:"requirements,omitempty"`
+	EmployerID     *int       `json:"employerID,omitempty"`
 }
 
 type PhoneNumberExists struct {
@@ -658,6 +663,7 @@ type UnapprovedJob struct {
 	MinSalary      *int                      `json:"minSalary,omitempty"`
 	MaxSalary      *int                      `json:"maxSalary,omitempty"`
 	Requirements   *string                   `json:"requirements,omitempty"`
+	EmployerID     *int                      `json:"employerID,omitempty"`
 }
 
 // Filter input selection for UnapprovedJob
@@ -677,6 +683,7 @@ type UnapprovedJobFiltersInput struct {
 	MinSalary      *IntFilterInput              `json:"minSalary,omitempty"`
 	MaxSalary      *IntFilterInput              `json:"maxSalary,omitempty"`
 	Requirements   *StringFilterInput           `json:"requirements,omitempty"`
+	EmployerID     *IntFilterInput              `json:"employerID,omitempty"`
 	And            []*UnapprovedJobFiltersInput `json:"and,omitempty"`
 	Or             []*UnapprovedJobFiltersInput `json:"or,omitempty"`
 	Not            *UnapprovedJobFiltersInput   `json:"not,omitempty"`
@@ -695,6 +702,7 @@ type UnapprovedJobInput struct {
 	MinSalary      *int       `json:"minSalary,omitempty"`
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   *string    `json:"requirements,omitempty"`
+	EmployerID     *int       `json:"employerID,omitempty"`
 }
 
 // Order UnapprovedJob by asc or desc
@@ -716,6 +724,7 @@ type UnapprovedJobPatch struct {
 	MinSalary      *int       `json:"minSalary,omitempty"`
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   *string    `json:"requirements,omitempty"`
+	EmployerID     *int       `json:"employerID,omitempty"`
 }
 
 // UnapprovedJob result
@@ -1332,6 +1341,7 @@ const (
 	JobGroupMinSalary      JobGroup = "minSalary"
 	JobGroupMaxSalary      JobGroup = "maxSalary"
 	JobGroupRequirements   JobGroup = "requirements"
+	JobGroupEmployerID     JobGroup = "employerID"
 )
 
 var AllJobGroup = []JobGroup{
@@ -1349,11 +1359,12 @@ var AllJobGroup = []JobGroup{
 	JobGroupMinSalary,
 	JobGroupMaxSalary,
 	JobGroupRequirements,
+	JobGroupEmployerID,
 }
 
 func (e JobGroup) IsValid() bool {
 	switch e {
-	case JobGroupID, JobGroupCreatedAt, JobGroupUpdatedAt, JobGroupTitle, JobGroupIndustry, JobGroupDescription, JobGroupLevel, JobGroupLocation, JobGroupDeadline, JobGroupEducationLevel, JobGroupExperience, JobGroupMinSalary, JobGroupMaxSalary, JobGroupRequirements:
+	case JobGroupID, JobGroupCreatedAt, JobGroupUpdatedAt, JobGroupTitle, JobGroupIndustry, JobGroupDescription, JobGroupLevel, JobGroupLocation, JobGroupDeadline, JobGroupEducationLevel, JobGroupExperience, JobGroupMinSalary, JobGroupMaxSalary, JobGroupRequirements, JobGroupEmployerID:
 		return true
 	}
 	return false
@@ -1396,6 +1407,7 @@ const (
 	JobOrderableMinSalary      JobOrderable = "minSalary"
 	JobOrderableMaxSalary      JobOrderable = "maxSalary"
 	JobOrderableRequirements   JobOrderable = "requirements"
+	JobOrderableEmployerID     JobOrderable = "employerID"
 )
 
 var AllJobOrderable = []JobOrderable{
@@ -1410,11 +1422,12 @@ var AllJobOrderable = []JobOrderable{
 	JobOrderableMinSalary,
 	JobOrderableMaxSalary,
 	JobOrderableRequirements,
+	JobOrderableEmployerID,
 }
 
 func (e JobOrderable) IsValid() bool {
 	switch e {
-	case JobOrderableID, JobOrderableTitle, JobOrderableIndustry, JobOrderableDescription, JobOrderableLevel, JobOrderableLocation, JobOrderableEducationLevel, JobOrderableExperience, JobOrderableMinSalary, JobOrderableMaxSalary, JobOrderableRequirements:
+	case JobOrderableID, JobOrderableTitle, JobOrderableIndustry, JobOrderableDescription, JobOrderableLevel, JobOrderableLocation, JobOrderableEducationLevel, JobOrderableExperience, JobOrderableMinSalary, JobOrderableMaxSalary, JobOrderableRequirements, JobOrderableEmployerID:
 		return true
 	}
 	return false
@@ -1460,6 +1473,7 @@ const (
 	UnapprovedJobGroupMinSalary      UnapprovedJobGroup = "minSalary"
 	UnapprovedJobGroupMaxSalary      UnapprovedJobGroup = "maxSalary"
 	UnapprovedJobGroupRequirements   UnapprovedJobGroup = "requirements"
+	UnapprovedJobGroupEmployerID     UnapprovedJobGroup = "employerID"
 )
 
 var AllUnapprovedJobGroup = []UnapprovedJobGroup{
@@ -1477,11 +1491,12 @@ var AllUnapprovedJobGroup = []UnapprovedJobGroup{
 	UnapprovedJobGroupMinSalary,
 	UnapprovedJobGroupMaxSalary,
 	UnapprovedJobGroupRequirements,
+	UnapprovedJobGroupEmployerID,
 }
 
 func (e UnapprovedJobGroup) IsValid() bool {
 	switch e {
-	case UnapprovedJobGroupID, UnapprovedJobGroupCreatedAt, UnapprovedJobGroupUpdatedAt, UnapprovedJobGroupTitle, UnapprovedJobGroupIndustry, UnapprovedJobGroupDescription, UnapprovedJobGroupLevel, UnapprovedJobGroupLocation, UnapprovedJobGroupDeadline, UnapprovedJobGroupEducationLevel, UnapprovedJobGroupExperience, UnapprovedJobGroupMinSalary, UnapprovedJobGroupMaxSalary, UnapprovedJobGroupRequirements:
+	case UnapprovedJobGroupID, UnapprovedJobGroupCreatedAt, UnapprovedJobGroupUpdatedAt, UnapprovedJobGroupTitle, UnapprovedJobGroupIndustry, UnapprovedJobGroupDescription, UnapprovedJobGroupLevel, UnapprovedJobGroupLocation, UnapprovedJobGroupDeadline, UnapprovedJobGroupEducationLevel, UnapprovedJobGroupExperience, UnapprovedJobGroupMinSalary, UnapprovedJobGroupMaxSalary, UnapprovedJobGroupRequirements, UnapprovedJobGroupEmployerID:
 		return true
 	}
 	return false
@@ -1524,6 +1539,7 @@ const (
 	UnapprovedJobOrderableMinSalary      UnapprovedJobOrderable = "minSalary"
 	UnapprovedJobOrderableMaxSalary      UnapprovedJobOrderable = "maxSalary"
 	UnapprovedJobOrderableRequirements   UnapprovedJobOrderable = "requirements"
+	UnapprovedJobOrderableEmployerID     UnapprovedJobOrderable = "employerID"
 )
 
 var AllUnapprovedJobOrderable = []UnapprovedJobOrderable{
@@ -1538,11 +1554,12 @@ var AllUnapprovedJobOrderable = []UnapprovedJobOrderable{
 	UnapprovedJobOrderableMinSalary,
 	UnapprovedJobOrderableMaxSalary,
 	UnapprovedJobOrderableRequirements,
+	UnapprovedJobOrderableEmployerID,
 }
 
 func (e UnapprovedJobOrderable) IsValid() bool {
 	switch e {
-	case UnapprovedJobOrderableID, UnapprovedJobOrderableTitle, UnapprovedJobOrderableIndustry, UnapprovedJobOrderableDescription, UnapprovedJobOrderableLevel, UnapprovedJobOrderableLocation, UnapprovedJobOrderableEducationLevel, UnapprovedJobOrderableExperience, UnapprovedJobOrderableMinSalary, UnapprovedJobOrderableMaxSalary, UnapprovedJobOrderableRequirements:
+	case UnapprovedJobOrderableID, UnapprovedJobOrderableTitle, UnapprovedJobOrderableIndustry, UnapprovedJobOrderableDescription, UnapprovedJobOrderableLevel, UnapprovedJobOrderableLocation, UnapprovedJobOrderableEducationLevel, UnapprovedJobOrderableExperience, UnapprovedJobOrderableMinSalary, UnapprovedJobOrderableMaxSalary, UnapprovedJobOrderableRequirements, UnapprovedJobOrderableEmployerID:
 		return true
 	}
 	return false

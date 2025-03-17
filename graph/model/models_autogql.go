@@ -235,6 +235,9 @@ func (d *JobPatch) MergeToType() map[string]interface{} {
 	if d.Requirements != nil {
 		res["requirements"] = d.Requirements
 	}
+	if d.EmployerID != nil {
+		res["employer_id"] = d.EmployerID
+	}
 	return res
 }
 
@@ -289,6 +292,11 @@ func (d *JobInput) MergeToType() Job {
 	if d.Requirements != nil {
 		tmpRequirements = d.Requirements
 	}
+
+	var tmpEmployerID *int
+	if d.EmployerID != nil {
+		tmpEmployerID = d.EmployerID
+	}
 	return Job{
 		Title:          tmpTitle,
 		Industry:       tmpIndustry,
@@ -301,6 +309,7 @@ func (d *JobInput) MergeToType() Job {
 		MinSalary:      tmpMinSalary,
 		MaxSalary:      tmpMaxSalary,
 		Requirements:   tmpRequirements,
+		EmployerID:     tmpEmployerID,
 	}
 }
 
@@ -347,6 +356,9 @@ func (d *UnapprovedJobPatch) MergeToType() map[string]interface{} {
 	}
 	if d.Requirements != nil {
 		res["requirements"] = d.Requirements
+	}
+	if d.EmployerID != nil {
+		res["employer_id"] = d.EmployerID
 	}
 	return res
 }
@@ -402,6 +414,11 @@ func (d *UnapprovedJobInput) MergeToType() UnapprovedJob {
 	if d.Requirements != nil {
 		tmpRequirements = d.Requirements
 	}
+
+	var tmpEmployerID *int
+	if d.EmployerID != nil {
+		tmpEmployerID = d.EmployerID
+	}
 	return UnapprovedJob{
 		Title:          tmpTitle,
 		Industry:       tmpIndustry,
@@ -414,6 +431,7 @@ func (d *UnapprovedJobInput) MergeToType() UnapprovedJob {
 		MinSalary:      tmpMinSalary,
 		MaxSalary:      tmpMaxSalary,
 		Requirements:   tmpRequirements,
+		EmployerID:     tmpEmployerID,
 	}
 }
 

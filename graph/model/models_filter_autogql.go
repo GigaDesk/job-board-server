@@ -241,6 +241,9 @@ func (d *JobFiltersInput) ExtendsDatabaseQuery(db *gorm.DB, alias string, deep b
 	if d.Requirements != nil {
 		res = append(res, d.Requirements.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "requirements"), true, blackList)...)
 	}
+	if d.EmployerID != nil {
+		res = append(res, d.EmployerID.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "employer_id"), true, blackList)...)
+	}
 
 	return res
 }
@@ -314,6 +317,9 @@ func (d *UnapprovedJobFiltersInput) ExtendsDatabaseQuery(db *gorm.DB, alias stri
 	}
 	if d.Requirements != nil {
 		res = append(res, d.Requirements.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "requirements"), true, blackList)...)
+	}
+	if d.EmployerID != nil {
+		res = append(res, d.EmployerID.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "employer_id"), true, blackList)...)
 	}
 
 	return res
