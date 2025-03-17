@@ -49,6 +49,7 @@ type EmployerProfile {
   phone_number: String!
   badge: String
   Website: String
+  jobs: [JobProfile]
 }
 #fields required by an employer to log into the system
 input EmployerLogin {
