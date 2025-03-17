@@ -17,6 +17,42 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// Employer is the resolver for the employer field.
+func (r *jobProfileResolver) Employer(ctx context.Context, obj *model.JobProfile) (*model.EmployerProfile, error) {
+	// declare a job variable
+	var job *model.Job
+
+	// Find the first job that matches the id from the job profile
+	if err := r.Sql.Db.Where("id = ?", obj.ID).First(&job).Error; err != nil {
+		log.Info().Int("id", obj.ID).Str("object", "JobProfile").Msg("job with id does not exist")
+		return nil, errors.New("error finding job with id: " + strconv.Itoa(obj.ID))
+	}
+
+	if job.EmployerID != nil {
+		//declare an employer variable
+		var employer *model.Employer
+
+		if err := r.Sql.Db.Where("id = ?", job.EmployerID).First(&employer).Error; err != nil {
+			log.Info().Int("id", *job.EmployerID).Str("object", "JobProfile").Msg("employer with id does not exist")
+			return nil, errors.New("error finding employer with id: " + strconv.Itoa(*job.EmployerID))
+		}
+
+		employerprofile := &model.EmployerProfile{
+			ID:          employer.ID,
+			CreatedAt:   employer.CreatedAt,
+			UpdatedAt:   employer.UpdatedAt,
+			Name:        employer.Name,
+			PhoneNumber: employer.PhoneNumber,
+			Badge:       employer.Badge,
+			Website:     employer.Website,
+		}
+
+		return employerprofile, nil
+	}
+
+	return nil, nil
+}
+
 // CreateJob is the resolver for the CreateJob field.
 func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*model.JobProfile, error) {
 	//check if system is in shutdown mode
@@ -587,3 +623,8 @@ func (r *queryResolver) FindUnapprovedJob(ctx context.Context, id int) (*model.J
 
 	return jobprofile, nil
 }
+
+// JobProfile returns JobProfileResolver implementation.
+func (r *Resolver) JobProfile() JobProfileResolver { return &jobProfileResolver{r} }
+
+type jobProfileResolver struct{ *Resolver }

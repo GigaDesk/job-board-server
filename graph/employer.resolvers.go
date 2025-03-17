@@ -9,7 +9,9 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
+	"github.com/AlekSi/pointer"
 	"github.com/GigaDesk/eardrum-prefix/validate"
 	"github.com/GigaDesk/eardrum-server/auth"
 	"github.com/GigaDesk/eardrum-server/encrypt"
@@ -19,6 +21,39 @@ import (
 	"github.com/GigaDesk/eardrum-server/shutdown"
 	"github.com/rs/zerolog/log"
 )
+
+// Jobs is the resolver for the jobs field.
+func (r *employerProfileResolver) Jobs(ctx context.Context, obj *model.EmployerProfile) ([]*model.JobProfile, error) {
+	var jobs []model.Job
+	if err := r.Sql.Db.Where("employer_id = ?", obj.ID).Find(&jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("could not access jobs!")
+	}
+	var jobprofiles []*model.JobProfile
+
+	for _, job := range jobs {
+		jobprofile := &model.JobProfile{
+			ID:             job.ID,
+			CreatedAt:      job.CreatedAt,
+			UpdatedAt:      job.UpdatedAt,
+			DeletedAt:      job.DeletedAt,
+			Title:          job.Title,
+			Industry:       job.Industry,
+			Description:    job.Description,
+			Level:          job.Level,
+			Location:       job.Location,
+			Deadline:       job.Deadline,
+			EducationLevel: job.EducationLevel,
+			MinSalary:      job.MinSalary,
+			MaxSalary:      job.MaxSalary,
+			Experience:     job.Experience,
+			Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
+		}
+		jobprofiles = append(jobprofiles, jobprofile)
+	}
+
+	return jobprofiles, nil
+}
 
 // CreateEmployer is the resolver for the createEmployer field, signs up an employer to the system
 func (r *mutationResolver) CreateEmployer(ctx context.Context, input model.NewEmployer) (*model.UnverifiedEmployer, error) {
@@ -449,3 +484,8 @@ func (r *queryResolver) FindEmployer(ctx context.Context, id int) (*model.Employ
 
 	return employerprofile, nil
 }
+
+// EmployerProfile returns EmployerProfileResolver implementation.
+func (r *Resolver) EmployerProfile() EmployerProfileResolver { return &employerProfileResolver{r} }
+
+type employerProfileResolver struct{ *Resolver }
