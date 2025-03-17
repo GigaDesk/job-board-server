@@ -77,6 +77,7 @@ extend type Query {
   employerPhoneNumberExists(phone_number: String!): PhoneNumberExists!
   getEmployerProfile: EmployerProfile
   getEmployersProfile: [EmployerProfile!]
+  findEmployer(id: Int!): EmployerProfile!
 }
 
 extend type Mutation {
