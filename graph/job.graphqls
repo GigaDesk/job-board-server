@@ -14,6 +14,7 @@ type Job @SQL {
   minSalary: Int
   maxSalary: Int
   requirements: String
+  employerID: Int
 }
 
 type UnapprovedJob @SQL {
@@ -32,6 +33,7 @@ type UnapprovedJob @SQL {
   minSalary: Int
   maxSalary: Int
   requirements: String
+  employerID: Int
 }
 
 type JobProfile{
@@ -64,6 +66,7 @@ input NewJob {
   minSalary: Int
   maxSalary: Int
   requirements: [String!]
+  employerID: Int
 }
 
 extend type Query {
