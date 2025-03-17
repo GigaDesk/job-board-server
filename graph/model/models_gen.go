@@ -329,13 +329,14 @@ type EmployerPatch struct {
 }
 
 type EmployerProfile struct {
-	ID          int       `json:"id"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	Name        string    `json:"name"`
-	PhoneNumber string    `json:"phone_number"`
-	Badge       *string   `json:"badge,omitempty"`
-	Website     *string   `json:"Website,omitempty"`
+	ID          int           `json:"id"`
+	CreatedAt   time.Time     `json:"createdAt"`
+	UpdatedAt   time.Time     `json:"updatedAt"`
+	Name        string        `json:"name"`
+	PhoneNumber string        `json:"phone_number"`
+	Badge       *string       `json:"badge,omitempty"`
+	Website     *string       `json:"Website,omitempty"`
+	Jobs        []*JobProfile `json:"jobs,omitempty"`
 }
 
 // Employer result
@@ -502,6 +503,7 @@ type JobProfile struct {
 	MinSalary      *int                      `json:"minSalary,omitempty"`
 	MaxSalary      *int                      `json:"maxSalary,omitempty"`
 	Requirements   []string                  `json:"requirements,omitempty"`
+	Employer       *EmployerProfile          `json:"employer,omitempty"`
 }
 
 // Job result

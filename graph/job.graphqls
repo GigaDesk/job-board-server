@@ -52,6 +52,7 @@ type JobProfile{
   minSalary: Int
   maxSalary: Int
   requirements: [String!]
+  employer: EmployerProfile
 }
 
 input NewJob {

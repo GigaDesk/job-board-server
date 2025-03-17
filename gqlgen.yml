@@ -95,3 +95,11 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  JobProfile:
+    fields:
+      employer:
+        resolver: true
+  EmployerProfile:
+    fields:
+      jobs:
+        resolver: true
