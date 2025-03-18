@@ -36,7 +36,7 @@ type UnapprovedJob @SQL {
   employerID: Int
 }
 
-type JobProfile{
+type JobProfile {
   id: Int!
   createdAt: Time!
   updatedAt: Time!
@@ -70,10 +70,16 @@ input NewJob {
   employerID: Int
 }
 
+input JobsFilterParameters {
+  educationLevel: String
+  industry: String
+  experience: Int
+}
+
 extend type Query {
-  getJobs: [JobProfile!]
+  getJobs(filterparameters: JobsFilterParameters): [JobProfile!]
   findJob(id: Int!): JobProfile!
-  getUnapprovedJobs: [JobProfile!]
+  getUnapprovedJobs(filterparameters: JobsFilterParameters): [JobProfile!]
   findUnapprovedJob(id: Int!): JobProfile!
 }
 
@@ -81,7 +87,7 @@ extend type Mutation {
   createJob(input: NewJob!): JobProfile!
   createUnapprovedJob(input: NewJob!): JobProfile!
   approveJob(id: Int!): JobProfile!
-  editJob(id:Int!, input: NewJob!): JobProfile!
+  editJob(id: Int!, input: NewJob!): JobProfile!
   removeJob(id: Int!): JobProfile!
   removeUnapprovedJob(id: Int!): JobProfile!
 }
