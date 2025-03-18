@@ -142,7 +142,7 @@ func (r *mutationResolver) EmployeeLogin(ctx context.Context, input model.Employ
 	}
 
 	//declare an employee variable
-	var employee *model.Employer
+	var employee *model.Employee
 	// Find the first employee that matches the input phone number from the employee table
 
 	if err := r.Sql.Db.Where("phone_number = ?", input.PhoneNumber).First(&employee).Error; err != nil {
