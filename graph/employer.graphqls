@@ -50,6 +50,7 @@ type EmployerProfile {
   badge: String
   Website: String
   jobs: [JobProfile]
+  unapprovedJobs: [UnapprovedJobProfile]
 }
 #fields required by an employer to log into the system
 input EmployerLogin {
