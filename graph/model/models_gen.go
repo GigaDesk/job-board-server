@@ -424,6 +424,7 @@ type Job struct {
 	MaxSalary      *int                      `json:"maxSalary,omitempty"`
 	Requirements   *string                   `json:"requirements,omitempty"`
 	EmployerID     *int                      `json:"employerID,omitempty"`
+	JobURL         *string                   `json:"jobUrl,omitempty"`
 }
 
 // Filter input selection for Job
@@ -444,6 +445,7 @@ type JobFiltersInput struct {
 	MaxSalary      *IntFilterInput    `json:"maxSalary,omitempty"`
 	Requirements   *StringFilterInput `json:"requirements,omitempty"`
 	EmployerID     *IntFilterInput    `json:"employerID,omitempty"`
+	JobURL         *StringFilterInput `json:"jobUrl,omitempty"`
 	And            []*JobFiltersInput `json:"and,omitempty"`
 	Or             []*JobFiltersInput `json:"or,omitempty"`
 	Not            *JobFiltersInput   `json:"not,omitempty"`
@@ -463,6 +465,7 @@ type JobInput struct {
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   *string    `json:"requirements,omitempty"`
 	EmployerID     *int       `json:"employerID,omitempty"`
+	JobURL         *string    `json:"jobUrl,omitempty"`
 }
 
 // Order Job by asc or desc
@@ -485,6 +488,7 @@ type JobPatch struct {
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   *string    `json:"requirements,omitempty"`
 	EmployerID     *int       `json:"employerID,omitempty"`
+	JobURL         *string    `json:"jobUrl,omitempty"`
 }
 
 type JobProfile struct {
@@ -503,6 +507,7 @@ type JobProfile struct {
 	MinSalary      *int                      `json:"minSalary,omitempty"`
 	MaxSalary      *int                      `json:"maxSalary,omitempty"`
 	Requirements   []string                  `json:"requirements,omitempty"`
+	JobURL         *string                   `json:"jobUrl,omitempty"`
 	Employer       *EmployerProfile          `json:"employer,omitempty"`
 }
 
@@ -555,6 +560,7 @@ type NewJob struct {
 	MinSalary      *int       `json:"minSalary,omitempty"`
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   []string   `json:"requirements,omitempty"`
+	JobURL         *string    `json:"jobUrl,omitempty"`
 }
 
 type PhoneNumberExists struct {
@@ -671,6 +677,7 @@ type UnapprovedJob struct {
 	MaxSalary      *int                      `json:"maxSalary,omitempty"`
 	Requirements   *string                   `json:"requirements,omitempty"`
 	EmployerID     *int                      `json:"employerID,omitempty"`
+	JobURL         *string                   `json:"jobUrl,omitempty"`
 }
 
 // Filter input selection for UnapprovedJob
@@ -691,6 +698,7 @@ type UnapprovedJobFiltersInput struct {
 	MaxSalary      *IntFilterInput              `json:"maxSalary,omitempty"`
 	Requirements   *StringFilterInput           `json:"requirements,omitempty"`
 	EmployerID     *IntFilterInput              `json:"employerID,omitempty"`
+	JobURL         *StringFilterInput           `json:"jobUrl,omitempty"`
 	And            []*UnapprovedJobFiltersInput `json:"and,omitempty"`
 	Or             []*UnapprovedJobFiltersInput `json:"or,omitempty"`
 	Not            *UnapprovedJobFiltersInput   `json:"not,omitempty"`
@@ -710,6 +718,7 @@ type UnapprovedJobInput struct {
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   *string    `json:"requirements,omitempty"`
 	EmployerID     *int       `json:"employerID,omitempty"`
+	JobURL         *string    `json:"jobUrl,omitempty"`
 }
 
 // Order UnapprovedJob by asc or desc
@@ -732,6 +741,7 @@ type UnapprovedJobPatch struct {
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   *string    `json:"requirements,omitempty"`
 	EmployerID     *int       `json:"employerID,omitempty"`
+	JobURL         *string    `json:"jobUrl,omitempty"`
 }
 
 // UnapprovedJob result
@@ -1349,6 +1359,7 @@ const (
 	JobGroupMaxSalary      JobGroup = "maxSalary"
 	JobGroupRequirements   JobGroup = "requirements"
 	JobGroupEmployerID     JobGroup = "employerID"
+	JobGroupJobURL         JobGroup = "jobUrl"
 )
 
 var AllJobGroup = []JobGroup{
@@ -1367,11 +1378,12 @@ var AllJobGroup = []JobGroup{
 	JobGroupMaxSalary,
 	JobGroupRequirements,
 	JobGroupEmployerID,
+	JobGroupJobURL,
 }
 
 func (e JobGroup) IsValid() bool {
 	switch e {
-	case JobGroupID, JobGroupCreatedAt, JobGroupUpdatedAt, JobGroupTitle, JobGroupIndustry, JobGroupDescription, JobGroupLevel, JobGroupLocation, JobGroupDeadline, JobGroupEducationLevel, JobGroupExperience, JobGroupMinSalary, JobGroupMaxSalary, JobGroupRequirements, JobGroupEmployerID:
+	case JobGroupID, JobGroupCreatedAt, JobGroupUpdatedAt, JobGroupTitle, JobGroupIndustry, JobGroupDescription, JobGroupLevel, JobGroupLocation, JobGroupDeadline, JobGroupEducationLevel, JobGroupExperience, JobGroupMinSalary, JobGroupMaxSalary, JobGroupRequirements, JobGroupEmployerID, JobGroupJobURL:
 		return true
 	}
 	return false
@@ -1415,6 +1427,7 @@ const (
 	JobOrderableMaxSalary      JobOrderable = "maxSalary"
 	JobOrderableRequirements   JobOrderable = "requirements"
 	JobOrderableEmployerID     JobOrderable = "employerID"
+	JobOrderableJobURL         JobOrderable = "jobUrl"
 )
 
 var AllJobOrderable = []JobOrderable{
@@ -1430,11 +1443,12 @@ var AllJobOrderable = []JobOrderable{
 	JobOrderableMaxSalary,
 	JobOrderableRequirements,
 	JobOrderableEmployerID,
+	JobOrderableJobURL,
 }
 
 func (e JobOrderable) IsValid() bool {
 	switch e {
-	case JobOrderableID, JobOrderableTitle, JobOrderableIndustry, JobOrderableDescription, JobOrderableLevel, JobOrderableLocation, JobOrderableEducationLevel, JobOrderableExperience, JobOrderableMinSalary, JobOrderableMaxSalary, JobOrderableRequirements, JobOrderableEmployerID:
+	case JobOrderableID, JobOrderableTitle, JobOrderableIndustry, JobOrderableDescription, JobOrderableLevel, JobOrderableLocation, JobOrderableEducationLevel, JobOrderableExperience, JobOrderableMinSalary, JobOrderableMaxSalary, JobOrderableRequirements, JobOrderableEmployerID, JobOrderableJobURL:
 		return true
 	}
 	return false
@@ -1481,6 +1495,7 @@ const (
 	UnapprovedJobGroupMaxSalary      UnapprovedJobGroup = "maxSalary"
 	UnapprovedJobGroupRequirements   UnapprovedJobGroup = "requirements"
 	UnapprovedJobGroupEmployerID     UnapprovedJobGroup = "employerID"
+	UnapprovedJobGroupJobURL         UnapprovedJobGroup = "jobUrl"
 )
 
 var AllUnapprovedJobGroup = []UnapprovedJobGroup{
@@ -1499,11 +1514,12 @@ var AllUnapprovedJobGroup = []UnapprovedJobGroup{
 	UnapprovedJobGroupMaxSalary,
 	UnapprovedJobGroupRequirements,
 	UnapprovedJobGroupEmployerID,
+	UnapprovedJobGroupJobURL,
 }
 
 func (e UnapprovedJobGroup) IsValid() bool {
 	switch e {
-	case UnapprovedJobGroupID, UnapprovedJobGroupCreatedAt, UnapprovedJobGroupUpdatedAt, UnapprovedJobGroupTitle, UnapprovedJobGroupIndustry, UnapprovedJobGroupDescription, UnapprovedJobGroupLevel, UnapprovedJobGroupLocation, UnapprovedJobGroupDeadline, UnapprovedJobGroupEducationLevel, UnapprovedJobGroupExperience, UnapprovedJobGroupMinSalary, UnapprovedJobGroupMaxSalary, UnapprovedJobGroupRequirements, UnapprovedJobGroupEmployerID:
+	case UnapprovedJobGroupID, UnapprovedJobGroupCreatedAt, UnapprovedJobGroupUpdatedAt, UnapprovedJobGroupTitle, UnapprovedJobGroupIndustry, UnapprovedJobGroupDescription, UnapprovedJobGroupLevel, UnapprovedJobGroupLocation, UnapprovedJobGroupDeadline, UnapprovedJobGroupEducationLevel, UnapprovedJobGroupExperience, UnapprovedJobGroupMinSalary, UnapprovedJobGroupMaxSalary, UnapprovedJobGroupRequirements, UnapprovedJobGroupEmployerID, UnapprovedJobGroupJobURL:
 		return true
 	}
 	return false
@@ -1547,6 +1563,7 @@ const (
 	UnapprovedJobOrderableMaxSalary      UnapprovedJobOrderable = "maxSalary"
 	UnapprovedJobOrderableRequirements   UnapprovedJobOrderable = "requirements"
 	UnapprovedJobOrderableEmployerID     UnapprovedJobOrderable = "employerID"
+	UnapprovedJobOrderableJobURL         UnapprovedJobOrderable = "jobUrl"
 )
 
 var AllUnapprovedJobOrderable = []UnapprovedJobOrderable{
@@ -1562,11 +1579,12 @@ var AllUnapprovedJobOrderable = []UnapprovedJobOrderable{
 	UnapprovedJobOrderableMaxSalary,
 	UnapprovedJobOrderableRequirements,
 	UnapprovedJobOrderableEmployerID,
+	UnapprovedJobOrderableJobURL,
 }
 
 func (e UnapprovedJobOrderable) IsValid() bool {
 	switch e {
-	case UnapprovedJobOrderableID, UnapprovedJobOrderableTitle, UnapprovedJobOrderableIndustry, UnapprovedJobOrderableDescription, UnapprovedJobOrderableLevel, UnapprovedJobOrderableLocation, UnapprovedJobOrderableEducationLevel, UnapprovedJobOrderableExperience, UnapprovedJobOrderableMinSalary, UnapprovedJobOrderableMaxSalary, UnapprovedJobOrderableRequirements, UnapprovedJobOrderableEmployerID:
+	case UnapprovedJobOrderableID, UnapprovedJobOrderableTitle, UnapprovedJobOrderableIndustry, UnapprovedJobOrderableDescription, UnapprovedJobOrderableLevel, UnapprovedJobOrderableLocation, UnapprovedJobOrderableEducationLevel, UnapprovedJobOrderableExperience, UnapprovedJobOrderableMinSalary, UnapprovedJobOrderableMaxSalary, UnapprovedJobOrderableRequirements, UnapprovedJobOrderableEmployerID, UnapprovedJobOrderableJobURL:
 		return true
 	}
 	return false
