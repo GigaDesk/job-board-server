@@ -93,11 +93,13 @@ func (r *mutationResolver) CreateEmployer(ctx context.Context, input model.NewEm
 		Badge:       input.Badge,
 		Website:     input.Website,
 	}
-	//send an OTP code to the phone number associated with the unverified employer record, return error if there is any
-	if err := phoneutils.SendOtp(unverifiedemployer.PhoneNumber); err != nil {
-		log.Error().Str("phone_number", input.PhoneNumber).Str("path", "CreateEmployer").Msg(err.Error())
-		return nil, err
-	}
+	/*send an OTP code to the phone number associated with the unverified employer record, return error if there is any
+		if err := phoneutils.SendOtp(unverifiedemployer.PhoneNumber); err != nil {
+			log.Error().Str("phone_number", input.PhoneNumber).Str("path", "CreateEmployer").Msg(err.Error())
+			return nil, err
+		}
+	    OTP defaulted to: 777777 for testing purposes
+	*/
 	//create an unverified employer record in the database and return if operation succeeds
 	if err := r.Sql.Db.Create(unverifiedemployer).Error; err != nil {
 		log.Error().Str("name", input.Name).Str("path", "CreateEmployer").Msg(err.Error())
@@ -117,9 +119,16 @@ func (r *mutationResolver) VerifyEmployer(ctx context.Context, input model.Verif
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
-	//Check the validity of an OTP code
+
+	/*Check the validity of an OTP code
 	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
 		return nil, err
+	}
+	OTP defaulted to: 777777 for testing purposes
+	*/
+
+	if input.Otp != "777777" {
+		return nil, errors.New("incorrect OTP code")
 	}
 	//declare an unverifiedemployer variable
 	var unverifiedemployer *model.UnverifiedEmployer
@@ -165,11 +174,13 @@ func (r *mutationResolver) SendCode(ctx context.Context, phoneNumber string) (*m
 	if err := validate.ValidateKenyanPhoneNumber(phoneNumber); err != nil {
 		return nil, err
 	}
-
-	if err := phoneutils.SendOtp(phoneNumber); err != nil {
-		log.Error().Str("phone_number", phoneNumber).Str("path", "SendCode").Msg(err.Error())
-		return nil, err
-	}
+	/*
+		if err := phoneutils.SendOtp(phoneNumber); err != nil {
+			log.Error().Str("phone_number", phoneNumber).Str("path", "SendCode").Msg(err.Error())
+			return nil, err
+			OTP defaulted to: 777777 for testing purposes
+		}
+	*/
 	sendcodestatus := &model.SendCodeStatus{
 		PhoneNumber: phoneNumber,
 		Success:     true,
@@ -244,11 +255,13 @@ func (r *mutationResolver) ForgotEmployerPassword(ctx context.Context, phoneNumb
 	if phoneexists.Verified != true && phoneexists.Unverified != true {
 		return nil, errors.New("phone number does not exist")
 	}
-	//send an OTP code to the phone number provided, return error if there is any
+	/*send an OTP code to the phone number provided, return error if there is any
 	if err := phoneutils.SendOtp(phoneNumber); err != nil {
 		log.Error().Str("phone_number", phoneNumber).Str("path", "ForgotEmployerPassword").Msg(err.Error())
 		return nil, err
 	}
+	OTP defaulted to: 777777 for testing purposes
+	*/
 	//return status on success
 	sendcodestatus := &model.SendCodeStatus{
 		PhoneNumber: phoneNumber,
@@ -268,10 +281,16 @@ func (r *mutationResolver) RequestEmployerPasswordReset(ctx context.Context, inp
 		return nil, err
 	}
 
-	//Check the validity of an OTP code
+	/*Check the validity of an OTP code
 	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
 		return nil, err
 	}
+	OTP defaulted to: 777777 for testing purposes
+	*/
+	if input.Otp != "777777" {
+		return nil, errors.New("incorrect OTP code")
+	}
+
 	//declare an employer variable
 	var employer *model.Employer
 
