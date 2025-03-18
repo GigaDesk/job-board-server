@@ -555,7 +555,6 @@ type NewJob struct {
 	MinSalary      *int       `json:"minSalary,omitempty"`
 	MaxSalary      *int       `json:"maxSalary,omitempty"`
 	Requirements   []string   `json:"requirements,omitempty"`
-	EmployerID     *int       `json:"employerID,omitempty"`
 }
 
 type PhoneNumberExists struct {
