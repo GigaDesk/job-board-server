@@ -249,6 +249,7 @@ func (r *mutationResolver) ApproveJob(ctx context.Context, id int) (*model.JobPr
 		Experience:     unapprovedjob.Experience,
 		JobURL:         unapprovedjob.JobURL,
 		Requirements:   unapprovedjob.Requirements,
+		EmployerID:     unapprovedjob.EmployerID,
 	}
 
 	// take the newly transformed and copied job data and transfer it into the official verified job table
@@ -677,38 +678,38 @@ func (r *queryResolver) FindUnapprovedJob(ctx context.Context, id int) (*model.U
 
 // Employer is the resolver for the employer field.
 func (r *unapprovedJobProfileResolver) Employer(ctx context.Context, obj *model.UnapprovedJobProfile) (*model.EmployerProfile, error) {
-		// declare an unapproved job variable
-		var unapprovedjob *model.UnapprovedJob
+	// declare an unapproved job variable
+	var unapprovedjob *model.UnapprovedJob
 
-		// Find the first unapproved job that matches the id from the unapproved job profile
-		if err := r.Sql.Db.Where("id = ?", obj.ID).First(&unapprovedjob).Error; err != nil {
-			log.Info().Int("id", obj.ID).Str("object", "UnapprovedJobProfile").Msg("unapproved job with id does not exist")
-			return nil, errors.New("error finding unapproved job with id: " + strconv.Itoa(obj.ID))
+	// Find the first unapproved job that matches the id from the unapproved job profile
+	if err := r.Sql.Db.Where("id = ?", obj.ID).First(&unapprovedjob).Error; err != nil {
+		log.Info().Int("id", obj.ID).Str("object", "UnapprovedJobProfile").Msg("unapproved job with id does not exist")
+		return nil, errors.New("error finding unapproved job with id: " + strconv.Itoa(obj.ID))
+	}
+
+	if unapprovedjob.EmployerID != nil {
+		//declare an employer variable
+		var employer *model.Employer
+
+		if err := r.Sql.Db.Where("id = ?", unapprovedjob.EmployerID).First(&employer).Error; err != nil {
+			log.Info().Int("id", *unapprovedjob.EmployerID).Str("object", "UnapprovedJobProfile").Msg("employer with id does not exist")
+			return nil, errors.New("error finding employer with id: " + strconv.Itoa(*unapprovedjob.EmployerID))
 		}
-	
-		if unapprovedjob.EmployerID != nil {
-			//declare an employer variable
-			var employer *model.Employer
-	
-			if err := r.Sql.Db.Where("id = ?", unapprovedjob.EmployerID).First(&employer).Error; err != nil {
-				log.Info().Int("id", *unapprovedjob.EmployerID).Str("object", "UnapprovedJobProfile").Msg("employer with id does not exist")
-				return nil, errors.New("error finding employer with id: " + strconv.Itoa(*unapprovedjob.EmployerID))
-			}
-	
-			employerprofile := &model.EmployerProfile{
-				ID:          employer.ID,
-				CreatedAt:   employer.CreatedAt,
-				UpdatedAt:   employer.UpdatedAt,
-				Name:        employer.Name,
-				PhoneNumber: employer.PhoneNumber,
-				Badge:       employer.Badge,
-				Website:     employer.Website,
-			}
-	
-			return employerprofile, nil
+
+		employerprofile := &model.EmployerProfile{
+			ID:          employer.ID,
+			CreatedAt:   employer.CreatedAt,
+			UpdatedAt:   employer.UpdatedAt,
+			Name:        employer.Name,
+			PhoneNumber: employer.PhoneNumber,
+			Badge:       employer.Badge,
+			Website:     employer.Website,
 		}
-	
-		return nil, nil
+
+		return employerprofile, nil
+	}
+
+	return nil, nil
 }
 
 // JobProfile returns JobProfileResolver implementation.
