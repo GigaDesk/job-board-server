@@ -1,7 +1,6 @@
 package graph
 
 import (
-	"github.com/GigaDesk/eardrum-graph/neo4jutils"
 	"github.com/GigaDesk/eardrum-server/graph/db"
 )
 
@@ -11,5 +10,4 @@ import (
 
 type Resolver struct{
 	Sql *db.AutoGqlDB // this is the new line the package db is autogenerate by this plugin
-	Neo4j *neo4jutils.Neo4jInstance
 }
