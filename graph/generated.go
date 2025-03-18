@@ -28548,7 +28548,7 @@ func (ec *executionContext) unmarshalInputNewJob(ctx context.Context, obj interf
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "industry", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID"}
+	fieldsInOrder := [...]string{"title", "description", "industry", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -28632,13 +28632,6 @@ func (ec *executionContext) unmarshalInputNewJob(ctx context.Context, obj interf
 				return it, err
 			}
 			it.Requirements = data
-		case "employerID":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("employerID"))
-			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.EmployerID = data
 		}
 	}
 

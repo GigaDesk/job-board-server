@@ -67,7 +67,6 @@ input NewJob {
   minSalary: Int
   maxSalary: Int
   requirements: [String!]
-  employerID: Int
 }
 
 input JobsFilterParameters {

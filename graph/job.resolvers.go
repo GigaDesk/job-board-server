@@ -132,6 +132,23 @@ func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
 
+	var employerid *int
+
+	user, _ := auth.ForContext(ctx)
+
+	role := user.GetRole()
+	if role == "employer" {
+		id, err := user.GetID()
+
+		employerid = &id
+
+		if err != nil {
+			return nil, errors.New("could not access employer's id!")
+		}
+
+		log.Info().Str("role", role).Int("id", id).Str("path", "CreateUnapprovedJob").Msg("creating unapproved job")
+	}
+
 	//Join input.Requiremets with "||" separator
 
 	requirements := strings.Join(input.Requirements, "||")
@@ -148,7 +165,7 @@ func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.
 		MaxSalary:      input.MaxSalary,
 		Experience:     input.Experience,
 		Requirements:   &requirements,
-		EmployerID:     input.EmployerID,
+		EmployerID:     employerid,
 	}
 
 	//Create records in postgres
