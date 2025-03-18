@@ -513,6 +513,12 @@ type JobQueryResult struct {
 	TotalCount int    `json:"totalCount"`
 }
 
+type JobsFilterParameters struct {
+	EducationLevel *string `json:"educationLevel,omitempty"`
+	Industry       *string `json:"industry,omitempty"`
+	Experience     *int    `json:"experience,omitempty"`
+}
+
 type Mutation struct {
 }
 

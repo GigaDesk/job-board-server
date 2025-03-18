@@ -367,9 +367,9 @@ type ComplexityRoot struct {
 		GetEmployerProfile        func(childComplexity int) int
 		GetEmployersProfile       func(childComplexity int) int
 		GetJob                    func(childComplexity int, id int) int
-		GetJobs                   func(childComplexity int) int
+		GetJobs                   func(childComplexity int, filterparameters *model.JobsFilterParameters) int
 		GetUnapprovedJob          func(childComplexity int, id int) int
-		GetUnapprovedJobs         func(childComplexity int) int
+		GetUnapprovedJobs         func(childComplexity int, filterparameters *model.JobsFilterParameters) int
 		GetUnverifiedAdmin        func(childComplexity int, id int) int
 		GetUnverifiedEmployee     func(childComplexity int, id int) int
 		GetUnverifiedEmployer     func(childComplexity int, id int) int
@@ -631,9 +631,9 @@ type QueryResolver interface {
 	GetEmployerProfile(ctx context.Context) (*model.EmployerProfile, error)
 	GetEmployersProfile(ctx context.Context) ([]*model.EmployerProfile, error)
 	FindEmployer(ctx context.Context, id int) (*model.EmployerProfile, error)
-	GetJobs(ctx context.Context) ([]*model.JobProfile, error)
+	GetJobs(ctx context.Context, filterparameters *model.JobsFilterParameters) ([]*model.JobProfile, error)
 	FindJob(ctx context.Context, id int) (*model.JobProfile, error)
-	GetUnapprovedJobs(ctx context.Context) ([]*model.JobProfile, error)
+	GetUnapprovedJobs(ctx context.Context, filterparameters *model.JobsFilterParameters) ([]*model.JobProfile, error)
 	FindUnapprovedJob(ctx context.Context, id int) (*model.JobProfile, error)
 	GetAdmin(ctx context.Context, id int) (*model.Admin, error)
 	QueryAdmin(ctx context.Context, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
@@ -2477,7 +2477,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.GetJobs(childComplexity), true
+		args, err := ec.field_Query_getJobs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetJobs(childComplexity, args["filterparameters"].(*model.JobsFilterParameters)), true
 
 	case "Query.getUnapprovedJob":
 		if e.complexity.Query.GetUnapprovedJob == nil {
@@ -2496,7 +2501,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.GetUnapprovedJobs(childComplexity), true
+		args, err := ec.field_Query_getUnapprovedJobs_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetUnapprovedJobs(childComplexity, args["filterparameters"].(*model.JobsFilterParameters)), true
 
 	case "Query.getUnverifiedAdmin":
 		if e.complexity.Query.GetUnverifiedAdmin == nil {
@@ -3249,6 +3259,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputJobInput,
 		ec.unmarshalInputJobOrder,
 		ec.unmarshalInputJobPatch,
+		ec.unmarshalInputJobsFilterParameters,
 		ec.unmarshalInputNewAdmin,
 		ec.unmarshalInputNewEmployee,
 		ec.unmarshalInputNewEmployer,
@@ -7815,6 +7826,29 @@ func (ec *executionContext) field_Query_getJob_argsID(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_getJobs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getJobs_argsFilterparameters(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filterparameters"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getJobs_argsFilterparameters(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.JobsFilterParameters, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filterparameters"))
+	if tmp, ok := rawArgs["filterparameters"]; ok {
+		return ec.unmarshalOJobsFilterParameters2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobsFilterParameters(ctx, tmp)
+	}
+
+	var zeroVal *model.JobsFilterParameters
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Query_getUnapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -7835,6 +7869,29 @@ func (ec *executionContext) field_Query_getUnapprovedJob_argsID(
 	}
 
 	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_getUnapprovedJobs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getUnapprovedJobs_argsFilterparameters(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filterparameters"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getUnapprovedJobs_argsFilterparameters(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.JobsFilterParameters, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filterparameters"))
+	if tmp, ok := rawArgs["filterparameters"]; ok {
+		return ec.unmarshalOJobsFilterParameters2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobsFilterParameters(ctx, tmp)
+	}
+
+	var zeroVal *model.JobsFilterParameters
 	return zeroVal, nil
 }
 
@@ -19593,7 +19650,7 @@ func (ec *executionContext) _Query_getJobs(ctx context.Context, field graphql.Co
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetJobs(rctx)
+		return ec.resolvers.Query().GetJobs(rctx, fc.Args["filterparameters"].(*model.JobsFilterParameters))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -19607,7 +19664,7 @@ func (ec *executionContext) _Query_getJobs(ctx context.Context, field graphql.Co
 	return ec.marshalOJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfileᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getJobs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getJobs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -19650,6 +19707,17 @@ func (ec *executionContext) fieldContext_Query_getJobs(_ context.Context, field 
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getJobs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -19757,7 +19825,7 @@ func (ec *executionContext) _Query_getUnapprovedJobs(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetUnapprovedJobs(rctx)
+		return ec.resolvers.Query().GetUnapprovedJobs(rctx, fc.Args["filterparameters"].(*model.JobsFilterParameters))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -19771,7 +19839,7 @@ func (ec *executionContext) _Query_getUnapprovedJobs(ctx context.Context, field 
 	return ec.marshalOJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfileᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_getUnapprovedJobs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getUnapprovedJobs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -19814,6 +19882,17 @@ func (ec *executionContext) fieldContext_Query_getUnapprovedJobs(_ context.Conte
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getUnapprovedJobs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -28271,6 +28350,47 @@ func (ec *executionContext) unmarshalInputJobPatch(ctx context.Context, obj inte
 				return it, err
 			}
 			it.EmployerID = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputJobsFilterParameters(ctx context.Context, obj interface{}) (model.JobsFilterParameters, error) {
+	var it model.JobsFilterParameters
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"educationLevel", "industry", "experience"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "educationLevel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("educationLevel"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EducationLevel = data
+		case "industry":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("industry"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Industry = data
+		case "experience":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("experience"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Experience = data
 		}
 	}
 
@@ -37468,6 +37588,14 @@ func (ec *executionContext) marshalOJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋ
 		return graphql.Null
 	}
 	return ec._JobQueryResult(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOJobsFilterParameters2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobsFilterParameters(ctx context.Context, v interface{}) (*model.JobsFilterParameters, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputJobsFilterParameters(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalORefreshTokenInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐRefreshTokenInput(ctx context.Context, v interface{}) (*model.RefreshTokenInput, error) {
