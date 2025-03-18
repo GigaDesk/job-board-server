@@ -58,6 +58,26 @@ type JobProfile {
   employer: EmployerProfile
 }
 
+type UnapprovedJobProfile {
+  id: Int!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  title: String!
+  industry: String
+  description: String!
+  level: String
+  location: String
+  deadline: Time
+  educationLevel: String
+  experience: Int
+  minSalary: Int
+  maxSalary: Int
+  requirements: [String!]
+  jobUrl: String
+  employer: EmployerProfile
+}
+
 input NewJob {
   title: String!
   description: String!
@@ -82,15 +102,15 @@ input JobsFilterParameters {
 extend type Query {
   getJobs(filterparameters: JobsFilterParameters): [JobProfile!]
   findJob(id: Int!): JobProfile!
-  getUnapprovedJobs(filterparameters: JobsFilterParameters): [JobProfile!]
-  findUnapprovedJob(id: Int!): JobProfile!
+  getUnapprovedJobs(filterparameters: JobsFilterParameters): [UnapprovedJobProfile!]
+  findUnapprovedJob(id: Int!): UnapprovedJobProfile!
 }
 
 extend type Mutation {
   createJob(input: NewJob!): JobProfile!
-  createUnapprovedJob(input: NewJob!): JobProfile!
+  createUnapprovedJob(input: NewJob!): UnapprovedJobProfile!
   approveJob(id: Int!): JobProfile!
   editJob(id: Int!, input: NewJob!): JobProfile!
   removeJob(id: Int!): JobProfile!
-  removeUnapprovedJob(id: Int!): JobProfile!
+  removeUnapprovedJob(id: Int!): UnapprovedJobProfile!
 }
