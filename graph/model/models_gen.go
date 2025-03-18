@@ -329,14 +329,15 @@ type EmployerPatch struct {
 }
 
 type EmployerProfile struct {
-	ID          int           `json:"id"`
-	CreatedAt   time.Time     `json:"createdAt"`
-	UpdatedAt   time.Time     `json:"updatedAt"`
-	Name        string        `json:"name"`
-	PhoneNumber string        `json:"phone_number"`
-	Badge       *string       `json:"badge,omitempty"`
-	Website     *string       `json:"Website,omitempty"`
-	Jobs        []*JobProfile `json:"jobs,omitempty"`
+	ID             int                     `json:"id"`
+	CreatedAt      time.Time               `json:"createdAt"`
+	UpdatedAt      time.Time               `json:"updatedAt"`
+	Name           string                  `json:"name"`
+	PhoneNumber    string                  `json:"phone_number"`
+	Badge          *string                 `json:"badge,omitempty"`
+	Website        *string                 `json:"Website,omitempty"`
+	Jobs           []*JobProfile           `json:"jobs,omitempty"`
+	UnapprovedJobs []*UnapprovedJobProfile `json:"unapprovedJobs,omitempty"`
 }
 
 // Employer result
@@ -742,6 +743,26 @@ type UnapprovedJobPatch struct {
 	Requirements   *string    `json:"requirements,omitempty"`
 	EmployerID     *int       `json:"employerID,omitempty"`
 	JobURL         *string    `json:"jobUrl,omitempty"`
+}
+
+type UnapprovedJobProfile struct {
+	ID             int                       `json:"id"`
+	CreatedAt      time.Time                 `json:"createdAt"`
+	UpdatedAt      time.Time                 `json:"updatedAt"`
+	DeletedAt      *runtimehelper.SoftDelete `json:"deletedAt,omitempty"`
+	Title          string                    `json:"title"`
+	Industry       *string                   `json:"industry,omitempty"`
+	Description    string                    `json:"description"`
+	Level          *string                   `json:"level,omitempty"`
+	Location       *string                   `json:"location,omitempty"`
+	Deadline       *time.Time                `json:"deadline,omitempty"`
+	EducationLevel *string                   `json:"educationLevel,omitempty"`
+	Experience     *int                      `json:"experience,omitempty"`
+	MinSalary      *int                      `json:"minSalary,omitempty"`
+	MaxSalary      *int                      `json:"maxSalary,omitempty"`
+	Requirements   []string                  `json:"requirements,omitempty"`
+	JobURL         *string                   `json:"jobUrl,omitempty"`
+	Employer       *EmployerProfile          `json:"employer,omitempty"`
 }
 
 // UnapprovedJob result

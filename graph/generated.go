@@ -61,6 +61,7 @@ type ResolverRoot interface {
 	JobProfile() JobProfileResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	UnapprovedJobProfile() UnapprovedJobProfileResolver
 	UpdateAdminPayload() UpdateAdminPayloadResolver
 	UpdateEmployeePayload() UpdateEmployeePayloadResolver
 	UpdateEmployerPayload() UpdateEmployerPayloadResolver
@@ -231,14 +232,15 @@ type ComplexityRoot struct {
 	}
 
 	EmployerProfile struct {
-		Badge       func(childComplexity int) int
-		CreatedAt   func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Jobs        func(childComplexity int) int
-		Name        func(childComplexity int) int
-		PhoneNumber func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
-		Website     func(childComplexity int) int
+		Badge          func(childComplexity int) int
+		CreatedAt      func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Jobs           func(childComplexity int) int
+		Name           func(childComplexity int) int
+		PhoneNumber    func(childComplexity int) int
+		UnapprovedJobs func(childComplexity int) int
+		UpdatedAt      func(childComplexity int) int
+		Website        func(childComplexity int) int
 	}
 
 	EmployerQueryResult struct {
@@ -410,6 +412,26 @@ type ComplexityRoot struct {
 		UpdatedAt      func(childComplexity int) int
 	}
 
+	UnapprovedJobProfile struct {
+		CreatedAt      func(childComplexity int) int
+		Deadline       func(childComplexity int) int
+		DeletedAt      func(childComplexity int) int
+		Description    func(childComplexity int) int
+		EducationLevel func(childComplexity int) int
+		Employer       func(childComplexity int) int
+		Experience     func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Industry       func(childComplexity int) int
+		JobURL         func(childComplexity int) int
+		Level          func(childComplexity int) int
+		Location       func(childComplexity int) int
+		MaxSalary      func(childComplexity int) int
+		MinSalary      func(childComplexity int) int
+		Requirements   func(childComplexity int) int
+		Title          func(childComplexity int) int
+		UpdatedAt      func(childComplexity int) int
+	}
+
 	UnapprovedJobQueryResult struct {
 		Count      func(childComplexity int) int
 		Data       func(childComplexity int) int
@@ -566,6 +588,7 @@ type DeleteUnverifiedEmployerPayloadResolver interface {
 }
 type EmployerProfileResolver interface {
 	Jobs(ctx context.Context, obj *model.EmployerProfile) ([]*model.JobProfile, error)
+	UnapprovedJobs(ctx context.Context, obj *model.EmployerProfile) ([]*model.UnapprovedJobProfile, error)
 }
 type JobProfileResolver interface {
 	Employer(ctx context.Context, obj *model.JobProfile) (*model.EmployerProfile, error)
@@ -593,11 +616,11 @@ type MutationResolver interface {
 	ResetEmployerPassword(ctx context.Context, newPassword string) (*model.Employer, error)
 	RefreshToken(ctx context.Context, input *model.RefreshTokenInput) (*string, error)
 	CreateJob(ctx context.Context, input model.NewJob) (*model.JobProfile, error)
-	CreateUnapprovedJob(ctx context.Context, input model.NewJob) (*model.JobProfile, error)
+	CreateUnapprovedJob(ctx context.Context, input model.NewJob) (*model.UnapprovedJobProfile, error)
 	ApproveJob(ctx context.Context, id int) (*model.JobProfile, error)
 	EditJob(ctx context.Context, id int, input model.NewJob) (*model.JobProfile, error)
 	RemoveJob(ctx context.Context, id int) (*model.JobProfile, error)
-	RemoveUnapprovedJob(ctx context.Context, id int) (*model.JobProfile, error)
+	RemoveUnapprovedJob(ctx context.Context, id int) (*model.UnapprovedJobProfile, error)
 	AddAdmin(ctx context.Context, input []*model.AdminInput) (*model.AddAdminPayload, error)
 	UpdateAdmin(ctx context.Context, input model.UpdateAdminInput) (*model.UpdateAdminPayload, error)
 	DeleteAdmin(ctx context.Context, filter model.AdminFiltersInput) (*model.DeleteAdminPayload, error)
@@ -636,8 +659,8 @@ type QueryResolver interface {
 	FindEmployer(ctx context.Context, id int) (*model.EmployerProfile, error)
 	GetJobs(ctx context.Context, filterparameters *model.JobsFilterParameters) ([]*model.JobProfile, error)
 	FindJob(ctx context.Context, id int) (*model.JobProfile, error)
-	GetUnapprovedJobs(ctx context.Context, filterparameters *model.JobsFilterParameters) ([]*model.JobProfile, error)
-	FindUnapprovedJob(ctx context.Context, id int) (*model.JobProfile, error)
+	GetUnapprovedJobs(ctx context.Context, filterparameters *model.JobsFilterParameters) ([]*model.UnapprovedJobProfile, error)
+	FindUnapprovedJob(ctx context.Context, id int) (*model.UnapprovedJobProfile, error)
 	GetAdmin(ctx context.Context, id int) (*model.Admin, error)
 	QueryAdmin(ctx context.Context, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
 	GetEmployee(ctx context.Context, id int) (*model.Employee, error)
@@ -654,6 +677,9 @@ type QueryResolver interface {
 	QueryUnverifiedEmployee(ctx context.Context, filter *model.UnverifiedEmployeeFiltersInput, order *model.UnverifiedEmployeeOrder, first *int, offset *int, group []model.UnverifiedEmployeeGroup) (*model.UnverifiedEmployeeQueryResult, error)
 	GetUnverifiedEmployer(ctx context.Context, id int) (*model.UnverifiedEmployer, error)
 	QueryUnverifiedEmployer(ctx context.Context, filter *model.UnverifiedEmployerFiltersInput, order *model.UnverifiedEmployerOrder, first *int, offset *int, group []model.UnverifiedEmployerGroup) (*model.UnverifiedEmployerQueryResult, error)
+}
+type UnapprovedJobProfileResolver interface {
+	Employer(ctx context.Context, obj *model.UnapprovedJobProfile) (*model.EmployerProfile, error)
 }
 type UpdateAdminPayloadResolver interface {
 	Admin(ctx context.Context, obj *model.UpdateAdminPayload, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
@@ -1401,6 +1427,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EmployerProfile.PhoneNumber(childComplexity), true
+
+	case "EmployerProfile.unapprovedJobs":
+		if e.complexity.EmployerProfile.UnapprovedJobs == nil {
+			break
+		}
+
+		return e.complexity.EmployerProfile.UnapprovedJobs(childComplexity), true
 
 	case "EmployerProfile.updatedAt":
 		if e.complexity.EmployerProfile.UpdatedAt == nil {
@@ -2789,6 +2822,125 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UnapprovedJob.UpdatedAt(childComplexity), true
+
+	case "UnapprovedJobProfile.createdAt":
+		if e.complexity.UnapprovedJobProfile.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.CreatedAt(childComplexity), true
+
+	case "UnapprovedJobProfile.deadline":
+		if e.complexity.UnapprovedJobProfile.Deadline == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.Deadline(childComplexity), true
+
+	case "UnapprovedJobProfile.deletedAt":
+		if e.complexity.UnapprovedJobProfile.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.DeletedAt(childComplexity), true
+
+	case "UnapprovedJobProfile.description":
+		if e.complexity.UnapprovedJobProfile.Description == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.Description(childComplexity), true
+
+	case "UnapprovedJobProfile.educationLevel":
+		if e.complexity.UnapprovedJobProfile.EducationLevel == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.EducationLevel(childComplexity), true
+
+	case "UnapprovedJobProfile.employer":
+		if e.complexity.UnapprovedJobProfile.Employer == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.Employer(childComplexity), true
+
+	case "UnapprovedJobProfile.experience":
+		if e.complexity.UnapprovedJobProfile.Experience == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.Experience(childComplexity), true
+
+	case "UnapprovedJobProfile.id":
+		if e.complexity.UnapprovedJobProfile.ID == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.ID(childComplexity), true
+
+	case "UnapprovedJobProfile.industry":
+		if e.complexity.UnapprovedJobProfile.Industry == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.Industry(childComplexity), true
+
+	case "UnapprovedJobProfile.jobUrl":
+		if e.complexity.UnapprovedJobProfile.JobURL == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.JobURL(childComplexity), true
+
+	case "UnapprovedJobProfile.level":
+		if e.complexity.UnapprovedJobProfile.Level == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.Level(childComplexity), true
+
+	case "UnapprovedJobProfile.location":
+		if e.complexity.UnapprovedJobProfile.Location == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.Location(childComplexity), true
+
+	case "UnapprovedJobProfile.maxSalary":
+		if e.complexity.UnapprovedJobProfile.MaxSalary == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.MaxSalary(childComplexity), true
+
+	case "UnapprovedJobProfile.minSalary":
+		if e.complexity.UnapprovedJobProfile.MinSalary == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.MinSalary(childComplexity), true
+
+	case "UnapprovedJobProfile.requirements":
+		if e.complexity.UnapprovedJobProfile.Requirements == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.Requirements(childComplexity), true
+
+	case "UnapprovedJobProfile.title":
+		if e.complexity.UnapprovedJobProfile.Title == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.Title(childComplexity), true
+
+	case "UnapprovedJobProfile.updatedAt":
+		if e.complexity.UnapprovedJobProfile.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.UpdatedAt(childComplexity), true
 
 	case "UnapprovedJobQueryResult.count":
 		if e.complexity.UnapprovedJobQueryResult.Count == nil {
@@ -14076,6 +14228,83 @@ func (ec *executionContext) fieldContext_EmployerProfile_jobs(_ context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _EmployerProfile_unapprovedJobs(ctx context.Context, field graphql.CollectedField, obj *model.EmployerProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EmployerProfile_unapprovedJobs(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.EmployerProfile().UnapprovedJobs(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UnapprovedJobProfile)
+	fc.Result = res
+	return ec.marshalOUnapprovedJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EmployerProfile_unapprovedJobs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EmployerProfile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnapprovedJobProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnapprovedJobProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnapprovedJobProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnapprovedJobProfile_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_UnapprovedJobProfile_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_UnapprovedJobProfile_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_UnapprovedJobProfile_description(ctx, field)
+			case "level":
+				return ec.fieldContext_UnapprovedJobProfile_level(ctx, field)
+			case "location":
+				return ec.fieldContext_UnapprovedJobProfile_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_UnapprovedJobProfile_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_UnapprovedJobProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_UnapprovedJobProfile_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_UnapprovedJobProfile_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_UnapprovedJobProfile_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
+			case "employer":
+				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJobProfile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _EmployerQueryResult_data(ctx context.Context, field graphql.CollectedField, obj *model.EmployerQueryResult) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EmployerQueryResult_data(ctx, field)
 	if err != nil {
@@ -15663,6 +15892,8 @@ func (ec *executionContext) fieldContext_JobProfile_employer(_ context.Context, 
 				return ec.fieldContext_EmployerProfile_Website(ctx, field)
 			case "jobs":
 				return ec.fieldContext_EmployerProfile_jobs(ctx, field)
+			case "unapprovedJobs":
+				return ec.fieldContext_EmployerProfile_unapprovedJobs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmployerProfile", field.Name)
 		},
@@ -17239,9 +17470,9 @@ func (ec *executionContext) _Mutation_createUnapprovedJob(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.JobProfile)
+	res := resTmp.(*model.UnapprovedJobProfile)
 	fc.Result = res
-	return ec.marshalNJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx, field.Selections, res)
+	return ec.marshalNUnapprovedJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_createUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17253,41 +17484,41 @@ func (ec *executionContext) fieldContext_Mutation_createUnapprovedJob(ctx contex
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_JobProfile_id(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_id(ctx, field)
 			case "createdAt":
-				return ec.fieldContext_JobProfile_createdAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_createdAt(ctx, field)
 			case "updatedAt":
-				return ec.fieldContext_JobProfile_updatedAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_updatedAt(ctx, field)
 			case "deletedAt":
-				return ec.fieldContext_JobProfile_deletedAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_deletedAt(ctx, field)
 			case "title":
-				return ec.fieldContext_JobProfile_title(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_title(ctx, field)
 			case "industry":
-				return ec.fieldContext_JobProfile_industry(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_industry(ctx, field)
 			case "description":
-				return ec.fieldContext_JobProfile_description(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_description(ctx, field)
 			case "level":
-				return ec.fieldContext_JobProfile_level(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_level(ctx, field)
 			case "location":
-				return ec.fieldContext_JobProfile_location(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_location(ctx, field)
 			case "deadline":
-				return ec.fieldContext_JobProfile_deadline(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_deadline(ctx, field)
 			case "educationLevel":
-				return ec.fieldContext_JobProfile_educationLevel(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_educationLevel(ctx, field)
 			case "experience":
-				return ec.fieldContext_JobProfile_experience(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_experience(ctx, field)
 			case "minSalary":
-				return ec.fieldContext_JobProfile_minSalary(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_minSalary(ctx, field)
 			case "maxSalary":
-				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_maxSalary(ctx, field)
 			case "requirements":
-				return ec.fieldContext_JobProfile_requirements(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
 			case "jobUrl":
-				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
 			case "employer":
-				return ec.fieldContext_JobProfile_employer(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJobProfile", field.Name)
 		},
 	}
 	defer func() {
@@ -17603,9 +17834,9 @@ func (ec *executionContext) _Mutation_removeUnapprovedJob(ctx context.Context, f
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.JobProfile)
+	res := resTmp.(*model.UnapprovedJobProfile)
 	fc.Result = res
-	return ec.marshalNJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx, field.Selections, res)
+	return ec.marshalNUnapprovedJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_removeUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -17617,41 +17848,41 @@ func (ec *executionContext) fieldContext_Mutation_removeUnapprovedJob(ctx contex
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_JobProfile_id(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_id(ctx, field)
 			case "createdAt":
-				return ec.fieldContext_JobProfile_createdAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_createdAt(ctx, field)
 			case "updatedAt":
-				return ec.fieldContext_JobProfile_updatedAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_updatedAt(ctx, field)
 			case "deletedAt":
-				return ec.fieldContext_JobProfile_deletedAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_deletedAt(ctx, field)
 			case "title":
-				return ec.fieldContext_JobProfile_title(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_title(ctx, field)
 			case "industry":
-				return ec.fieldContext_JobProfile_industry(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_industry(ctx, field)
 			case "description":
-				return ec.fieldContext_JobProfile_description(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_description(ctx, field)
 			case "level":
-				return ec.fieldContext_JobProfile_level(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_level(ctx, field)
 			case "location":
-				return ec.fieldContext_JobProfile_location(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_location(ctx, field)
 			case "deadline":
-				return ec.fieldContext_JobProfile_deadline(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_deadline(ctx, field)
 			case "educationLevel":
-				return ec.fieldContext_JobProfile_educationLevel(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_educationLevel(ctx, field)
 			case "experience":
-				return ec.fieldContext_JobProfile_experience(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_experience(ctx, field)
 			case "minSalary":
-				return ec.fieldContext_JobProfile_minSalary(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_minSalary(ctx, field)
 			case "maxSalary":
-				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_maxSalary(ctx, field)
 			case "requirements":
-				return ec.fieldContext_JobProfile_requirements(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
 			case "jobUrl":
-				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
 			case "employer":
-				return ec.fieldContext_JobProfile_employer(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJobProfile", field.Name)
 		},
 	}
 	defer func() {
@@ -19633,6 +19864,8 @@ func (ec *executionContext) fieldContext_Query_getEmployerProfile(_ context.Cont
 				return ec.fieldContext_EmployerProfile_Website(ctx, field)
 			case "jobs":
 				return ec.fieldContext_EmployerProfile_jobs(ctx, field)
+			case "unapprovedJobs":
+				return ec.fieldContext_EmployerProfile_unapprovedJobs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmployerProfile", field.Name)
 		},
@@ -19692,6 +19925,8 @@ func (ec *executionContext) fieldContext_Query_getEmployersProfile(_ context.Con
 				return ec.fieldContext_EmployerProfile_Website(ctx, field)
 			case "jobs":
 				return ec.fieldContext_EmployerProfile_jobs(ctx, field)
+			case "unapprovedJobs":
+				return ec.fieldContext_EmployerProfile_unapprovedJobs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmployerProfile", field.Name)
 		},
@@ -19754,6 +19989,8 @@ func (ec *executionContext) fieldContext_Query_findEmployer(ctx context.Context,
 				return ec.fieldContext_EmployerProfile_Website(ctx, field)
 			case "jobs":
 				return ec.fieldContext_EmployerProfile_jobs(ctx, field)
+			case "unapprovedJobs":
+				return ec.fieldContext_EmployerProfile_unapprovedJobs(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmployerProfile", field.Name)
 		},
@@ -19974,9 +20211,9 @@ func (ec *executionContext) _Query_getUnapprovedJobs(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.JobProfile)
+	res := resTmp.([]*model.UnapprovedJobProfile)
 	fc.Result = res
-	return ec.marshalOJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfileᚄ(ctx, field.Selections, res)
+	return ec.marshalOUnapprovedJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getUnapprovedJobs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -19988,41 +20225,41 @@ func (ec *executionContext) fieldContext_Query_getUnapprovedJobs(ctx context.Con
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_JobProfile_id(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_id(ctx, field)
 			case "createdAt":
-				return ec.fieldContext_JobProfile_createdAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_createdAt(ctx, field)
 			case "updatedAt":
-				return ec.fieldContext_JobProfile_updatedAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_updatedAt(ctx, field)
 			case "deletedAt":
-				return ec.fieldContext_JobProfile_deletedAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_deletedAt(ctx, field)
 			case "title":
-				return ec.fieldContext_JobProfile_title(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_title(ctx, field)
 			case "industry":
-				return ec.fieldContext_JobProfile_industry(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_industry(ctx, field)
 			case "description":
-				return ec.fieldContext_JobProfile_description(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_description(ctx, field)
 			case "level":
-				return ec.fieldContext_JobProfile_level(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_level(ctx, field)
 			case "location":
-				return ec.fieldContext_JobProfile_location(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_location(ctx, field)
 			case "deadline":
-				return ec.fieldContext_JobProfile_deadline(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_deadline(ctx, field)
 			case "educationLevel":
-				return ec.fieldContext_JobProfile_educationLevel(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_educationLevel(ctx, field)
 			case "experience":
-				return ec.fieldContext_JobProfile_experience(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_experience(ctx, field)
 			case "minSalary":
-				return ec.fieldContext_JobProfile_minSalary(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_minSalary(ctx, field)
 			case "maxSalary":
-				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_maxSalary(ctx, field)
 			case "requirements":
-				return ec.fieldContext_JobProfile_requirements(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
 			case "jobUrl":
-				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
 			case "employer":
-				return ec.fieldContext_JobProfile_employer(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJobProfile", field.Name)
 		},
 	}
 	defer func() {
@@ -20065,9 +20302,9 @@ func (ec *executionContext) _Query_findUnapprovedJob(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.JobProfile)
+	res := resTmp.(*model.UnapprovedJobProfile)
 	fc.Result = res
-	return ec.marshalNJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx, field.Selections, res)
+	return ec.marshalNUnapprovedJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_findUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -20079,41 +20316,41 @@ func (ec *executionContext) fieldContext_Query_findUnapprovedJob(ctx context.Con
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_JobProfile_id(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_id(ctx, field)
 			case "createdAt":
-				return ec.fieldContext_JobProfile_createdAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_createdAt(ctx, field)
 			case "updatedAt":
-				return ec.fieldContext_JobProfile_updatedAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_updatedAt(ctx, field)
 			case "deletedAt":
-				return ec.fieldContext_JobProfile_deletedAt(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_deletedAt(ctx, field)
 			case "title":
-				return ec.fieldContext_JobProfile_title(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_title(ctx, field)
 			case "industry":
-				return ec.fieldContext_JobProfile_industry(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_industry(ctx, field)
 			case "description":
-				return ec.fieldContext_JobProfile_description(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_description(ctx, field)
 			case "level":
-				return ec.fieldContext_JobProfile_level(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_level(ctx, field)
 			case "location":
-				return ec.fieldContext_JobProfile_location(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_location(ctx, field)
 			case "deadline":
-				return ec.fieldContext_JobProfile_deadline(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_deadline(ctx, field)
 			case "educationLevel":
-				return ec.fieldContext_JobProfile_educationLevel(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_educationLevel(ctx, field)
 			case "experience":
-				return ec.fieldContext_JobProfile_experience(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_experience(ctx, field)
 			case "minSalary":
-				return ec.fieldContext_JobProfile_minSalary(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_minSalary(ctx, field)
 			case "maxSalary":
-				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_maxSalary(ctx, field)
 			case "requirements":
-				return ec.fieldContext_JobProfile_requirements(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
 			case "jobUrl":
-				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
 			case "employer":
-				return ec.fieldContext_JobProfile_employer(ctx, field)
+				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJobProfile", field.Name)
 		},
 	}
 	defer func() {
@@ -22130,6 +22367,738 @@ func (ec *executionContext) fieldContext_UnapprovedJob_jobUrl(_ context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_id(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_updatedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_deletedAt(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_deletedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*runtimehelper.SoftDelete)
+	fc.Result = res
+	return ec.marshalOSoftDelete2ᚖgithubᚗcomᚋfasibioᚋautogqlᚋruntimehelperᚐSoftDelete(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_deletedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type SoftDelete does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_title(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_title(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_industry(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_industry(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Industry, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_industry(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_description(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_description(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_level(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_level(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Level, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_level(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_location(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_location(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Location, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_location(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_deadline(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_deadline(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Deadline, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_deadline(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_educationLevel(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_educationLevel(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EducationLevel, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_educationLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_experience(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_experience(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Experience, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_experience(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_minSalary(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_minSalary(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MinSalary, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_minSalary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_maxSalary(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_maxSalary(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MaxSalary, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_maxSalary(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_requirements(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Requirements, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_requirements(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_jobUrl(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JobURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_jobUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_employer(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UnapprovedJobProfile().Employer(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.EmployerProfile)
+	fc.Result = res
+	return ec.marshalOEmployerProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐEmployerProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_employer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EmployerProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EmployerProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_EmployerProfile_updatedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_EmployerProfile_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_EmployerProfile_phone_number(ctx, field)
+			case "badge":
+				return ec.fieldContext_EmployerProfile_badge(ctx, field)
+			case "Website":
+				return ec.fieldContext_EmployerProfile_Website(ctx, field)
+			case "jobs":
+				return ec.fieldContext_EmployerProfile_jobs(ctx, field)
+			case "unapprovedJobs":
+				return ec.fieldContext_EmployerProfile_unapprovedJobs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EmployerProfile", field.Name)
 		},
 	}
 	return fc, nil
@@ -32551,6 +33520,39 @@ func (ec *executionContext) _EmployerProfile(ctx context.Context, sel ast.Select
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "unapprovedJobs":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EmployerProfile_unapprovedJobs(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -33922,6 +34924,120 @@ func (ec *executionContext) _UnapprovedJob(ctx context.Context, sel ast.Selectio
 			out.Values[i] = ec._UnapprovedJob_employerID(ctx, field, obj)
 		case "jobUrl":
 			out.Values[i] = ec._UnapprovedJob_jobUrl(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var unapprovedJobProfileImplementors = []string{"UnapprovedJobProfile"}
+
+func (ec *executionContext) _UnapprovedJobProfile(ctx context.Context, sel ast.SelectionSet, obj *model.UnapprovedJobProfile) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, unapprovedJobProfileImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UnapprovedJobProfile")
+		case "id":
+			out.Values[i] = ec._UnapprovedJobProfile_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "createdAt":
+			out.Values[i] = ec._UnapprovedJobProfile_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "updatedAt":
+			out.Values[i] = ec._UnapprovedJobProfile_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "deletedAt":
+			out.Values[i] = ec._UnapprovedJobProfile_deletedAt(ctx, field, obj)
+		case "title":
+			out.Values[i] = ec._UnapprovedJobProfile_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "industry":
+			out.Values[i] = ec._UnapprovedJobProfile_industry(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._UnapprovedJobProfile_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "level":
+			out.Values[i] = ec._UnapprovedJobProfile_level(ctx, field, obj)
+		case "location":
+			out.Values[i] = ec._UnapprovedJobProfile_location(ctx, field, obj)
+		case "deadline":
+			out.Values[i] = ec._UnapprovedJobProfile_deadline(ctx, field, obj)
+		case "educationLevel":
+			out.Values[i] = ec._UnapprovedJobProfile_educationLevel(ctx, field, obj)
+		case "experience":
+			out.Values[i] = ec._UnapprovedJobProfile_experience(ctx, field, obj)
+		case "minSalary":
+			out.Values[i] = ec._UnapprovedJobProfile_minSalary(ctx, field, obj)
+		case "maxSalary":
+			out.Values[i] = ec._UnapprovedJobProfile_maxSalary(ctx, field, obj)
+		case "requirements":
+			out.Values[i] = ec._UnapprovedJobProfile_requirements(ctx, field, obj)
+		case "jobUrl":
+			out.Values[i] = ec._UnapprovedJobProfile_jobUrl(ctx, field, obj)
+		case "employer":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UnapprovedJobProfile_employer(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -36072,6 +37188,20 @@ func (ec *executionContext) unmarshalNUnapprovedJobPatch2ᚖgithubᚗcomᚋGigaD
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNUnapprovedJobProfile2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx context.Context, sel ast.SelectionSet, v model.UnapprovedJobProfile) graphql.Marshaler {
+	return ec._UnapprovedJobProfile(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUnapprovedJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx context.Context, sel ast.SelectionSet, v *model.UnapprovedJobProfile) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UnapprovedJobProfile(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNUnapprovedJobQueryResult2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobQueryResult(ctx context.Context, sel ast.SelectionSet, v model.UnapprovedJobQueryResult) graphql.Marshaler {
 	return ec._UnapprovedJobQueryResult(ctx, sel, &v)
 }
@@ -38186,6 +39316,101 @@ func (ec *executionContext) marshalOUnapprovedJobOrderable2ᚖgithubᚗcomᚋGig
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) marshalOUnapprovedJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx context.Context, sel ast.SelectionSet, v []*model.UnapprovedJobProfile) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOUnapprovedJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOUnapprovedJobProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UnapprovedJobProfile) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUnapprovedJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalOUnapprovedJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx context.Context, sel ast.SelectionSet, v *model.UnapprovedJobProfile) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UnapprovedJobProfile(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOUnapprovedJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobQueryResult(ctx context.Context, sel ast.SelectionSet, v *model.UnapprovedJobQueryResult) graphql.Marshaler {
