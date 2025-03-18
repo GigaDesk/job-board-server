@@ -17,7 +17,6 @@ require (
 )
 
 require (
-	github.com/GigaDesk/eardrum-graph v1.0.1
 	github.com/GigaDesk/eardrum-prefix v1.0.2
 	github.com/rs/cors v1.11.1
 )
@@ -48,7 +47,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/neo4j/neo4j-go-driver/v5 v5.26.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/zerolog v1.33.0
 	github.com/shopspring/decimal v1.3.1 // indirect
