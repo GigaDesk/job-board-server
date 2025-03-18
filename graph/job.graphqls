@@ -15,6 +15,7 @@ type Job @SQL {
   maxSalary: Int
   requirements: String
   employerID: Int
+  jobUrl: String
 }
 
 type UnapprovedJob @SQL {
@@ -34,6 +35,7 @@ type UnapprovedJob @SQL {
   maxSalary: Int
   requirements: String
   employerID: Int
+  jobUrl: String
 }
 
 type JobProfile {
@@ -52,6 +54,7 @@ type JobProfile {
   minSalary: Int
   maxSalary: Int
   requirements: [String!]
+  jobUrl: String
   employer: EmployerProfile
 }
 
@@ -67,6 +70,7 @@ input NewJob {
   minSalary: Int
   maxSalary: Int
   requirements: [String!]
+  jobUrl: String
 }
 
 input JobsFilterParameters {
