@@ -15,6 +15,7 @@ import (
 	"github.com/GigaDesk/eardrum-server/graph/model"
 	"github.com/GigaDesk/eardrum-server/shutdown"
 	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 // Employer is the resolver for the employer field.
@@ -471,14 +472,24 @@ func (r *mutationResolver) RemoveUnapprovedJob(ctx context.Context, id int) (*mo
 }
 
 // GetJobs is the resolver for the getJobs field.
-func (r *queryResolver) GetJobs(ctx context.Context) ([]*model.JobProfile, error) {
+func (r *queryResolver) GetJobs(ctx context.Context, filterparameters *model.JobsFilterParameters) ([]*model.JobProfile, error) {
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
 
+	var query *gorm.DB
+
+	if filterparameters != nil {
+		// extract queries from the filter parameters
+		query = filterparameters.Query(r.Sql.Db.Model(&model.Job{}))
+	} else {
+		query = r.Sql.Db.Model(&model.Job{})
+	}
+
 	var jobs []*model.Job
-	if err := r.Sql.Db.Find(&jobs).Error; err != nil {
+
+	if err := query.Find(&jobs).Error; err != nil {
 		log.Error().Str("path", "GetJobs").Msg(err.Error())
 		return nil, errors.New("could not access jobs!")
 	}
@@ -548,14 +559,23 @@ func (r *queryResolver) FindJob(ctx context.Context, id int) (*model.JobProfile,
 }
 
 // GetUnapprovedJobs is the resolver for the getUnapprovedJobs field.
-func (r *queryResolver) GetUnapprovedJobs(ctx context.Context) ([]*model.JobProfile, error) {
+func (r *queryResolver) GetUnapprovedJobs(ctx context.Context, filterparameters *model.JobsFilterParameters) ([]*model.JobProfile, error) {
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
 	}
 
+	var query *gorm.DB
+
+	if filterparameters != nil {
+		// extract queries from the filter parameters
+		query = filterparameters.Query(r.Sql.Db.Model(&model.UnapprovedJob{}))
+	} else {
+		query = r.Sql.Db.Model(&model.UnapprovedJob{})
+	}
+
 	var jobs []*model.UnapprovedJob
-	if err := r.Sql.Db.Find(&jobs).Error; err != nil {
+	if err := query.Find(&jobs).Error; err != nil {
 		log.Error().Str("path", "GetUnapprovedJobs").Msg(err.Error())
 		return nil, errors.New("could not access unapproved jobs!")
 	}
