@@ -56,6 +56,40 @@ func (r *employerProfileResolver) Jobs(ctx context.Context, obj *model.EmployerP
 	return jobprofiles, nil
 }
 
+// UnapprovedJobs is the resolver for the unapprovedJobs field.
+func (r *employerProfileResolver) UnapprovedJobs(ctx context.Context, obj *model.EmployerProfile) ([]*model.UnapprovedJobProfile, error) {
+	var unapprovedjobs []model.UnapprovedJob
+	if err := r.Sql.Db.Where("employer_id = ?", obj.ID).Find(&unapprovedjobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("could not access unapproved jobs!")
+	}
+	var unapprovedjobprofiles []*model.UnapprovedJobProfile
+
+	for _, unapprovedjob := range unapprovedjobs {
+		unapprovedjobprofile := &model.UnapprovedJobProfile{
+			ID:             unapprovedjob.ID,
+			CreatedAt:      unapprovedjob.CreatedAt,
+			UpdatedAt:      unapprovedjob.UpdatedAt,
+			DeletedAt:      unapprovedjob.DeletedAt,
+			Title:          unapprovedjob.Title,
+			Industry:       unapprovedjob.Industry,
+			Description:    unapprovedjob.Description,
+			Level:          unapprovedjob.Level,
+			Location:       unapprovedjob.Location,
+			Deadline:       unapprovedjob.Deadline,
+			EducationLevel: unapprovedjob.EducationLevel,
+			MinSalary:      unapprovedjob.MinSalary,
+			MaxSalary:      unapprovedjob.MaxSalary,
+			Experience:     unapprovedjob.Experience,
+			JobURL:         unapprovedjob.JobURL,
+			Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
+		}
+		unapprovedjobprofiles = append(unapprovedjobprofiles, unapprovedjobprofile)
+	}
+
+	return unapprovedjobprofiles, nil
+}
+
 // CreateEmployer is the resolver for the createEmployer field, signs up an employer to the system
 func (r *mutationResolver) CreateEmployer(ctx context.Context, input model.NewEmployer) (*model.UnverifiedEmployer, error) {
 	//check if system is in shutdown mode
