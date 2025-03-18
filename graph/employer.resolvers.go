@@ -47,6 +47,7 @@ func (r *employerProfileResolver) Jobs(ctx context.Context, obj *model.EmployerP
 			MinSalary:      job.MinSalary,
 			MaxSalary:      job.MaxSalary,
 			Experience:     job.Experience,
+			JobURL:         job.JobURL,
 			Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 		}
 		jobprofiles = append(jobprofiles, jobprofile)

@@ -96,6 +96,7 @@ func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*
 		MaxSalary:      input.MaxSalary,
 		Experience:     input.Experience,
 		Requirements:   &requirements,
+		JobURL:         input.JobURL,
 	}
 
 	//Create records in postgres
@@ -119,6 +120,7 @@ func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*
 		MinSalary:      n.MinSalary,
 		MaxSalary:      n.MaxSalary,
 		Experience:     n.Experience,
+		JobURL:         n.JobURL,
 		Requirements:   strings.Split(pointer.GetString(n.Requirements), "||"),
 	}
 
@@ -166,6 +168,7 @@ func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.
 		Experience:     input.Experience,
 		Requirements:   &requirements,
 		EmployerID:     employerid,
+		JobURL:         input.JobURL,
 	}
 
 	//Create records in postgres
@@ -189,6 +192,7 @@ func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.
 		MinSalary:      n.MinSalary,
 		MaxSalary:      n.MaxSalary,
 		Experience:     n.Experience,
+		JobURL:         n.JobURL,
 		Requirements:   strings.Split(pointer.GetString(n.Requirements), "||"),
 	}
 
@@ -243,6 +247,7 @@ func (r *mutationResolver) ApproveJob(ctx context.Context, id int) (*model.JobPr
 		MinSalary:      unapprovedjob.MinSalary,
 		MaxSalary:      unapprovedjob.MaxSalary,
 		Experience:     unapprovedjob.Experience,
+		JobURL:         unapprovedjob.JobURL,
 		Requirements:   unapprovedjob.Requirements,
 	}
 
@@ -275,6 +280,7 @@ func (r *mutationResolver) ApproveJob(ctx context.Context, id int) (*model.JobPr
 		MinSalary:      job.MinSalary,
 		MaxSalary:      job.MaxSalary,
 		Experience:     job.Experience,
+		JobURL:         job.JobURL,
 		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 	}
 
@@ -329,6 +335,7 @@ func (r *mutationResolver) EditJob(ctx context.Context, id int, input model.NewJ
 	job.MinSalary = input.MinSalary
 	job.MaxSalary = input.MaxSalary
 	job.Experience = input.Experience
+	job.JobURL = input.JobURL
 	job.Requirements = &requirements
 
 	// Update job record
@@ -357,6 +364,7 @@ func (r *mutationResolver) EditJob(ctx context.Context, id int, input model.NewJ
 		EducationLevel: job.EducationLevel,
 		MinSalary:      job.MinSalary,
 		MaxSalary:      job.MaxSalary,
+		JobURL:         job.JobURL,
 		Experience:     job.Experience,
 		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 	}
@@ -420,6 +428,7 @@ func (r *mutationResolver) RemoveJob(ctx context.Context, id int) (*model.JobPro
 		MinSalary:      job.MinSalary,
 		MaxSalary:      job.MaxSalary,
 		Experience:     job.Experience,
+		JobURL:         job.JobURL,
 		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 	}
 
@@ -482,6 +491,7 @@ func (r *mutationResolver) RemoveUnapprovedJob(ctx context.Context, id int) (*mo
 		MinSalary:      unapprovedjob.MinSalary,
 		MaxSalary:      unapprovedjob.MaxSalary,
 		Experience:     unapprovedjob.Experience,
+		JobURL:         unapprovedjob.JobURL,
 		Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
 	}
 
@@ -530,6 +540,7 @@ func (r *queryResolver) GetJobs(ctx context.Context, filterparameters *model.Job
 			MinSalary:      job.MinSalary,
 			MaxSalary:      job.MaxSalary,
 			Experience:     job.Experience,
+			JobURL:         job.JobURL,
 			Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 		}
 		jobprofiles = append(jobprofiles, jobprofile)
@@ -569,6 +580,7 @@ func (r *queryResolver) FindJob(ctx context.Context, id int) (*model.JobProfile,
 		MinSalary:      job.MinSalary,
 		MaxSalary:      job.MaxSalary,
 		Experience:     job.Experience,
+		JobURL:         job.JobURL,
 		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 	}
 
@@ -616,6 +628,7 @@ func (r *queryResolver) GetUnapprovedJobs(ctx context.Context, filterparameters 
 			MinSalary:      job.MinSalary,
 			MaxSalary:      job.MaxSalary,
 			Experience:     job.Experience,
+			JobURL:         job.JobURL,
 			Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 		}
 		jobprofiles = append(jobprofiles, jobprofile)
@@ -655,6 +668,7 @@ func (r *queryResolver) FindUnapprovedJob(ctx context.Context, id int) (*model.J
 		MinSalary:      unapprovedjob.MinSalary,
 		MaxSalary:      unapprovedjob.MaxSalary,
 		Experience:     unapprovedjob.Experience,
+		JobURL:         unapprovedjob.JobURL,
 		Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
 	}
 

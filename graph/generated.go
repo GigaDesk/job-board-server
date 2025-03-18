@@ -257,6 +257,7 @@ type ComplexityRoot struct {
 		Experience     func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Industry       func(childComplexity int) int
+		JobURL         func(childComplexity int) int
 		Level          func(childComplexity int) int
 		Location       func(childComplexity int) int
 		MaxSalary      func(childComplexity int) int
@@ -276,6 +277,7 @@ type ComplexityRoot struct {
 		Experience     func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Industry       func(childComplexity int) int
+		JobURL         func(childComplexity int) int
 		Level          func(childComplexity int) int
 		Location       func(childComplexity int) int
 		MaxSalary      func(childComplexity int) int
@@ -398,6 +400,7 @@ type ComplexityRoot struct {
 		Experience     func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Industry       func(childComplexity int) int
+		JobURL         func(childComplexity int) int
 		Level          func(childComplexity int) int
 		Location       func(childComplexity int) int
 		MaxSalary      func(childComplexity int) int
@@ -1497,6 +1500,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Job.Industry(childComplexity), true
 
+	case "Job.jobUrl":
+		if e.complexity.Job.JobURL == nil {
+			break
+		}
+
+		return e.complexity.Job.JobURL(childComplexity), true
+
 	case "Job.level":
 		if e.complexity.Job.Level == nil {
 			break
@@ -1608,6 +1618,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.JobProfile.Industry(childComplexity), true
+
+	case "JobProfile.jobUrl":
+		if e.complexity.JobProfile.JobURL == nil {
+			break
+		}
+
+		return e.complexity.JobProfile.JobURL(childComplexity), true
 
 	case "JobProfile.level":
 		if e.complexity.JobProfile.Level == nil {
@@ -2716,6 +2733,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UnapprovedJob.Industry(childComplexity), true
+
+	case "UnapprovedJob.jobUrl":
+		if e.complexity.UnapprovedJob.JobURL == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJob.JobURL(childComplexity), true
 
 	case "UnapprovedJob.level":
 		if e.complexity.UnapprovedJob.Level == nil {
@@ -4051,6 +4075,7 @@ input TimeFilterBetween{
       maxSalary: Int  
       requirements: String  
       employerID: Int  
+      jobUrl: String  
   }
 
   """
@@ -4069,6 +4094,7 @@ input TimeFilterBetween{
       maxSalary: Int  
       requirements: String  
       employerID: Int  
+      jobUrl: String  
   } 
 
 
@@ -4138,6 +4164,7 @@ input TimeFilterBetween{
         maxSalary
         requirements
         employerID
+        jobUrl
     }
     """
     Order Job by asc or desc 
@@ -4167,6 +4194,7 @@ input TimeFilterBetween{
           maxSalary
           requirements
           employerID
+          jobUrl
     }
 
     """
@@ -4189,6 +4217,7 @@ input TimeFilterBetween{
           maxSalary: IntFilterInput
           requirements: StringFilterInput
           employerID: IntFilterInput
+          jobUrl: StringFilterInput
       and: [JobFiltersInput]
       or: [JobFiltersInput]
       not: JobFiltersInput
@@ -4234,6 +4263,7 @@ input TimeFilterBetween{
       maxSalary: Int  
       requirements: String  
       employerID: Int  
+      jobUrl: String  
   }
 
   """
@@ -4252,6 +4282,7 @@ input TimeFilterBetween{
       maxSalary: Int  
       requirements: String  
       employerID: Int  
+      jobUrl: String  
   } 
 
 
@@ -4321,6 +4352,7 @@ input TimeFilterBetween{
         maxSalary
         requirements
         employerID
+        jobUrl
     }
     """
     Order UnapprovedJob by asc or desc 
@@ -4350,6 +4382,7 @@ input TimeFilterBetween{
           maxSalary
           requirements
           employerID
+          jobUrl
     }
 
     """
@@ -4372,6 +4405,7 @@ input TimeFilterBetween{
           maxSalary: IntFilterInput
           requirements: StringFilterInput
           employerID: IntFilterInput
+          jobUrl: StringFilterInput
       and: [UnapprovedJobFiltersInput]
       or: [UnapprovedJobFiltersInput]
       not: UnapprovedJobFiltersInput
@@ -10047,6 +10081,8 @@ func (ec *executionContext) fieldContext_AddJobPayload_affected(_ context.Contex
 				return ec.fieldContext_Job_requirements(ctx, field)
 			case "employerID":
 				return ec.fieldContext_Job_employerID(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_Job_jobUrl(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Job", field.Name)
 		},
@@ -10188,6 +10224,8 @@ func (ec *executionContext) fieldContext_AddUnapprovedJobPayload_affected(_ cont
 				return ec.fieldContext_UnapprovedJob_requirements(ctx, field)
 			case "employerID":
 				return ec.fieldContext_UnapprovedJob_employerID(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_UnapprovedJob_jobUrl(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJob", field.Name)
 		},
@@ -14027,6 +14065,8 @@ func (ec *executionContext) fieldContext_EmployerProfile_jobs(_ context.Context,
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -14859,6 +14899,47 @@ func (ec *executionContext) fieldContext_Job_employerID(_ context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _Job_jobUrl(ctx context.Context, field graphql.CollectedField, obj *model.Job) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Job_jobUrl(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JobURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Job_jobUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Job",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _JobProfile_id(ctx context.Context, field graphql.CollectedField, obj *model.JobProfile) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_JobProfile_id(ctx, field)
 	if err != nil {
@@ -15489,6 +15570,47 @@ func (ec *executionContext) fieldContext_JobProfile_requirements(_ context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _JobProfile_jobUrl(ctx context.Context, field graphql.CollectedField, obj *model.JobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_JobProfile_jobUrl(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JobURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_JobProfile_jobUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _JobProfile_employer(ctx context.Context, field graphql.CollectedField, obj *model.JobProfile) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_JobProfile_employer(ctx, field)
 	if err != nil {
@@ -15619,6 +15741,8 @@ func (ec *executionContext) fieldContext_JobQueryResult_data(_ context.Context, 
 				return ec.fieldContext_Job_requirements(ctx, field)
 			case "employerID":
 				return ec.fieldContext_Job_employerID(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_Job_jobUrl(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Job", field.Name)
 		},
@@ -17067,6 +17191,8 @@ func (ec *executionContext) fieldContext_Mutation_createJob(ctx context.Context,
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -17156,6 +17282,8 @@ func (ec *executionContext) fieldContext_Mutation_createUnapprovedJob(ctx contex
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -17245,6 +17373,8 @@ func (ec *executionContext) fieldContext_Mutation_approveJob(ctx context.Context
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -17334,6 +17464,8 @@ func (ec *executionContext) fieldContext_Mutation_editJob(ctx context.Context, f
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -17423,6 +17555,8 @@ func (ec *executionContext) fieldContext_Mutation_removeJob(ctx context.Context,
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -17512,6 +17646,8 @@ func (ec *executionContext) fieldContext_Mutation_removeUnapprovedJob(ctx contex
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -19702,6 +19838,8 @@ func (ec *executionContext) fieldContext_Query_getJobs(ctx context.Context, fiel
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -19791,6 +19929,8 @@ func (ec *executionContext) fieldContext_Query_findJob(ctx context.Context, fiel
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -19877,6 +20017,8 @@ func (ec *executionContext) fieldContext_Query_getUnapprovedJobs(ctx context.Con
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -19966,6 +20108,8 @@ func (ec *executionContext) fieldContext_Query_findUnapprovedJob(ctx context.Con
 				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
 			case "requirements":
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			}
@@ -20444,6 +20588,8 @@ func (ec *executionContext) fieldContext_Query_getJob(ctx context.Context, field
 				return ec.fieldContext_Job_requirements(ctx, field)
 			case "employerID":
 				return ec.fieldContext_Job_employerID(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_Job_jobUrl(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Job", field.Name)
 		},
@@ -20590,6 +20736,8 @@ func (ec *executionContext) fieldContext_Query_getUnapprovedJob(ctx context.Cont
 				return ec.fieldContext_UnapprovedJob_requirements(ctx, field)
 			case "employerID":
 				return ec.fieldContext_UnapprovedJob_employerID(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_UnapprovedJob_jobUrl(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJob", field.Name)
 		},
@@ -21946,6 +22094,47 @@ func (ec *executionContext) fieldContext_UnapprovedJob_employerID(_ context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _UnapprovedJob_jobUrl(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJob) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJob_jobUrl(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JobURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJob_jobUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJob",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UnapprovedJobQueryResult_data(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobQueryResult) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UnapprovedJobQueryResult_data(ctx, field)
 	if err != nil {
@@ -22017,6 +22206,8 @@ func (ec *executionContext) fieldContext_UnapprovedJobQueryResult_data(_ context
 				return ec.fieldContext_UnapprovedJob_requirements(ctx, field)
 			case "employerID":
 				return ec.fieldContext_UnapprovedJob_employerID(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_UnapprovedJob_jobUrl(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJob", field.Name)
 		},
@@ -24285,6 +24476,8 @@ func (ec *executionContext) fieldContext_UpdateJobPayload_affected(_ context.Con
 				return ec.fieldContext_Job_requirements(ctx, field)
 			case "employerID":
 				return ec.fieldContext_Job_employerID(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_Job_jobUrl(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Job", field.Name)
 		},
@@ -24470,6 +24663,8 @@ func (ec *executionContext) fieldContext_UpdateUnapprovedJobPayload_affected(_ c
 				return ec.fieldContext_UnapprovedJob_requirements(ctx, field)
 			case "employerID":
 				return ec.fieldContext_UnapprovedJob_employerID(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_UnapprovedJob_jobUrl(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJob", field.Name)
 		},
@@ -27975,7 +28170,7 @@ func (ec *executionContext) unmarshalInputJobFiltersInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "createdAt", "updatedAt", "title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID", "and", "or", "not"}
+	fieldsInOrder := [...]string{"id", "createdAt", "updatedAt", "title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID", "jobUrl", "and", "or", "not"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -28087,6 +28282,13 @@ func (ec *executionContext) unmarshalInputJobFiltersInput(ctx context.Context, o
 				return it, err
 			}
 			it.EmployerID = data
+		case "jobUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobUrl"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobURL = data
 		case "and":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
 			data, err := ec.unmarshalOJobFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobFiltersInput(ctx, v)
@@ -28121,7 +28323,7 @@ func (ec *executionContext) unmarshalInputJobInput(ctx context.Context, obj inte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID"}
+	fieldsInOrder := [...]string{"title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID", "jobUrl"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -28212,6 +28414,13 @@ func (ec *executionContext) unmarshalInputJobInput(ctx context.Context, obj inte
 				return it, err
 			}
 			it.EmployerID = data
+		case "jobUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobUrl"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobURL = data
 		}
 	}
 
@@ -28259,7 +28468,7 @@ func (ec *executionContext) unmarshalInputJobPatch(ctx context.Context, obj inte
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID"}
+	fieldsInOrder := [...]string{"title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID", "jobUrl"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -28350,6 +28559,13 @@ func (ec *executionContext) unmarshalInputJobPatch(ctx context.Context, obj inte
 				return it, err
 			}
 			it.EmployerID = data
+		case "jobUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobUrl"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobURL = data
 		}
 	}
 
@@ -28548,7 +28764,7 @@ func (ec *executionContext) unmarshalInputNewJob(ctx context.Context, obj interf
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "description", "industry", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements"}
+	fieldsInOrder := [...]string{"title", "description", "industry", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "jobUrl"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -28632,6 +28848,13 @@ func (ec *executionContext) unmarshalInputNewJob(ctx context.Context, obj interf
 				return it, err
 			}
 			it.Requirements = data
+		case "jobUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobUrl"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobURL = data
 		}
 	}
 
@@ -29197,7 +29420,7 @@ func (ec *executionContext) unmarshalInputUnapprovedJobFiltersInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "createdAt", "updatedAt", "title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID", "and", "or", "not"}
+	fieldsInOrder := [...]string{"id", "createdAt", "updatedAt", "title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID", "jobUrl", "and", "or", "not"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -29309,6 +29532,13 @@ func (ec *executionContext) unmarshalInputUnapprovedJobFiltersInput(ctx context.
 				return it, err
 			}
 			it.EmployerID = data
+		case "jobUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobUrl"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobURL = data
 		case "and":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
 			data, err := ec.unmarshalOUnapprovedJobFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobFiltersInput(ctx, v)
@@ -29343,7 +29573,7 @@ func (ec *executionContext) unmarshalInputUnapprovedJobInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID"}
+	fieldsInOrder := [...]string{"title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID", "jobUrl"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -29434,6 +29664,13 @@ func (ec *executionContext) unmarshalInputUnapprovedJobInput(ctx context.Context
 				return it, err
 			}
 			it.EmployerID = data
+		case "jobUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobUrl"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobURL = data
 		}
 	}
 
@@ -29481,7 +29718,7 @@ func (ec *executionContext) unmarshalInputUnapprovedJobPatch(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID"}
+	fieldsInOrder := [...]string{"title", "industry", "description", "level", "location", "deadline", "educationLevel", "experience", "minSalary", "maxSalary", "requirements", "employerID", "jobUrl"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -29572,6 +29809,13 @@ func (ec *executionContext) unmarshalInputUnapprovedJobPatch(ctx context.Context
 				return it, err
 			}
 			it.EmployerID = data
+		case "jobUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobUrl"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobURL = data
 		}
 	}
 
@@ -32437,6 +32681,8 @@ func (ec *executionContext) _Job(ctx context.Context, sel ast.SelectionSet, obj 
 			out.Values[i] = ec._Job_requirements(ctx, field, obj)
 		case "employerID":
 			out.Values[i] = ec._Job_employerID(ctx, field, obj)
+		case "jobUrl":
+			out.Values[i] = ec._Job_jobUrl(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -32516,6 +32762,8 @@ func (ec *executionContext) _JobProfile(ctx context.Context, sel ast.SelectionSe
 			out.Values[i] = ec._JobProfile_maxSalary(ctx, field, obj)
 		case "requirements":
 			out.Values[i] = ec._JobProfile_requirements(ctx, field, obj)
+		case "jobUrl":
+			out.Values[i] = ec._JobProfile_jobUrl(ctx, field, obj)
 		case "employer":
 			field := field
 
@@ -33672,6 +33920,8 @@ func (ec *executionContext) _UnapprovedJob(ctx context.Context, sel ast.Selectio
 			out.Values[i] = ec._UnapprovedJob_requirements(ctx, field, obj)
 		case "employerID":
 			out.Values[i] = ec._UnapprovedJob_employerID(ctx, field, obj)
+		case "jobUrl":
+			out.Values[i] = ec._UnapprovedJob_jobUrl(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
