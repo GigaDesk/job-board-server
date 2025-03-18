@@ -128,7 +128,7 @@ func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*
 }
 
 // CreateUnapprovedJob is the resolver for the createUnapprovedJob field.
-func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.NewJob) (*model.JobProfile, error) {
+func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.NewJob) (*model.UnapprovedJobProfile, error) {
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
@@ -177,7 +177,7 @@ func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.
 		return nil, errors.New("an unexpected error occurred while creating the unapproved job. please try again later or contact support")
 	}
 
-	jobprofile := &model.JobProfile{
+	unapprovedjobprofile := &model.UnapprovedJobProfile{
 		ID:             n.ID,
 		CreatedAt:      n.CreatedAt,
 		UpdatedAt:      n.UpdatedAt,
@@ -196,7 +196,7 @@ func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.
 		Requirements:   strings.Split(pointer.GetString(n.Requirements), "||"),
 	}
 
-	return jobprofile, nil
+	return unapprovedjobprofile, nil
 }
 
 // ApproveJob is the resolver for the approveJob field.
@@ -436,7 +436,7 @@ func (r *mutationResolver) RemoveJob(ctx context.Context, id int) (*model.JobPro
 }
 
 // RemoveUnapprovedJob is the resolver for the removeUnapprovedJob field.
-func (r *mutationResolver) RemoveUnapprovedJob(ctx context.Context, id int) (*model.JobProfile, error) {
+func (r *mutationResolver) RemoveUnapprovedJob(ctx context.Context, id int) (*model.UnapprovedJobProfile, error) {
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
@@ -476,7 +476,7 @@ func (r *mutationResolver) RemoveUnapprovedJob(ctx context.Context, id int) (*mo
 		return nil, errors.New("Failed to complete unapproved job removal. please try again later or contact support")
 	}
 
-	jobprofile := &model.JobProfile{
+	unapprovedjobprofile := &model.UnapprovedJobProfile{
 		ID:             unapprovedjob.ID,
 		CreatedAt:      unapprovedjob.CreatedAt,
 		UpdatedAt:      unapprovedjob.UpdatedAt,
@@ -495,7 +495,7 @@ func (r *mutationResolver) RemoveUnapprovedJob(ctx context.Context, id int) (*mo
 		Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
 	}
 
-	return jobprofile, nil
+	return unapprovedjobprofile, nil
 }
 
 // GetJobs is the resolver for the getJobs field.
@@ -588,7 +588,7 @@ func (r *queryResolver) FindJob(ctx context.Context, id int) (*model.JobProfile,
 }
 
 // GetUnapprovedJobs is the resolver for the getUnapprovedJobs field.
-func (r *queryResolver) GetUnapprovedJobs(ctx context.Context, filterparameters *model.JobsFilterParameters) ([]*model.JobProfile, error) {
+func (r *queryResolver) GetUnapprovedJobs(ctx context.Context, filterparameters *model.JobsFilterParameters) ([]*model.UnapprovedJobProfile, error) {
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
@@ -610,10 +610,10 @@ func (r *queryResolver) GetUnapprovedJobs(ctx context.Context, filterparameters 
 	}
 	log.Info().Str("path", "GetUnapprovedJobs").Msg("getting unapproved jobs")
 
-	var jobprofiles []*model.JobProfile
+	var unapprovedjobprofiles []*model.UnapprovedJobProfile
 
 	for _, job := range jobs {
-		jobprofile := &model.JobProfile{
+		unapprovedjobprofile := &model.UnapprovedJobProfile{
 			ID:             job.ID,
 			CreatedAt:      job.CreatedAt,
 			UpdatedAt:      job.UpdatedAt,
@@ -631,14 +631,14 @@ func (r *queryResolver) GetUnapprovedJobs(ctx context.Context, filterparameters 
 			JobURL:         job.JobURL,
 			Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 		}
-		jobprofiles = append(jobprofiles, jobprofile)
+		unapprovedjobprofiles = append(unapprovedjobprofiles, unapprovedjobprofile)
 	}
 
-	return jobprofiles, nil
+	return unapprovedjobprofiles, nil
 }
 
 // FindUnapprovedJob is the resolver for the findUnapprovedJob field.
-func (r *queryResolver) FindUnapprovedJob(ctx context.Context, id int) (*model.JobProfile, error) {
+func (r *queryResolver) FindUnapprovedJob(ctx context.Context, id int) (*model.UnapprovedJobProfile, error) {
 	//check if system is in shutdown mode
 	if *shutdown.IsShutdown {
 		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
@@ -653,7 +653,7 @@ func (r *queryResolver) FindUnapprovedJob(ctx context.Context, id int) (*model.J
 		return nil, errors.New("error finding unapproved job with id: " + strconv.Itoa(id))
 	}
 
-	jobprofile := &model.JobProfile{
+	unapprovedjobprofile := &model.UnapprovedJobProfile{
 		ID:             unapprovedjob.ID,
 		CreatedAt:      unapprovedjob.CreatedAt,
 		UpdatedAt:      unapprovedjob.UpdatedAt,
@@ -672,10 +672,52 @@ func (r *queryResolver) FindUnapprovedJob(ctx context.Context, id int) (*model.J
 		Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
 	}
 
-	return jobprofile, nil
+	return unapprovedjobprofile, nil
+}
+
+// Employer is the resolver for the employer field.
+func (r *unapprovedJobProfileResolver) Employer(ctx context.Context, obj *model.UnapprovedJobProfile) (*model.EmployerProfile, error) {
+		// declare an unapproved job variable
+		var unapprovedjob *model.UnapprovedJob
+
+		// Find the first unapproved job that matches the id from the unapproved job profile
+		if err := r.Sql.Db.Where("id = ?", obj.ID).First(&unapprovedjob).Error; err != nil {
+			log.Info().Int("id", obj.ID).Str("object", "UnapprovedJobProfile").Msg("unapproved job with id does not exist")
+			return nil, errors.New("error finding unapproved job with id: " + strconv.Itoa(obj.ID))
+		}
+	
+		if unapprovedjob.EmployerID != nil {
+			//declare an employer variable
+			var employer *model.Employer
+	
+			if err := r.Sql.Db.Where("id = ?", unapprovedjob.EmployerID).First(&employer).Error; err != nil {
+				log.Info().Int("id", *unapprovedjob.EmployerID).Str("object", "UnapprovedJobProfile").Msg("employer with id does not exist")
+				return nil, errors.New("error finding employer with id: " + strconv.Itoa(*unapprovedjob.EmployerID))
+			}
+	
+			employerprofile := &model.EmployerProfile{
+				ID:          employer.ID,
+				CreatedAt:   employer.CreatedAt,
+				UpdatedAt:   employer.UpdatedAt,
+				Name:        employer.Name,
+				PhoneNumber: employer.PhoneNumber,
+				Badge:       employer.Badge,
+				Website:     employer.Website,
+			}
+	
+			return employerprofile, nil
+		}
+	
+		return nil, nil
 }
 
 // JobProfile returns JobProfileResolver implementation.
 func (r *Resolver) JobProfile() JobProfileResolver { return &jobProfileResolver{r} }
 
+// UnapprovedJobProfile returns UnapprovedJobProfileResolver implementation.
+func (r *Resolver) UnapprovedJobProfile() UnapprovedJobProfileResolver {
+	return &unapprovedJobProfileResolver{r}
+}
+
 type jobProfileResolver struct{ *Resolver }
+type unapprovedJobProfileResolver struct{ *Resolver }
