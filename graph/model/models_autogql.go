@@ -32,18 +32,20 @@ func GetInputStruct(name string, obj map[string]interface{}) (interface{}, error
 	switch name {
 	case "AdminInput":
 		return AdminInputFromMap(obj)
+	case "EmployeeInput":
+		return EmployeeInputFromMap(obj)
+	case "EmployerInput":
+		return EmployerInputFromMap(obj)
 	case "JobInput":
 		return JobInputFromMap(obj)
-	case "SchoolInput":
-		return SchoolInputFromMap(obj)
-	case "StudentInput":
-		return StudentInputFromMap(obj)
 	case "UnapprovedJobInput":
 		return UnapprovedJobInputFromMap(obj)
 	case "UnverifiedAdminInput":
 		return UnverifiedAdminInputFromMap(obj)
-	case "UnverifiedSchoolInput":
-		return UnverifiedSchoolInputFromMap(obj)
+	case "UnverifiedEmployeeInput":
+		return UnverifiedEmployeeInputFromMap(obj)
+	case "UnverifiedEmployerInput":
+		return UnverifiedEmployerInputFromMap(obj)
 	}
 	return nil, fmt.Errorf("%s not found", name)
 }
@@ -83,6 +85,109 @@ func (d *AdminInput) MergeToType() Admin {
 		Name:        tmpName,
 		PhoneNumber: tmpPhoneNumber,
 		Password:    tmpPassword,
+	}
+}
+
+// EmployeeInputFromMap return a EmployeeInput from data map
+// use github.com/mitchellh/mapstructure with reflaction
+func EmployeeInputFromMap(data map[string]interface{}) (EmployeeInput, error) {
+	model := EmployeeInput{}
+	err := mapstructure.Decode(data, &model)
+	return model, err
+}
+
+// MergeToType returns a map with all values set to EmployeePatch
+func (d *EmployeePatch) MergeToType() map[string]interface{} {
+	res := make(map[string]interface{})
+	if d.Name != nil {
+		res["name"] = *d.Name
+	}
+	if d.PhoneNumber != nil {
+		res["phone_number"] = *d.PhoneNumber
+	}
+	if d.Password != nil {
+		res["password"] = *d.Password
+	}
+	if d.Profilepicture != nil {
+		res["profilepicture"] = d.Profilepicture
+	}
+	return res
+}
+
+// MergeToType retuns a Employee filled from EmployeeInput
+func (d *EmployeeInput) MergeToType() Employee {
+
+	tmpName := d.Name
+
+	tmpPhoneNumber := d.PhoneNumber
+
+	tmpPassword := d.Password
+
+	var tmpProfilepicture *string
+	if d.Profilepicture != nil {
+		tmpProfilepicture = d.Profilepicture
+	}
+	return Employee{
+		Name:           tmpName,
+		PhoneNumber:    tmpPhoneNumber,
+		Password:       tmpPassword,
+		Profilepicture: tmpProfilepicture,
+	}
+}
+
+// EmployerInputFromMap return a EmployerInput from data map
+// use github.com/mitchellh/mapstructure with reflaction
+func EmployerInputFromMap(data map[string]interface{}) (EmployerInput, error) {
+	model := EmployerInput{}
+	err := mapstructure.Decode(data, &model)
+	return model, err
+}
+
+// MergeToType returns a map with all values set to EmployerPatch
+func (d *EmployerPatch) MergeToType() map[string]interface{} {
+	res := make(map[string]interface{})
+	if d.Name != nil {
+		res["name"] = *d.Name
+	}
+	if d.PhoneNumber != nil {
+		res["phone_number"] = *d.PhoneNumber
+	}
+	if d.Password != nil {
+		res["password"] = *d.Password
+	}
+	if d.Badge != nil {
+		res["badge"] = d.Badge
+	}
+	if d.Website != nil {
+		res["website"] = d.Website
+	}
+	return res
+}
+
+// MergeToType retuns a Employer filled from EmployerInput
+func (d *EmployerInput) MergeToType() Employer {
+
+	tmpName := d.Name
+
+	tmpPhoneNumber := d.PhoneNumber
+
+	tmpPassword := d.Password
+
+	var tmpBadge *string
+	if d.Badge != nil {
+		tmpBadge = d.Badge
+	}
+
+	var tmpWebsite *string
+	if d.Website != nil {
+		tmpWebsite = d.Website
+	}
+	return Employer{
+		Name:        tmpName,
+		PhoneNumber: tmpPhoneNumber,
+		Password:    tmpPassword,
+		Badge:       tmpBadge,
+		Website:     tmpWebsite,
 	}
 }
 
@@ -129,6 +234,12 @@ func (d *JobPatch) MergeToType() map[string]interface{} {
 	}
 	if d.Requirements != nil {
 		res["requirements"] = d.Requirements
+	}
+	if d.EmployerID != nil {
+		res["employer_id"] = d.EmployerID
+	}
+	if d.JobURL != nil {
+		res["job_url"] = d.JobURL
 	}
 	return res
 }
@@ -184,6 +295,16 @@ func (d *JobInput) MergeToType() Job {
 	if d.Requirements != nil {
 		tmpRequirements = d.Requirements
 	}
+
+	var tmpEmployerID *int
+	if d.EmployerID != nil {
+		tmpEmployerID = d.EmployerID
+	}
+
+	var tmpJobURL *string
+	if d.JobURL != nil {
+		tmpJobURL = d.JobURL
+	}
 	return Job{
 		Title:          tmpTitle,
 		Industry:       tmpIndustry,
@@ -196,133 +317,8 @@ func (d *JobInput) MergeToType() Job {
 		MinSalary:      tmpMinSalary,
 		MaxSalary:      tmpMaxSalary,
 		Requirements:   tmpRequirements,
-	}
-}
-
-// SchoolInputFromMap return a SchoolInput from data map
-// use github.com/mitchellh/mapstructure with reflaction
-func SchoolInputFromMap(data map[string]interface{}) (SchoolInput, error) {
-	model := SchoolInput{}
-	err := mapstructure.Decode(data, &model)
-	return model, err
-}
-
-// MergeToType returns a map with all values set to SchoolPatch
-func (d *SchoolPatch) MergeToType() map[string]interface{} {
-	res := make(map[string]interface{})
-	if d.Name != nil {
-		res["name"] = *d.Name
-	}
-	if d.PhoneNumber != nil {
-		res["phone_number"] = *d.PhoneNumber
-	}
-	if d.Password != nil {
-		res["password"] = *d.Password
-	}
-	if d.Badge != nil {
-		res["badge"] = d.Badge
-	}
-	if d.Website != nil {
-		res["website"] = d.Website
-	}
-	return res
-}
-
-// MergeToType retuns a School filled from SchoolInput
-func (d *SchoolInput) MergeToType() School {
-
-	tmpName := d.Name
-
-	tmpPhoneNumber := d.PhoneNumber
-
-	tmpPassword := d.Password
-
-	var tmpBadge *string
-	if d.Badge != nil {
-		tmpBadge = d.Badge
-	}
-
-	var tmpWebsite *string
-	if d.Website != nil {
-		tmpWebsite = d.Website
-	}
-	return School{
-		Name:        tmpName,
-		PhoneNumber: tmpPhoneNumber,
-		Password:    tmpPassword,
-		Badge:       tmpBadge,
-		Website:     tmpWebsite,
-	}
-}
-
-// StudentInputFromMap return a StudentInput from data map
-// use github.com/mitchellh/mapstructure with reflaction
-func StudentInputFromMap(data map[string]interface{}) (StudentInput, error) {
-	model := StudentInput{}
-	err := mapstructure.Decode(data, &model)
-	return model, err
-}
-
-// MergeToType returns a map with all values set to StudentPatch
-func (d *StudentPatch) MergeToType() map[string]interface{} {
-	res := make(map[string]interface{})
-	if d.RegistrationNumber != nil {
-		res["registration_number"] = *d.RegistrationNumber
-	}
-	if d.Name != nil {
-		res["name"] = *d.Name
-	}
-	if d.PhoneNumber != nil {
-		res["phone_number"] = *d.PhoneNumber
-	}
-	if d.Password != nil {
-		res["password"] = *d.Password
-	}
-	if d.DateOfAdmission != nil {
-		res["date_of_admission"] = d.DateOfAdmission
-	}
-	if d.DateOfBirth != nil {
-		res["date_of_birth"] = d.DateOfBirth
-	}
-	if d.ProfilePicture != nil {
-		res["profile_picture"] = d.ProfilePicture
-	}
-	return res
-}
-
-// MergeToType retuns a Student filled from StudentInput
-func (d *StudentInput) MergeToType() Student {
-
-	tmpRegistrationNumber := d.RegistrationNumber
-
-	tmpName := d.Name
-
-	tmpPhoneNumber := d.PhoneNumber
-
-	tmpPassword := d.Password
-
-	var tmpDateOfAdmission *time.Time
-	if d.DateOfAdmission != nil {
-		tmpDateOfAdmission = d.DateOfAdmission
-	}
-
-	var tmpDateOfBirth *time.Time
-	if d.DateOfBirth != nil {
-		tmpDateOfBirth = d.DateOfBirth
-	}
-
-	var tmpProfilePicture *string
-	if d.ProfilePicture != nil {
-		tmpProfilePicture = d.ProfilePicture
-	}
-	return Student{
-		RegistrationNumber: tmpRegistrationNumber,
-		Name:               tmpName,
-		PhoneNumber:        tmpPhoneNumber,
-		Password:           tmpPassword,
-		DateOfAdmission:    tmpDateOfAdmission,
-		DateOfBirth:        tmpDateOfBirth,
-		ProfilePicture:     tmpProfilePicture,
+		EmployerID:     tmpEmployerID,
+		JobURL:         tmpJobURL,
 	}
 }
 
@@ -369,6 +365,12 @@ func (d *UnapprovedJobPatch) MergeToType() map[string]interface{} {
 	}
 	if d.Requirements != nil {
 		res["requirements"] = d.Requirements
+	}
+	if d.EmployerID != nil {
+		res["employer_id"] = d.EmployerID
+	}
+	if d.JobURL != nil {
+		res["job_url"] = d.JobURL
 	}
 	return res
 }
@@ -424,6 +426,16 @@ func (d *UnapprovedJobInput) MergeToType() UnapprovedJob {
 	if d.Requirements != nil {
 		tmpRequirements = d.Requirements
 	}
+
+	var tmpEmployerID *int
+	if d.EmployerID != nil {
+		tmpEmployerID = d.EmployerID
+	}
+
+	var tmpJobURL *string
+	if d.JobURL != nil {
+		tmpJobURL = d.JobURL
+	}
 	return UnapprovedJob{
 		Title:          tmpTitle,
 		Industry:       tmpIndustry,
@@ -436,6 +448,8 @@ func (d *UnapprovedJobInput) MergeToType() UnapprovedJob {
 		MinSalary:      tmpMinSalary,
 		MaxSalary:      tmpMaxSalary,
 		Requirements:   tmpRequirements,
+		EmployerID:     tmpEmployerID,
+		JobURL:         tmpJobURL,
 	}
 }
 
@@ -477,16 +491,63 @@ func (d *UnverifiedAdminInput) MergeToType() UnverifiedAdmin {
 	}
 }
 
-// UnverifiedSchoolInputFromMap return a UnverifiedSchoolInput from data map
+// UnverifiedEmployeeInputFromMap return a UnverifiedEmployeeInput from data map
 // use github.com/mitchellh/mapstructure with reflaction
-func UnverifiedSchoolInputFromMap(data map[string]interface{}) (UnverifiedSchoolInput, error) {
-	model := UnverifiedSchoolInput{}
+func UnverifiedEmployeeInputFromMap(data map[string]interface{}) (UnverifiedEmployeeInput, error) {
+	model := UnverifiedEmployeeInput{}
 	err := mapstructure.Decode(data, &model)
 	return model, err
 }
 
-// MergeToType returns a map with all values set to UnverifiedSchoolPatch
-func (d *UnverifiedSchoolPatch) MergeToType() map[string]interface{} {
+// MergeToType returns a map with all values set to UnverifiedEmployeePatch
+func (d *UnverifiedEmployeePatch) MergeToType() map[string]interface{} {
+	res := make(map[string]interface{})
+	if d.Name != nil {
+		res["name"] = *d.Name
+	}
+	if d.PhoneNumber != nil {
+		res["phone_number"] = *d.PhoneNumber
+	}
+	if d.Password != nil {
+		res["password"] = *d.Password
+	}
+	if d.Profilepicture != nil {
+		res["profilepicture"] = d.Profilepicture
+	}
+	return res
+}
+
+// MergeToType retuns a UnverifiedEmployee filled from UnverifiedEmployeeInput
+func (d *UnverifiedEmployeeInput) MergeToType() UnverifiedEmployee {
+
+	tmpName := d.Name
+
+	tmpPhoneNumber := d.PhoneNumber
+
+	tmpPassword := d.Password
+
+	var tmpProfilepicture *string
+	if d.Profilepicture != nil {
+		tmpProfilepicture = d.Profilepicture
+	}
+	return UnverifiedEmployee{
+		Name:           tmpName,
+		PhoneNumber:    tmpPhoneNumber,
+		Password:       tmpPassword,
+		Profilepicture: tmpProfilepicture,
+	}
+}
+
+// UnverifiedEmployerInputFromMap return a UnverifiedEmployerInput from data map
+// use github.com/mitchellh/mapstructure with reflaction
+func UnverifiedEmployerInputFromMap(data map[string]interface{}) (UnverifiedEmployerInput, error) {
+	model := UnverifiedEmployerInput{}
+	err := mapstructure.Decode(data, &model)
+	return model, err
+}
+
+// MergeToType returns a map with all values set to UnverifiedEmployerPatch
+func (d *UnverifiedEmployerPatch) MergeToType() map[string]interface{} {
 	res := make(map[string]interface{})
 	if d.Name != nil {
 		res["name"] = *d.Name
@@ -506,8 +567,8 @@ func (d *UnverifiedSchoolPatch) MergeToType() map[string]interface{} {
 	return res
 }
 
-// MergeToType retuns a UnverifiedSchool filled from UnverifiedSchoolInput
-func (d *UnverifiedSchoolInput) MergeToType() UnverifiedSchool {
+// MergeToType retuns a UnverifiedEmployer filled from UnverifiedEmployerInput
+func (d *UnverifiedEmployerInput) MergeToType() UnverifiedEmployer {
 
 	tmpName := d.Name
 
@@ -524,7 +585,7 @@ func (d *UnverifiedSchoolInput) MergeToType() UnverifiedSchool {
 	if d.Website != nil {
 		tmpWebsite = d.Website
 	}
-	return UnverifiedSchool{
+	return UnverifiedEmployer{
 		Name:        tmpName,
 		PhoneNumber: tmpPhoneNumber,
 		Password:    tmpPassword,

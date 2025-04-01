@@ -4,8 +4,8 @@ import (
 	"github.com/GigaDesk/eardrum-prefix/validate"
 )
 
-// validates school login input data
-func (n SchoolLogin) Validate() error {
+// validates employer login input data
+func (n EmployeeLogin) Validate() error {
 	//validate phone number in kenyan conditions
 	if err := validate.ValidateKenyanPhoneNumber(n.PhoneNumber); err != nil {
 		return err
