@@ -54,6 +54,37 @@ func (r *jobProfileResolver) Employer(ctx context.Context, obj *model.JobProfile
 	return nil, nil
 }
 
+// Applications is the resolver for the applications field.
+func (r *jobProfileResolver) Applications(ctx context.Context, obj *model.JobProfile, status *model.ApplicationStatus) ([]*model.ApplicationProfile, error) {
+	var applications []model.Application
+
+	query := status.Query(r.Sql.Db.Model(&model.Application{}))
+
+	if err := query.Where("job_id = ?", obj.ID).Find(&applications).Error; err != nil {
+		log.Error().Str("object", "JobProfile").Msg(err.Error())
+		return nil, errors.New("could not access applications!")
+	}
+	var applicationprofiles []*model.ApplicationProfile
+
+	for _, application := range applications {
+		applicationprofile := &model.ApplicationProfile{
+			ID:             application.ID,
+			CreatedAt:      application.CreatedAt,
+			UpdatedAt:      application.UpdatedAt,
+			DeletedAt:      application.DeletedAt,
+			EducationLevel: application.EducationLevel,
+			Experience:     application.Experience,
+			CoverLetterURL: application.CoverLetterURL,
+			ResumeeURL: application.ResumeeURL,
+			Status: model.ApplicationStatus(strings.ToUpper(application.Status)),
+			
+		}
+		applicationprofiles = append(applicationprofiles, applicationprofile)
+	}
+
+	return applicationprofiles, nil
+}
+
 // CreateJob is the resolver for the CreateJob field.
 func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*model.JobProfile, error) {
 	//check if system is in shutdown mode
