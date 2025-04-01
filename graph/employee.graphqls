@@ -36,6 +36,7 @@ type EmployeeProfile {
   name: String!
   phone_number: String!
   profilepicture: String
+  applications(status: ApplicationStatus): [ApplicationProfile!]
 }
 
 #fields required by an employee to log into the system
