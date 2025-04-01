@@ -42,6 +42,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	AddAdminPayload() AddAdminPayloadResolver
+	AddApplicationPayload() AddApplicationPayloadResolver
 	AddEmployeePayload() AddEmployeePayloadResolver
 	AddEmployerPayload() AddEmployerPayloadResolver
 	AddJobPayload() AddJobPayloadResolver
@@ -49,7 +50,9 @@ type ResolverRoot interface {
 	AddUnverifiedAdminPayload() AddUnverifiedAdminPayloadResolver
 	AddUnverifiedEmployeePayload() AddUnverifiedEmployeePayloadResolver
 	AddUnverifiedEmployerPayload() AddUnverifiedEmployerPayloadResolver
+	ApplicationProfile() ApplicationProfileResolver
 	DeleteAdminPayload() DeleteAdminPayloadResolver
+	DeleteApplicationPayload() DeleteApplicationPayloadResolver
 	DeleteEmployeePayload() DeleteEmployeePayloadResolver
 	DeleteEmployerPayload() DeleteEmployerPayloadResolver
 	DeleteJobPayload() DeleteJobPayloadResolver
@@ -57,12 +60,14 @@ type ResolverRoot interface {
 	DeleteUnverifiedAdminPayload() DeleteUnverifiedAdminPayloadResolver
 	DeleteUnverifiedEmployeePayload() DeleteUnverifiedEmployeePayloadResolver
 	DeleteUnverifiedEmployerPayload() DeleteUnverifiedEmployerPayloadResolver
+	EmployeeProfile() EmployeeProfileResolver
 	EmployerProfile() EmployerProfileResolver
 	JobProfile() JobProfileResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 	UnapprovedJobProfile() UnapprovedJobProfileResolver
 	UpdateAdminPayload() UpdateAdminPayloadResolver
+	UpdateApplicationPayload() UpdateApplicationPayloadResolver
 	UpdateEmployeePayload() UpdateEmployeePayloadResolver
 	UpdateEmployerPayload() UpdateEmployerPayloadResolver
 	UpdateJobPayload() UpdateJobPayloadResolver
@@ -79,6 +84,11 @@ type ComplexityRoot struct {
 	AddAdminPayload struct {
 		Admin    func(childComplexity int, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) int
 		Affected func(childComplexity int) int
+	}
+
+	AddApplicationPayload struct {
+		Affected    func(childComplexity int) int
+		Application func(childComplexity int, filter *model.ApplicationFiltersInput, order *model.ApplicationOrder, first *int, offset *int, group []model.ApplicationGroup) int
 	}
 
 	AddEmployeePayload struct {
@@ -140,10 +150,50 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
+	Application struct {
+		CoverLetterURL func(childComplexity int) int
+		CreatedAt      func(childComplexity int) int
+		DeletedAt      func(childComplexity int) int
+		EducationLevel func(childComplexity int) int
+		EmployeeID     func(childComplexity int) int
+		Experience     func(childComplexity int) int
+		ID             func(childComplexity int) int
+		JobID          func(childComplexity int) int
+		ResumeeURL     func(childComplexity int) int
+		Status         func(childComplexity int) int
+		UpdatedAt      func(childComplexity int) int
+	}
+
+	ApplicationProfile struct {
+		CoverLetterURL func(childComplexity int) int
+		CreatedAt      func(childComplexity int) int
+		DeletedAt      func(childComplexity int) int
+		EducationLevel func(childComplexity int) int
+		Employee       func(childComplexity int) int
+		Experience     func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Job            func(childComplexity int) int
+		ResumeeURL     func(childComplexity int) int
+		Status         func(childComplexity int) int
+		UpdatedAt      func(childComplexity int) int
+	}
+
+	ApplicationQueryResult struct {
+		Count      func(childComplexity int) int
+		Data       func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
 	DeleteAdminPayload struct {
 		Admin func(childComplexity int, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) int
 		Count func(childComplexity int) int
 		Msg   func(childComplexity int) int
+	}
+
+	DeleteApplicationPayload struct {
+		Application func(childComplexity int, filter *model.ApplicationFiltersInput, order *model.ApplicationOrder, first *int, offset *int, group []model.ApplicationGroup) int
+		Count       func(childComplexity int) int
+		Msg         func(childComplexity int) int
 	}
 
 	DeleteEmployeePayload struct {
@@ -205,6 +255,7 @@ type ComplexityRoot struct {
 	}
 
 	EmployeeProfile struct {
+		Applications   func(childComplexity int, status *model.ApplicationStatus) int
 		CreatedAt      func(childComplexity int) int
 		ID             func(childComplexity int) int
 		Name           func(childComplexity int) int
@@ -270,6 +321,7 @@ type ComplexityRoot struct {
 	}
 
 	JobProfile struct {
+		Applications   func(childComplexity int, status *model.ApplicationStatus) int
 		CreatedAt      func(childComplexity int) int
 		Deadline       func(childComplexity int) int
 		DeletedAt      func(childComplexity int) int
@@ -297,6 +349,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AddAdmin                     func(childComplexity int, input []*model.AdminInput) int
+		AddApplication               func(childComplexity int, input []*model.ApplicationInput) int
 		AddEmployee                  func(childComplexity int, input []*model.EmployeeInput) int
 		AddEmployer                  func(childComplexity int, input []*model.EmployerInput) int
 		AddJob                       func(childComplexity int, input []*model.JobInput) int
@@ -307,12 +360,14 @@ type ComplexityRoot struct {
 		AdminLogin                   func(childComplexity int, input model.AdminLogin) int
 		ApproveJob                   func(childComplexity int, id int) int
 		CreateAdmin                  func(childComplexity int, input model.NewAdmin) int
+		CreateApplication            func(childComplexity int, input model.NewApplication) int
 		CreateDummy                  func(childComplexity int, name string) int
 		CreateEmployee               func(childComplexity int, input model.NewEmployee) int
 		CreateEmployer               func(childComplexity int, input model.NewEmployer) int
 		CreateJob                    func(childComplexity int, input model.NewJob) int
 		CreateUnapprovedJob          func(childComplexity int, input model.NewJob) int
 		DeleteAdmin                  func(childComplexity int, filter model.AdminFiltersInput) int
+		DeleteApplication            func(childComplexity int, filter model.ApplicationFiltersInput) int
 		DeleteEmployee               func(childComplexity int, filter model.EmployeeFiltersInput) int
 		DeleteEmployer               func(childComplexity int, filter model.EmployerFiltersInput) int
 		DeleteJob                    func(childComplexity int, filter model.JobFiltersInput) int
@@ -320,9 +375,11 @@ type ComplexityRoot struct {
 		DeleteUnverifiedAdmin        func(childComplexity int, filter model.UnverifiedAdminFiltersInput) int
 		DeleteUnverifiedEmployee     func(childComplexity int, filter model.UnverifiedEmployeeFiltersInput) int
 		DeleteUnverifiedEmployer     func(childComplexity int, filter model.UnverifiedEmployerFiltersInput) int
+		EditApplication              func(childComplexity int, id int, input *model.NewApplication, status *model.ApplicationStatus) int
 		EditJob                      func(childComplexity int, id int, input model.NewJob) int
 		EmployeeLogin                func(childComplexity int, input model.EmployeeLogin) int
 		EmployerLogin                func(childComplexity int, input model.EmployerLogin) int
+		FindApplication              func(childComplexity int, id int) int
 		ForgotAdminPassword          func(childComplexity int, phoneNumber string) int
 		ForgotEmployeePassword       func(childComplexity int, phoneNumber string) int
 		ForgotEmployerPassword       func(childComplexity int, phoneNumber string) int
@@ -337,6 +394,7 @@ type ComplexityRoot struct {
 		ResetEmployerPassword        func(childComplexity int, newPassword string) int
 		SendCode                     func(childComplexity int, phoneNumber string) int
 		UpdateAdmin                  func(childComplexity int, input model.UpdateAdminInput) int
+		UpdateApplication            func(childComplexity int, input model.UpdateApplicationInput) int
 		UpdateEmployee               func(childComplexity int, input model.UpdateEmployeeInput) int
 		UpdateEmployer               func(childComplexity int, input model.UpdateEmployerInput) int
 		UpdateJob                    func(childComplexity int, input model.UpdateJobInput) int
@@ -362,6 +420,7 @@ type ComplexityRoot struct {
 		FindJob                   func(childComplexity int, id int) int
 		FindUnapprovedJob         func(childComplexity int, id int) int
 		GetAdmin                  func(childComplexity int, id int) int
+		GetApplication            func(childComplexity int, id int) int
 		GetDummy                  func(childComplexity int, id *int) int
 		GetDummys                 func(childComplexity int) int
 		GetEmployee               func(childComplexity int, id int) int
@@ -378,6 +437,7 @@ type ComplexityRoot struct {
 		GetUnverifiedEmployee     func(childComplexity int, id int) int
 		GetUnverifiedEmployer     func(childComplexity int, id int) int
 		QueryAdmin                func(childComplexity int, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) int
+		QueryApplication          func(childComplexity int, filter *model.ApplicationFiltersInput, order *model.ApplicationOrder, first *int, offset *int, group []model.ApplicationGroup) int
 		QueryEmployee             func(childComplexity int, filter *model.EmployeeFiltersInput, order *model.EmployeeOrder, first *int, offset *int, group []model.EmployeeGroup) int
 		QueryEmployer             func(childComplexity int, filter *model.EmployerFiltersInput, order *model.EmployerOrder, first *int, offset *int, group []model.EmployerGroup) int
 		QueryJob                  func(childComplexity int, filter *model.JobFiltersInput, order *model.JobOrder, first *int, offset *int, group []model.JobGroup) int
@@ -495,6 +555,12 @@ type ComplexityRoot struct {
 		Count    func(childComplexity int) int
 	}
 
+	UpdateApplicationPayload struct {
+		Affected    func(childComplexity int) int
+		Application func(childComplexity int, filter *model.ApplicationFiltersInput, order *model.ApplicationOrder, first *int, offset *int, group []model.ApplicationGroup) int
+		Count       func(childComplexity int) int
+	}
+
 	UpdateEmployeePayload struct {
 		Affected func(childComplexity int) int
 		Count    func(childComplexity int) int
@@ -541,6 +607,9 @@ type ComplexityRoot struct {
 type AddAdminPayloadResolver interface {
 	Admin(ctx context.Context, obj *model.AddAdminPayload, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
 }
+type AddApplicationPayloadResolver interface {
+	Application(ctx context.Context, obj *model.AddApplicationPayload, filter *model.ApplicationFiltersInput, order *model.ApplicationOrder, first *int, offset *int, group []model.ApplicationGroup) (*model.ApplicationQueryResult, error)
+}
 type AddEmployeePayloadResolver interface {
 	Employee(ctx context.Context, obj *model.AddEmployeePayload, filter *model.EmployeeFiltersInput, order *model.EmployeeOrder, first *int, offset *int, group []model.EmployeeGroup) (*model.EmployeeQueryResult, error)
 }
@@ -562,8 +631,15 @@ type AddUnverifiedEmployeePayloadResolver interface {
 type AddUnverifiedEmployerPayloadResolver interface {
 	UnverifiedEmployer(ctx context.Context, obj *model.AddUnverifiedEmployerPayload, filter *model.UnverifiedEmployerFiltersInput, order *model.UnverifiedEmployerOrder, first *int, offset *int, group []model.UnverifiedEmployerGroup) (*model.UnverifiedEmployerQueryResult, error)
 }
+type ApplicationProfileResolver interface {
+	Job(ctx context.Context, obj *model.ApplicationProfile) (*model.JobProfile, error)
+	Employee(ctx context.Context, obj *model.ApplicationProfile) (*model.EmployeeProfile, error)
+}
 type DeleteAdminPayloadResolver interface {
 	Admin(ctx context.Context, obj *model.DeleteAdminPayload, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
+}
+type DeleteApplicationPayloadResolver interface {
+	Application(ctx context.Context, obj *model.DeleteApplicationPayload, filter *model.ApplicationFiltersInput, order *model.ApplicationOrder, first *int, offset *int, group []model.ApplicationGroup) (*model.ApplicationQueryResult, error)
 }
 type DeleteEmployeePayloadResolver interface {
 	Employee(ctx context.Context, obj *model.DeleteEmployeePayload, filter *model.EmployeeFiltersInput, order *model.EmployeeOrder, first *int, offset *int, group []model.EmployeeGroup) (*model.EmployeeQueryResult, error)
@@ -586,12 +662,16 @@ type DeleteUnverifiedEmployeePayloadResolver interface {
 type DeleteUnverifiedEmployerPayloadResolver interface {
 	UnverifiedEmployer(ctx context.Context, obj *model.DeleteUnverifiedEmployerPayload, filter *model.UnverifiedEmployerFiltersInput, order *model.UnverifiedEmployerOrder, first *int, offset *int, group []model.UnverifiedEmployerGroup) (*model.UnverifiedEmployerQueryResult, error)
 }
+type EmployeeProfileResolver interface {
+	Applications(ctx context.Context, obj *model.EmployeeProfile, status *model.ApplicationStatus) ([]*model.ApplicationProfile, error)
+}
 type EmployerProfileResolver interface {
 	Jobs(ctx context.Context, obj *model.EmployerProfile) ([]*model.JobProfile, error)
 	UnapprovedJobs(ctx context.Context, obj *model.EmployerProfile) ([]*model.UnapprovedJobProfile, error)
 }
 type JobProfileResolver interface {
 	Employer(ctx context.Context, obj *model.JobProfile) (*model.EmployerProfile, error)
+	Applications(ctx context.Context, obj *model.JobProfile, status *model.ApplicationStatus) ([]*model.ApplicationProfile, error)
 }
 type MutationResolver interface {
 	CreateDummy(ctx context.Context, name string) (*model.Dummy, error)
@@ -601,6 +681,9 @@ type MutationResolver interface {
 	ForgotAdminPassword(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error)
 	RequestAdminPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error)
 	ResetAdminPassword(ctx context.Context, newPassword string) (*model.Admin, error)
+	CreateApplication(ctx context.Context, input model.NewApplication) (*model.ApplicationProfile, error)
+	FindApplication(ctx context.Context, id int) (*model.ApplicationProfile, error)
+	EditApplication(ctx context.Context, id int, input *model.NewApplication, status *model.ApplicationStatus) (*model.ApplicationProfile, error)
 	CreateEmployee(ctx context.Context, input model.NewEmployee) (*model.UnverifiedEmployee, error)
 	VerifyEmployee(ctx context.Context, input model.Verificationinfo) (*model.Employee, error)
 	EmployeeLogin(ctx context.Context, input model.EmployeeLogin) (*string, error)
@@ -624,6 +707,9 @@ type MutationResolver interface {
 	AddAdmin(ctx context.Context, input []*model.AdminInput) (*model.AddAdminPayload, error)
 	UpdateAdmin(ctx context.Context, input model.UpdateAdminInput) (*model.UpdateAdminPayload, error)
 	DeleteAdmin(ctx context.Context, filter model.AdminFiltersInput) (*model.DeleteAdminPayload, error)
+	AddApplication(ctx context.Context, input []*model.ApplicationInput) (*model.AddApplicationPayload, error)
+	UpdateApplication(ctx context.Context, input model.UpdateApplicationInput) (*model.UpdateApplicationPayload, error)
+	DeleteApplication(ctx context.Context, filter model.ApplicationFiltersInput) (*model.DeleteApplicationPayload, error)
 	AddEmployee(ctx context.Context, input []*model.EmployeeInput) (*model.AddEmployeePayload, error)
 	UpdateEmployee(ctx context.Context, input model.UpdateEmployeeInput) (*model.UpdateEmployeePayload, error)
 	DeleteEmployee(ctx context.Context, filter model.EmployeeFiltersInput) (*model.DeleteEmployeePayload, error)
@@ -663,6 +749,8 @@ type QueryResolver interface {
 	FindUnapprovedJob(ctx context.Context, id int) (*model.UnapprovedJobProfile, error)
 	GetAdmin(ctx context.Context, id int) (*model.Admin, error)
 	QueryAdmin(ctx context.Context, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
+	GetApplication(ctx context.Context, id int) (*model.Application, error)
+	QueryApplication(ctx context.Context, filter *model.ApplicationFiltersInput, order *model.ApplicationOrder, first *int, offset *int, group []model.ApplicationGroup) (*model.ApplicationQueryResult, error)
 	GetEmployee(ctx context.Context, id int) (*model.Employee, error)
 	QueryEmployee(ctx context.Context, filter *model.EmployeeFiltersInput, order *model.EmployeeOrder, first *int, offset *int, group []model.EmployeeGroup) (*model.EmployeeQueryResult, error)
 	GetEmployer(ctx context.Context, id int) (*model.Employer, error)
@@ -683,6 +771,9 @@ type UnapprovedJobProfileResolver interface {
 }
 type UpdateAdminPayloadResolver interface {
 	Admin(ctx context.Context, obj *model.UpdateAdminPayload, filter *model.AdminFiltersInput, order *model.AdminOrder, first *int, offset *int, group []model.AdminGroup) (*model.AdminQueryResult, error)
+}
+type UpdateApplicationPayloadResolver interface {
+	Application(ctx context.Context, obj *model.UpdateApplicationPayload, filter *model.ApplicationFiltersInput, order *model.ApplicationOrder, first *int, offset *int, group []model.ApplicationGroup) (*model.ApplicationQueryResult, error)
 }
 type UpdateEmployeePayloadResolver interface {
 	Employee(ctx context.Context, obj *model.UpdateEmployeePayload, filter *model.EmployeeFiltersInput, order *model.EmployeeOrder, first *int, offset *int, group []model.EmployeeGroup) (*model.EmployeeQueryResult, error)
@@ -743,6 +834,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AddAdminPayload.Affected(childComplexity), true
+
+	case "AddApplicationPayload.affected":
+		if e.complexity.AddApplicationPayload.Affected == nil {
+			break
+		}
+
+		return e.complexity.AddApplicationPayload.Affected(childComplexity), true
+
+	case "AddApplicationPayload.application":
+		if e.complexity.AddApplicationPayload.Application == nil {
+			break
+		}
+
+		args, err := ec.field_AddApplicationPayload_application_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.AddApplicationPayload.Application(childComplexity, args["filter"].(*model.ApplicationFiltersInput), args["order"].(*model.ApplicationOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.ApplicationGroup)), true
 
 	case "AddEmployeePayload.affected":
 		if e.complexity.AddEmployeePayload.Affected == nil {
@@ -982,6 +1092,181 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AdminQueryResult.TotalCount(childComplexity), true
 
+	case "Application.coverLetterUrl":
+		if e.complexity.Application.CoverLetterURL == nil {
+			break
+		}
+
+		return e.complexity.Application.CoverLetterURL(childComplexity), true
+
+	case "Application.createdAt":
+		if e.complexity.Application.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Application.CreatedAt(childComplexity), true
+
+	case "Application.deletedAt":
+		if e.complexity.Application.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.Application.DeletedAt(childComplexity), true
+
+	case "Application.educationLevel":
+		if e.complexity.Application.EducationLevel == nil {
+			break
+		}
+
+		return e.complexity.Application.EducationLevel(childComplexity), true
+
+	case "Application.employeeID":
+		if e.complexity.Application.EmployeeID == nil {
+			break
+		}
+
+		return e.complexity.Application.EmployeeID(childComplexity), true
+
+	case "Application.experience":
+		if e.complexity.Application.Experience == nil {
+			break
+		}
+
+		return e.complexity.Application.Experience(childComplexity), true
+
+	case "Application.id":
+		if e.complexity.Application.ID == nil {
+			break
+		}
+
+		return e.complexity.Application.ID(childComplexity), true
+
+	case "Application.jobID":
+		if e.complexity.Application.JobID == nil {
+			break
+		}
+
+		return e.complexity.Application.JobID(childComplexity), true
+
+	case "Application.resumeeUrl":
+		if e.complexity.Application.ResumeeURL == nil {
+			break
+		}
+
+		return e.complexity.Application.ResumeeURL(childComplexity), true
+
+	case "Application.status":
+		if e.complexity.Application.Status == nil {
+			break
+		}
+
+		return e.complexity.Application.Status(childComplexity), true
+
+	case "Application.updatedAt":
+		if e.complexity.Application.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Application.UpdatedAt(childComplexity), true
+
+	case "ApplicationProfile.coverLetterUrl":
+		if e.complexity.ApplicationProfile.CoverLetterURL == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.CoverLetterURL(childComplexity), true
+
+	case "ApplicationProfile.createdAt":
+		if e.complexity.ApplicationProfile.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.CreatedAt(childComplexity), true
+
+	case "ApplicationProfile.deletedAt":
+		if e.complexity.ApplicationProfile.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.DeletedAt(childComplexity), true
+
+	case "ApplicationProfile.educationLevel":
+		if e.complexity.ApplicationProfile.EducationLevel == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.EducationLevel(childComplexity), true
+
+	case "ApplicationProfile.employee":
+		if e.complexity.ApplicationProfile.Employee == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.Employee(childComplexity), true
+
+	case "ApplicationProfile.experience":
+		if e.complexity.ApplicationProfile.Experience == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.Experience(childComplexity), true
+
+	case "ApplicationProfile.id":
+		if e.complexity.ApplicationProfile.ID == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.ID(childComplexity), true
+
+	case "ApplicationProfile.job":
+		if e.complexity.ApplicationProfile.Job == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.Job(childComplexity), true
+
+	case "ApplicationProfile.resumeeUrl":
+		if e.complexity.ApplicationProfile.ResumeeURL == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.ResumeeURL(childComplexity), true
+
+	case "ApplicationProfile.status":
+		if e.complexity.ApplicationProfile.Status == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.Status(childComplexity), true
+
+	case "ApplicationProfile.updatedAt":
+		if e.complexity.ApplicationProfile.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.ApplicationProfile.UpdatedAt(childComplexity), true
+
+	case "ApplicationQueryResult.count":
+		if e.complexity.ApplicationQueryResult.Count == nil {
+			break
+		}
+
+		return e.complexity.ApplicationQueryResult.Count(childComplexity), true
+
+	case "ApplicationQueryResult.data":
+		if e.complexity.ApplicationQueryResult.Data == nil {
+			break
+		}
+
+		return e.complexity.ApplicationQueryResult.Data(childComplexity), true
+
+	case "ApplicationQueryResult.totalCount":
+		if e.complexity.ApplicationQueryResult.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.ApplicationQueryResult.TotalCount(childComplexity), true
+
 	case "DeleteAdminPayload.admin":
 		if e.complexity.DeleteAdminPayload.Admin == nil {
 			break
@@ -1007,6 +1292,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DeleteAdminPayload.Msg(childComplexity), true
+
+	case "DeleteApplicationPayload.application":
+		if e.complexity.DeleteApplicationPayload.Application == nil {
+			break
+		}
+
+		args, err := ec.field_DeleteApplicationPayload_application_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.DeleteApplicationPayload.Application(childComplexity, args["filter"].(*model.ApplicationFiltersInput), args["order"].(*model.ApplicationOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.ApplicationGroup)), true
+
+	case "DeleteApplicationPayload.count":
+		if e.complexity.DeleteApplicationPayload.Count == nil {
+			break
+		}
+
+		return e.complexity.DeleteApplicationPayload.Count(childComplexity), true
+
+	case "DeleteApplicationPayload.msg":
+		if e.complexity.DeleteApplicationPayload.Msg == nil {
+			break
+		}
+
+		return e.complexity.DeleteApplicationPayload.Msg(childComplexity), true
 
 	case "DeleteEmployeePayload.count":
 		if e.complexity.DeleteEmployeePayload.Count == nil {
@@ -1259,6 +1570,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Employee.UpdatedAt(childComplexity), true
+
+	case "EmployeeProfile.applications":
+		if e.complexity.EmployeeProfile.Applications == nil {
+			break
+		}
+
+		args, err := ec.field_EmployeeProfile_applications_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.EmployeeProfile.Applications(childComplexity, args["status"].(*model.ApplicationStatus)), true
 
 	case "EmployeeProfile.createdAt":
 		if e.complexity.EmployeeProfile.CreatedAt == nil {
@@ -1589,6 +1912,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Job.UpdatedAt(childComplexity), true
 
+	case "JobProfile.applications":
+		if e.complexity.JobProfile.Applications == nil {
+			break
+		}
+
+		args, err := ec.field_JobProfile_applications_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.JobProfile.Applications(childComplexity, args["status"].(*model.ApplicationStatus)), true
+
 	case "JobProfile.createdAt":
 		if e.complexity.JobProfile.CreatedAt == nil {
 			break
@@ -1741,6 +2076,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AddAdmin(childComplexity, args["input"].([]*model.AdminInput)), true
 
+	case "Mutation.addApplication":
+		if e.complexity.Mutation.AddApplication == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addApplication_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddApplication(childComplexity, args["input"].([]*model.ApplicationInput)), true
+
 	case "Mutation.addEmployee":
 		if e.complexity.Mutation.AddEmployee == nil {
 			break
@@ -1861,6 +2208,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateAdmin(childComplexity, args["input"].(model.NewAdmin)), true
 
+	case "Mutation.createApplication":
+		if e.complexity.Mutation.CreateApplication == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createApplication_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateApplication(childComplexity, args["input"].(model.NewApplication)), true
+
 	case "Mutation.createDummy":
 		if e.complexity.Mutation.CreateDummy == nil {
 			break
@@ -1932,6 +2291,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteAdmin(childComplexity, args["filter"].(model.AdminFiltersInput)), true
+
+	case "Mutation.deleteApplication":
+		if e.complexity.Mutation.DeleteApplication == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteApplication_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteApplication(childComplexity, args["filter"].(model.ApplicationFiltersInput)), true
 
 	case "Mutation.deleteEmployee":
 		if e.complexity.Mutation.DeleteEmployee == nil {
@@ -2017,6 +2388,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteUnverifiedEmployer(childComplexity, args["filter"].(model.UnverifiedEmployerFiltersInput)), true
 
+	case "Mutation.editApplication":
+		if e.complexity.Mutation.EditApplication == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_editApplication_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.EditApplication(childComplexity, args["id"].(int), args["input"].(*model.NewApplication), args["status"].(*model.ApplicationStatus)), true
+
 	case "Mutation.editJob":
 		if e.complexity.Mutation.EditJob == nil {
 			break
@@ -2052,6 +2435,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.EmployerLogin(childComplexity, args["input"].(model.EmployerLogin)), true
+
+	case "Mutation.findApplication":
+		if e.complexity.Mutation.FindApplication == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_findApplication_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.FindApplication(childComplexity, args["id"].(int)), true
 
 	case "Mutation.forgotAdminPassword":
 		if e.complexity.Mutation.ForgotAdminPassword == nil {
@@ -2220,6 +2615,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateAdmin(childComplexity, args["input"].(model.UpdateAdminInput)), true
+
+	case "Mutation.updateApplication":
+		if e.complexity.Mutation.UpdateApplication == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateApplication_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateApplication(childComplexity, args["input"].(model.UpdateApplicationInput)), true
 
 	case "Mutation.updateEmployee":
 		if e.complexity.Mutation.UpdateEmployee == nil {
@@ -2439,6 +2846,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetAdmin(childComplexity, args["id"].(int)), true
 
+	case "Query.getApplication":
+		if e.complexity.Query.GetApplication == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getApplication_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetApplication(childComplexity, args["id"].(int)), true
+
 	case "Query.getDummy":
 		if e.complexity.Query.GetDummy == nil {
 			break
@@ -2605,6 +3024,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.QueryAdmin(childComplexity, args["filter"].(*model.AdminFiltersInput), args["order"].(*model.AdminOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.AdminGroup)), true
+
+	case "Query.queryApplication":
+		if e.complexity.Query.QueryApplication == nil {
+			break
+		}
+
+		args, err := ec.field_Query_queryApplication_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.QueryApplication(childComplexity, args["filter"].(*model.ApplicationFiltersInput), args["order"].(*model.ApplicationOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.ApplicationGroup)), true
 
 	case "Query.queryEmployee":
 		if e.complexity.Query.QueryEmployee == nil {
@@ -3220,6 +3651,32 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UpdateAdminPayload.Count(childComplexity), true
 
+	case "UpdateApplicationPayload.affected":
+		if e.complexity.UpdateApplicationPayload.Affected == nil {
+			break
+		}
+
+		return e.complexity.UpdateApplicationPayload.Affected(childComplexity), true
+
+	case "UpdateApplicationPayload.application":
+		if e.complexity.UpdateApplicationPayload.Application == nil {
+			break
+		}
+
+		args, err := ec.field_UpdateApplicationPayload_application_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.UpdateApplicationPayload.Application(childComplexity, args["filter"].(*model.ApplicationFiltersInput), args["order"].(*model.ApplicationOrder), args["first"].(*int), args["offset"].(*int), args["group"].([]model.ApplicationGroup)), true
+
+	case "UpdateApplicationPayload.count":
+		if e.complexity.UpdateApplicationPayload.Count == nil {
+			break
+		}
+
+		return e.complexity.UpdateApplicationPayload.Count(childComplexity), true
+
 	case "UpdateEmployeePayload.affected":
 		if e.complexity.UpdateEmployeePayload.Affected == nil {
 			break
@@ -3415,6 +3872,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputAdminLogin,
 		ec.unmarshalInputAdminOrder,
 		ec.unmarshalInputAdminPatch,
+		ec.unmarshalInputApplicationFiltersInput,
+		ec.unmarshalInputApplicationInput,
+		ec.unmarshalInputApplicationOrder,
+		ec.unmarshalInputApplicationPatch,
 		ec.unmarshalInputBooleanFilterInput,
 		ec.unmarshalInputEmployeeFiltersInput,
 		ec.unmarshalInputEmployeeInput,
@@ -3437,6 +3898,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputJobPatch,
 		ec.unmarshalInputJobsFilterParameters,
 		ec.unmarshalInputNewAdmin,
+		ec.unmarshalInputNewApplication,
 		ec.unmarshalInputNewEmployee,
 		ec.unmarshalInputNewEmployer,
 		ec.unmarshalInputNewJob,
@@ -3465,6 +3927,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUnverifiedEmployerOrder,
 		ec.unmarshalInputUnverifiedEmployerPatch,
 		ec.unmarshalInputUpdateAdminInput,
+		ec.unmarshalInputUpdateApplicationInput,
 		ec.unmarshalInputUpdateEmployeeInput,
 		ec.unmarshalInputUpdateEmployerInput,
 		ec.unmarshalInputUpdateJobInput,
@@ -3569,7 +4032,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "admin.graphqls" "employee.graphqls" "employer.graphqls" "job.graphqls" "schema.graphqls"
+//go:embed "admin.graphqls" "application.graphqls" "employee.graphqls" "employer.graphqls" "job.graphqls" "schema.graphqls"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -3582,6 +4045,7 @@ func sourceData(filename string) string {
 
 var sources = []*ast.Source{
 	{Name: "admin.graphqls", Input: sourceData("admin.graphqls"), BuiltIn: false},
+	{Name: "application.graphqls", Input: sourceData("application.graphqls"), BuiltIn: false},
 	{Name: "employee.graphqls", Input: sourceData("employee.graphqls"), BuiltIn: false},
 	{Name: "employer.graphqls", Input: sourceData("employer.graphqls"), BuiltIn: false},
 	{Name: "job.graphqls", Input: sourceData("job.graphqls"), BuiltIn: false},
@@ -3916,6 +4380,165 @@ input TimeFilterBetween{
         delete Admin filtered by selection and delete all matched values
         """
         deleteAdmin(filter: AdminFiltersInput!): DeleteAdminPayload 
+      }
+
+  """
+  Application Input value to add new Application
+  """
+  input ApplicationInput {
+      jobID: Int!  
+      employeeID: Int!  
+      educationLevel: String!  
+      experience: Int!  
+      coverLetterUrl: String!  
+      resumeeUrl: String!  
+      status: String!  
+  }
+
+  """
+  Application Patch value all values are optional to update Application entities
+  """
+  input ApplicationPatch {
+      jobID: Int  
+      employeeID: Int  
+      educationLevel: String  
+      experience: Int  
+      coverLetterUrl: String  
+      resumeeUrl: String  
+      status: String  
+  } 
+
+
+    """
+    Update rules for Application multiupdates simple possible by global filtervalue
+    """
+    input UpdateApplicationInput{
+      filter: ApplicationFiltersInput!
+      set: ApplicationPatch!
+    }
+
+    """
+    AddApplication result with filterable data and affected rows
+    """
+    type AddApplicationPayload{
+      application(filter: ApplicationFiltersInput, order: ApplicationOrder, first: Int, offset: Int, group: [ApplicationGroup!]): ApplicationQueryResult!
+      affected: [Application!]!
+    }
+
+    """
+    UpdateApplication result with filterable data and affected rows
+    """
+    type UpdateApplicationPayload{
+      application(filter: ApplicationFiltersInput, order: ApplicationOrder, first: Int, offset: Int, group: [ApplicationGroup!]): ApplicationQueryResult!
+      """
+      Count of affected updates
+      """
+      count: Int!
+      affected: [Application!]!
+    }
+
+    """
+    DeleteApplication result with filterable data and count of affected entries
+    """
+    type DeleteApplicationPayload{
+      application(filter: ApplicationFiltersInput, order: ApplicationOrder, first: Int, offset: Int, group: [ApplicationGroup!]): ApplicationQueryResult!
+      """
+      Count of deleted Application entities
+      """
+      count: Int!
+      msg: String
+    }
+
+    """
+    Application result
+    """
+    type ApplicationQueryResult{
+      data: [Application!]!
+      count: Int!
+      totalCount: Int!
+    }
+
+    """
+    for Application a enum of all orderable entities
+    can be used f.e.: queryApplication
+    """
+    enum ApplicationOrderable {
+        id
+        jobID
+        employeeID
+        educationLevel
+        experience
+        coverLetterUrl
+        resumeeUrl
+        status
+    }
+    """
+    Order Application by asc or desc 
+    """
+    input ApplicationOrder{
+      asc: ApplicationOrderable
+      desc: ApplicationOrderable
+    }
+
+    """
+    Groupable data for  Application
+    Can be used f.e.: by queryApplication
+    """
+    enum ApplicationGroup {
+          id
+          createdAt
+          updatedAt
+          jobID
+          employeeID
+          educationLevel
+          experience
+          coverLetterUrl
+          resumeeUrl
+          status
+    }
+
+    """
+    Filter input selection for Application
+    Can be used f.e.: by queryApplication
+    """
+    input ApplicationFiltersInput{
+          id: IntFilterInput
+          createdAt: TimeFilterInput
+          updatedAt: TimeFilterInput
+          jobID: IntFilterInput
+          employeeID: IntFilterInput
+          educationLevel: StringFilterInput
+          experience: IntFilterInput
+          coverLetterUrl: StringFilterInput
+          resumeeUrl: StringFilterInput
+          status: StringFilterInput
+      and: [ApplicationFiltersInput]
+      or: [ApplicationFiltersInput]
+      not: ApplicationFiltersInput
+    }
+      extend type Query {
+        """
+        return one Application selected by PrimaryKey(s)
+        """
+        getApplication(id: Int!, ): Application 
+        """
+        return a list of  Application filterable, pageination, orderbale, groupable ...
+        """
+        queryApplication(filter: ApplicationFiltersInput, order: ApplicationOrder, first: Int, offset: Int, group: [ApplicationGroup!] ): ApplicationQueryResult 
+      }
+      extend type Mutation {
+        """
+        Add new Application
+        """
+        addApplication(input: [ApplicationInput!]!): AddApplicationPayload 
+        """
+        update Application filtered by selection and update all matched values
+        """
+        updateApplication(input: UpdateApplicationInput!): UpdateApplicationPayload 
+        """
+        delete Application filtered by selection and delete all matched values
+        """
+        deleteApplication(filter: ApplicationFiltersInput!): DeleteApplicationPayload 
       }
 
   """
@@ -5120,6 +5743,101 @@ func (ec *executionContext) field_AddAdminPayload_admin_argsGroup(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_AddApplicationPayload_application_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_AddApplicationPayload_application_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_AddApplicationPayload_application_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_AddApplicationPayload_application_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_AddApplicationPayload_application_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_AddApplicationPayload_application_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_AddApplicationPayload_application_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOApplicationFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddApplicationPayload_application_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOApplicationOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddApplicationPayload_application_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddApplicationPayload_application_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_AddApplicationPayload_application_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.ApplicationGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOApplicationGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.ApplicationGroup
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_AddEmployeePayload_employee_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -5880,6 +6598,101 @@ func (ec *executionContext) field_DeleteAdminPayload_admin_argsGroup(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_DeleteApplicationPayload_application_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_DeleteApplicationPayload_application_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_DeleteApplicationPayload_application_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_DeleteApplicationPayload_application_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_DeleteApplicationPayload_application_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_DeleteApplicationPayload_application_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_DeleteApplicationPayload_application_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOApplicationFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteApplicationPayload_application_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOApplicationOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteApplicationPayload_application_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteApplicationPayload_application_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_DeleteApplicationPayload_application_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.ApplicationGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOApplicationGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.ApplicationGroup
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_DeleteEmployeePayload_employee_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6545,6 +7358,52 @@ func (ec *executionContext) field_DeleteUnverifiedEmployerPayload_unverifiedEmpl
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_EmployeeProfile_applications_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_EmployeeProfile_applications_argsStatus(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["status"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_EmployeeProfile_applications_argsStatus(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationStatus, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+	if tmp, ok := rawArgs["status"]; ok {
+		return ec.unmarshalOApplicationStatus2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationStatus(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationStatus
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_JobProfile_applications_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_JobProfile_applications_argsStatus(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["status"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_JobProfile_applications_argsStatus(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationStatus, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+	if tmp, ok := rawArgs["status"]; ok {
+		return ec.unmarshalOApplicationStatus2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationStatus(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationStatus
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_addAdmin_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6565,6 +7424,29 @@ func (ec *executionContext) field_Mutation_addAdmin_argsInput(
 	}
 
 	var zeroVal []*model.AdminInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_addApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_addApplication_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_addApplication_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*model.ApplicationInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNApplicationInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationInputᚄ(ctx, tmp)
+	}
+
+	var zeroVal []*model.ApplicationInput
 	return zeroVal, nil
 }
 
@@ -6798,6 +7680,29 @@ func (ec *executionContext) field_Mutation_createAdmin_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_createApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_createApplication_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_createApplication_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.NewApplication, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNNewApplication2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewApplication(ctx, tmp)
+	}
+
+	var zeroVal model.NewApplication
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_createDummy_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -6933,6 +7838,29 @@ func (ec *executionContext) field_Mutation_deleteAdmin_argsFilter(
 	}
 
 	var zeroVal model.AdminFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_deleteApplication_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_deleteApplication_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.ApplicationFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalNApplicationFiltersInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal model.ApplicationFiltersInput
 	return zeroVal, nil
 }
 
@@ -7097,6 +8025,65 @@ func (ec *executionContext) field_Mutation_deleteUnverifiedEmployer_argsFilter(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_editApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_editApplication_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	arg1, err := ec.field_Mutation_editApplication_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg1
+	arg2, err := ec.field_Mutation_editApplication_argsStatus(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["status"] = arg2
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_editApplication_argsID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_editApplication_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.NewApplication, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalONewApplication2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewApplication(ctx, tmp)
+	}
+
+	var zeroVal *model.NewApplication
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_editApplication_argsStatus(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationStatus, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+	if tmp, ok := rawArgs["status"]; ok {
+		return ec.unmarshalOApplicationStatus2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationStatus(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationStatus
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_editJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -7181,6 +8168,29 @@ func (ec *executionContext) field_Mutation_employerLogin_argsInput(
 	}
 
 	var zeroVal model.EmployerLogin
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_findApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_findApplication_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_findApplication_argsID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
 	return zeroVal, nil
 }
 
@@ -7503,6 +8513,29 @@ func (ec *executionContext) field_Mutation_updateAdmin_argsInput(
 	}
 
 	var zeroVal model.UpdateAdminInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_updateApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_updateApplication_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_updateApplication_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.UpdateApplicationInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNUpdateApplicationInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateApplicationInput(ctx, tmp)
+	}
+
+	var zeroVal model.UpdateApplicationInput
 	return zeroVal, nil
 }
 
@@ -7920,6 +8953,29 @@ func (ec *executionContext) field_Query_getAdmin_argsID(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_getApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_getApplication_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_getApplication_argsID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Query_getDummy_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -8242,6 +9298,101 @@ func (ec *executionContext) field_Query_queryAdmin_argsGroup(
 	}
 
 	var zeroVal []model.AdminGroup
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryApplication_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_queryApplication_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_Query_queryApplication_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_Query_queryApplication_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_Query_queryApplication_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_Query_queryApplication_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_Query_queryApplication_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOApplicationFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryApplication_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOApplicationOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryApplication_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryApplication_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_queryApplication_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.ApplicationGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOApplicationGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.ApplicationGroup
 	return zeroVal, nil
 }
 
@@ -9002,6 +10153,101 @@ func (ec *executionContext) field_UpdateAdminPayload_admin_argsGroup(
 	}
 
 	var zeroVal []model.AdminGroup
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateApplicationPayload_application_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_UpdateApplicationPayload_application_argsFilter(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg0
+	arg1, err := ec.field_UpdateApplicationPayload_application_argsOrder(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["order"] = arg1
+	arg2, err := ec.field_UpdateApplicationPayload_application_argsFirst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg2
+	arg3, err := ec.field_UpdateApplicationPayload_application_argsOffset(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg3
+	arg4, err := ec.field_UpdateApplicationPayload_application_argsGroup(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["group"] = arg4
+	return args, nil
+}
+func (ec *executionContext) field_UpdateApplicationPayload_application_argsFilter(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationFiltersInput, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+	if tmp, ok := rawArgs["filter"]; ok {
+		return ec.unmarshalOApplicationFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationFiltersInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateApplicationPayload_application_argsOrder(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.ApplicationOrder, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+	if tmp, ok := rawArgs["order"]; ok {
+		return ec.unmarshalOApplicationOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationOrder(ctx, tmp)
+	}
+
+	var zeroVal *model.ApplicationOrder
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateApplicationPayload_application_argsFirst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+	if tmp, ok := rawArgs["first"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateApplicationPayload_application_argsOffset(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
+	if tmp, ok := rawArgs["offset"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_UpdateApplicationPayload_application_argsGroup(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]model.ApplicationGroup, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("group"))
+	if tmp, ok := rawArgs["group"]; ok {
+		return ec.unmarshalOApplicationGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationGroupᚄ(ctx, tmp)
+	}
+
+	var zeroVal []model.ApplicationGroup
 	return zeroVal, nil
 }
 
@@ -9842,6 +11088,137 @@ func (ec *executionContext) fieldContext_AddAdminPayload_affected(_ context.Cont
 				return ec.fieldContext_Admin_password(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Admin", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddApplicationPayload_application(ctx context.Context, field graphql.CollectedField, obj *model.AddApplicationPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddApplicationPayload_application(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.AddApplicationPayload().Application(rctx, obj, fc.Args["filter"].(*model.ApplicationFiltersInput), fc.Args["order"].(*model.ApplicationOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.ApplicationGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ApplicationQueryResult)
+	fc.Result = res
+	return ec.marshalNApplicationQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddApplicationPayload_application(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddApplicationPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_ApplicationQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_ApplicationQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_ApplicationQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ApplicationQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_AddApplicationPayload_application_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddApplicationPayload_affected(ctx context.Context, field graphql.CollectedField, obj *model.AddApplicationPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddApplicationPayload_affected(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Affected, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Application)
+	fc.Result = res
+	return ec.marshalNApplication2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddApplicationPayload_affected(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddApplicationPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Application_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Application_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Application_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Application_deletedAt(ctx, field)
+			case "jobID":
+				return ec.fieldContext_Application_jobID(ctx, field)
+			case "employeeID":
+				return ec.fieldContext_Application_employeeID(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_Application_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_Application_experience(ctx, field)
+			case "coverLetterUrl":
+				return ec.fieldContext_Application_coverLetterUrl(ctx, field)
+			case "resumeeUrl":
+				return ec.fieldContext_Application_resumeeUrl(ctx, field)
+			case "status":
+				return ec.fieldContext_Application_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Application", field.Name)
 		},
 	}
 	return fc, nil
@@ -11433,6 +12810,1178 @@ func (ec *executionContext) fieldContext_AdminQueryResult_totalCount(_ context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _Application_id(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Application_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Application_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_updatedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Application_deletedAt(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_deletedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*runtimehelper.SoftDelete)
+	fc.Result = res
+	return ec.marshalOSoftDelete2ᚖgithubᚗcomᚋfasibioᚋautogqlᚋruntimehelperᚐSoftDelete(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_deletedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type SoftDelete does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Application_jobID(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_jobID(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JobID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_jobID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Application_employeeID(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_employeeID(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EmployeeID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_employeeID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Application_educationLevel(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_educationLevel(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EducationLevel, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_educationLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Application_experience(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_experience(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Experience, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_experience(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Application_coverLetterUrl(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_coverLetterUrl(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CoverLetterURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_coverLetterUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Application_resumeeUrl(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_resumeeUrl(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ResumeeURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_resumeeUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Application_status(ctx context.Context, field graphql.CollectedField, obj *model.Application) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Application_status(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Application_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Application",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_id(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_updatedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_deletedAt(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_deletedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*runtimehelper.SoftDelete)
+	fc.Result = res
+	return ec.marshalOSoftDelete2ᚖgithubᚗcomᚋfasibioᚋautogqlᚋruntimehelperᚐSoftDelete(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_deletedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type SoftDelete does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_job(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_job(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ApplicationProfile().Job(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobProfile)
+	fc.Result = res
+	return ec.marshalNJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_job(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_JobProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_JobProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_JobProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_JobProfile_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_JobProfile_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_JobProfile_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_JobProfile_description(ctx, field)
+			case "level":
+				return ec.fieldContext_JobProfile_level(ctx, field)
+			case "location":
+				return ec.fieldContext_JobProfile_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_JobProfile_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_JobProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_JobProfile_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_JobProfile_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_JobProfile_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_JobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+			case "employer":
+				return ec.fieldContext_JobProfile_employer(ctx, field)
+			case "applications":
+				return ec.fieldContext_JobProfile_applications(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_employee(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_employee(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ApplicationProfile().Employee(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.EmployeeProfile)
+	fc.Result = res
+	return ec.marshalNEmployeeProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐEmployeeProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_employee(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EmployeeProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EmployeeProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_EmployeeProfile_updatedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_EmployeeProfile_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_EmployeeProfile_phone_number(ctx, field)
+			case "profilepicture":
+				return ec.fieldContext_EmployeeProfile_profilepicture(ctx, field)
+			case "applications":
+				return ec.fieldContext_EmployeeProfile_applications(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EmployeeProfile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_educationLevel(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_educationLevel(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EducationLevel, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_educationLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_experience(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_experience(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Experience, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_experience(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_coverLetterUrl(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_coverLetterUrl(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CoverLetterURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_coverLetterUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_resumeeUrl(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_resumeeUrl(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ResumeeURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_resumeeUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationProfile_status(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationProfile_status(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.ApplicationStatus)
+	fc.Result = res
+	return ec.marshalNApplicationStatus2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationProfile_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ApplicationStatus does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationQueryResult_data(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationQueryResult_data(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Data, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Application)
+	fc.Result = res
+	return ec.marshalNApplication2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationQueryResult_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Application_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Application_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Application_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Application_deletedAt(ctx, field)
+			case "jobID":
+				return ec.fieldContext_Application_jobID(ctx, field)
+			case "employeeID":
+				return ec.fieldContext_Application_employeeID(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_Application_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_Application_experience(ctx, field)
+			case "coverLetterUrl":
+				return ec.fieldContext_Application_coverLetterUrl(ctx, field)
+			case "resumeeUrl":
+				return ec.fieldContext_Application_resumeeUrl(ctx, field)
+			case "status":
+				return ec.fieldContext_Application_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Application", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationQueryResult_count(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationQueryResult_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationQueryResult_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ApplicationQueryResult_totalCount(ctx context.Context, field graphql.CollectedField, obj *model.ApplicationQueryResult) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ApplicationQueryResult_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ApplicationQueryResult_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ApplicationQueryResult",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _DeleteAdminPayload_admin(ctx context.Context, field graphql.CollectedField, obj *model.DeleteAdminPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_DeleteAdminPayload_admin(ctx, field)
 	if err != nil {
@@ -11571,6 +14120,154 @@ func (ec *executionContext) _DeleteAdminPayload_msg(ctx context.Context, field g
 func (ec *executionContext) fieldContext_DeleteAdminPayload_msg(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "DeleteAdminPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteApplicationPayload_application(ctx context.Context, field graphql.CollectedField, obj *model.DeleteApplicationPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteApplicationPayload_application(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.DeleteApplicationPayload().Application(rctx, obj, fc.Args["filter"].(*model.ApplicationFiltersInput), fc.Args["order"].(*model.ApplicationOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.ApplicationGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ApplicationQueryResult)
+	fc.Result = res
+	return ec.marshalNApplicationQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteApplicationPayload_application(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteApplicationPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_ApplicationQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_ApplicationQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_ApplicationQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ApplicationQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_DeleteApplicationPayload_application_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteApplicationPayload_count(ctx context.Context, field graphql.CollectedField, obj *model.DeleteApplicationPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteApplicationPayload_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteApplicationPayload_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteApplicationPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DeleteApplicationPayload_msg(ctx context.Context, field graphql.CollectedField, obj *model.DeleteApplicationPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DeleteApplicationPayload_msg(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Msg, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DeleteApplicationPayload_msg(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DeleteApplicationPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -13312,6 +16009,82 @@ func (ec *executionContext) fieldContext_EmployeeProfile_profilepicture(_ contex
 	return fc, nil
 }
 
+func (ec *executionContext) _EmployeeProfile_applications(ctx context.Context, field graphql.CollectedField, obj *model.EmployeeProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EmployeeProfile_applications(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.EmployeeProfile().Applications(rctx, obj, fc.Args["status"].(*model.ApplicationStatus))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ApplicationProfile)
+	fc.Result = res
+	return ec.marshalOApplicationProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationProfileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EmployeeProfile_applications(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EmployeeProfile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ApplicationProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ApplicationProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_ApplicationProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_ApplicationProfile_deletedAt(ctx, field)
+			case "job":
+				return ec.fieldContext_ApplicationProfile_job(ctx, field)
+			case "employee":
+				return ec.fieldContext_ApplicationProfile_employee(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_ApplicationProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_ApplicationProfile_experience(ctx, field)
+			case "coverLetterUrl":
+				return ec.fieldContext_ApplicationProfile_coverLetterUrl(ctx, field)
+			case "resumeeUrl":
+				return ec.fieldContext_ApplicationProfile_resumeeUrl(ctx, field)
+			case "status":
+				return ec.fieldContext_ApplicationProfile_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ApplicationProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_EmployeeProfile_applications_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _EmployeeQueryResult_data(ctx context.Context, field graphql.CollectedField, obj *model.EmployeeQueryResult) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EmployeeQueryResult_data(ctx, field)
 	if err != nil {
@@ -14221,6 +16994,8 @@ func (ec *executionContext) fieldContext_EmployerProfile_jobs(_ context.Context,
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
+			case "applications":
+				return ec.fieldContext_JobProfile_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -15901,6 +18676,82 @@ func (ec *executionContext) fieldContext_JobProfile_employer(_ context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _JobProfile_applications(ctx context.Context, field graphql.CollectedField, obj *model.JobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_JobProfile_applications(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.JobProfile().Applications(rctx, obj, fc.Args["status"].(*model.ApplicationStatus))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.ApplicationProfile)
+	fc.Result = res
+	return ec.marshalOApplicationProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationProfileᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_JobProfile_applications(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JobProfile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ApplicationProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ApplicationProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_ApplicationProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_ApplicationProfile_deletedAt(ctx, field)
+			case "job":
+				return ec.fieldContext_ApplicationProfile_job(ctx, field)
+			case "employee":
+				return ec.fieldContext_ApplicationProfile_employee(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_ApplicationProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_ApplicationProfile_experience(ctx, field)
+			case "coverLetterUrl":
+				return ec.fieldContext_ApplicationProfile_coverLetterUrl(ctx, field)
+			case "resumeeUrl":
+				return ec.fieldContext_ApplicationProfile_resumeeUrl(ctx, field)
+			case "status":
+				return ec.fieldContext_ApplicationProfile_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ApplicationProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_JobProfile_applications_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _JobQueryResult_data(ctx context.Context, field graphql.CollectedField, obj *model.JobQueryResult) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_JobQueryResult_data(ctx, field)
 	if err != nil {
@@ -16487,6 +19338,243 @@ func (ec *executionContext) fieldContext_Mutation_resetAdminPassword(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_resetAdminPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_createApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_createApplication(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateApplication(rctx, fc.Args["input"].(model.NewApplication))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ApplicationProfile)
+	fc.Result = res
+	return ec.marshalNApplicationProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createApplication(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ApplicationProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ApplicationProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_ApplicationProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_ApplicationProfile_deletedAt(ctx, field)
+			case "job":
+				return ec.fieldContext_ApplicationProfile_job(ctx, field)
+			case "employee":
+				return ec.fieldContext_ApplicationProfile_employee(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_ApplicationProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_ApplicationProfile_experience(ctx, field)
+			case "coverLetterUrl":
+				return ec.fieldContext_ApplicationProfile_coverLetterUrl(ctx, field)
+			case "resumeeUrl":
+				return ec.fieldContext_ApplicationProfile_resumeeUrl(ctx, field)
+			case "status":
+				return ec.fieldContext_ApplicationProfile_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ApplicationProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createApplication_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_findApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_findApplication(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().FindApplication(rctx, fc.Args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ApplicationProfile)
+	fc.Result = res
+	return ec.marshalNApplicationProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_findApplication(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ApplicationProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ApplicationProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_ApplicationProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_ApplicationProfile_deletedAt(ctx, field)
+			case "job":
+				return ec.fieldContext_ApplicationProfile_job(ctx, field)
+			case "employee":
+				return ec.fieldContext_ApplicationProfile_employee(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_ApplicationProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_ApplicationProfile_experience(ctx, field)
+			case "coverLetterUrl":
+				return ec.fieldContext_ApplicationProfile_coverLetterUrl(ctx, field)
+			case "resumeeUrl":
+				return ec.fieldContext_ApplicationProfile_resumeeUrl(ctx, field)
+			case "status":
+				return ec.fieldContext_ApplicationProfile_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ApplicationProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_findApplication_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_editApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_editApplication(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().EditApplication(rctx, fc.Args["id"].(int), fc.Args["input"].(*model.NewApplication), fc.Args["status"].(*model.ApplicationStatus))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ApplicationProfile)
+	fc.Result = res
+	return ec.marshalNApplicationProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_editApplication(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ApplicationProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_ApplicationProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_ApplicationProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_ApplicationProfile_deletedAt(ctx, field)
+			case "job":
+				return ec.fieldContext_ApplicationProfile_job(ctx, field)
+			case "employee":
+				return ec.fieldContext_ApplicationProfile_employee(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_ApplicationProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_ApplicationProfile_experience(ctx, field)
+			case "coverLetterUrl":
+				return ec.fieldContext_ApplicationProfile_coverLetterUrl(ctx, field)
+			case "resumeeUrl":
+				return ec.fieldContext_ApplicationProfile_resumeeUrl(ctx, field)
+			case "status":
+				return ec.fieldContext_ApplicationProfile_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ApplicationProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_editApplication_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -17426,6 +20514,8 @@ func (ec *executionContext) fieldContext_Mutation_createJob(ctx context.Context,
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
+			case "applications":
+				return ec.fieldContext_JobProfile_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -17608,6 +20698,8 @@ func (ec *executionContext) fieldContext_Mutation_approveJob(ctx context.Context
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
+			case "applications":
+				return ec.fieldContext_JobProfile_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -17699,6 +20791,8 @@ func (ec *executionContext) fieldContext_Mutation_editJob(ctx context.Context, f
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
+			case "applications":
+				return ec.fieldContext_JobProfile_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -17790,6 +20884,8 @@ func (ec *executionContext) fieldContext_Mutation_removeJob(ctx context.Context,
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
+			case "applications":
+				return ec.fieldContext_JobProfile_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -18071,6 +21167,184 @@ func (ec *executionContext) fieldContext_Mutation_deleteAdmin(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addApplication(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddApplication(rctx, fc.Args["input"].([]*model.ApplicationInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.AddApplicationPayload)
+	fc.Result = res
+	return ec.marshalOAddApplicationPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddApplicationPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addApplication(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "application":
+				return ec.fieldContext_AddApplicationPayload_application(ctx, field)
+			case "affected":
+				return ec.fieldContext_AddApplicationPayload_affected(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AddApplicationPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addApplication_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateApplication(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateApplication(rctx, fc.Args["input"].(model.UpdateApplicationInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UpdateApplicationPayload)
+	fc.Result = res
+	return ec.marshalOUpdateApplicationPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateApplicationPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateApplication(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "application":
+				return ec.fieldContext_UpdateApplicationPayload_application(ctx, field)
+			case "count":
+				return ec.fieldContext_UpdateApplicationPayload_count(ctx, field)
+			case "affected":
+				return ec.fieldContext_UpdateApplicationPayload_affected(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UpdateApplicationPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateApplication_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteApplication(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteApplication(rctx, fc.Args["filter"].(model.ApplicationFiltersInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DeleteApplicationPayload)
+	fc.Result = res
+	return ec.marshalODeleteApplicationPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteApplicationPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteApplication(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "application":
+				return ec.fieldContext_DeleteApplicationPayload_application(ctx, field)
+			case "count":
+				return ec.fieldContext_DeleteApplicationPayload_count(ctx, field)
+			case "msg":
+				return ec.fieldContext_DeleteApplicationPayload_msg(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DeleteApplicationPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteApplication_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -19689,6 +22963,8 @@ func (ec *executionContext) fieldContext_Query_getEmployeeProfile(_ context.Cont
 				return ec.fieldContext_EmployeeProfile_phone_number(ctx, field)
 			case "profilepicture":
 				return ec.fieldContext_EmployeeProfile_profilepicture(ctx, field)
+			case "applications":
+				return ec.fieldContext_EmployeeProfile_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmployeeProfile", field.Name)
 		},
@@ -19744,6 +23020,8 @@ func (ec *executionContext) fieldContext_Query_getEmployeesProfile(_ context.Con
 				return ec.fieldContext_EmployeeProfile_phone_number(ctx, field)
 			case "profilepicture":
 				return ec.fieldContext_EmployeeProfile_profilepicture(ctx, field)
+			case "applications":
+				return ec.fieldContext_EmployeeProfile_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type EmployeeProfile", field.Name)
 		},
@@ -20079,6 +23357,8 @@ func (ec *executionContext) fieldContext_Query_getJobs(ctx context.Context, fiel
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
+			case "applications":
+				return ec.fieldContext_JobProfile_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -20170,6 +23450,8 @@ func (ec *executionContext) fieldContext_Query_findJob(ctx context.Context, fiel
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
+			case "applications":
+				return ec.fieldContext_JobProfile_applications(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type JobProfile", field.Name)
 		},
@@ -20489,6 +23771,142 @@ func (ec *executionContext) fieldContext_Query_queryAdmin(ctx context.Context, f
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_queryAdmin_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getApplication(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetApplication(rctx, fc.Args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Application)
+	fc.Result = res
+	return ec.marshalOApplication2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplication(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getApplication(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Application_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Application_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Application_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Application_deletedAt(ctx, field)
+			case "jobID":
+				return ec.fieldContext_Application_jobID(ctx, field)
+			case "employeeID":
+				return ec.fieldContext_Application_employeeID(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_Application_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_Application_experience(ctx, field)
+			case "coverLetterUrl":
+				return ec.fieldContext_Application_coverLetterUrl(ctx, field)
+			case "resumeeUrl":
+				return ec.fieldContext_Application_resumeeUrl(ctx, field)
+			case "status":
+				return ec.fieldContext_Application_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Application", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getApplication_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_queryApplication(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_queryApplication(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().QueryApplication(rctx, fc.Args["filter"].(*model.ApplicationFiltersInput), fc.Args["order"].(*model.ApplicationOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.ApplicationGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.ApplicationQueryResult)
+	fc.Result = res
+	return ec.marshalOApplicationQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_queryApplication(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_ApplicationQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_ApplicationQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_ApplicationQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ApplicationQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_queryApplication_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -24927,6 +28345,181 @@ func (ec *executionContext) fieldContext_UpdateAdminPayload_affected(_ context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _UpdateApplicationPayload_application(ctx context.Context, field graphql.CollectedField, obj *model.UpdateApplicationPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateApplicationPayload_application(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.UpdateApplicationPayload().Application(rctx, obj, fc.Args["filter"].(*model.ApplicationFiltersInput), fc.Args["order"].(*model.ApplicationOrder), fc.Args["first"].(*int), fc.Args["offset"].(*int), fc.Args["group"].([]model.ApplicationGroup))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ApplicationQueryResult)
+	fc.Result = res
+	return ec.marshalNApplicationQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationQueryResult(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateApplicationPayload_application(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateApplicationPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "data":
+				return ec.fieldContext_ApplicationQueryResult_data(ctx, field)
+			case "count":
+				return ec.fieldContext_ApplicationQueryResult_count(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_ApplicationQueryResult_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ApplicationQueryResult", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_UpdateApplicationPayload_application_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateApplicationPayload_count(ctx context.Context, field graphql.CollectedField, obj *model.UpdateApplicationPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateApplicationPayload_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateApplicationPayload_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateApplicationPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdateApplicationPayload_affected(ctx context.Context, field graphql.CollectedField, obj *model.UpdateApplicationPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateApplicationPayload_affected(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Affected, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Application)
+	fc.Result = res
+	return ec.marshalNApplication2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateApplicationPayload_affected(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateApplicationPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Application_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Application_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Application_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_Application_deletedAt(ctx, field)
+			case "jobID":
+				return ec.fieldContext_Application_jobID(ctx, field)
+			case "employeeID":
+				return ec.fieldContext_Application_employeeID(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_Application_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_Application_experience(ctx, field)
+			case "coverLetterUrl":
+				return ec.fieldContext_Application_coverLetterUrl(ctx, field)
+			case "resumeeUrl":
+				return ec.fieldContext_Application_resumeeUrl(ctx, field)
+			case "status":
+				return ec.fieldContext_Application_status(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Application", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UpdateEmployeePayload_employee(ctx context.Context, field graphql.CollectedField, obj *model.UpdateEmployeePayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UpdateEmployeePayload_employee(ctx, field)
 	if err != nil {
@@ -28154,6 +31747,289 @@ func (ec *executionContext) unmarshalInputAdminPatch(ctx context.Context, obj in
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputApplicationFiltersInput(ctx context.Context, obj interface{}) (model.ApplicationFiltersInput, error) {
+	var it model.ApplicationFiltersInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "createdAt", "updatedAt", "jobID", "employeeID", "educationLevel", "experience", "coverLetterUrl", "resumeeUrl", "status", "and", "or", "not"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOIntFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐIntFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "createdAt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdAt"))
+			data, err := ec.unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐTimeFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CreatedAt = data
+		case "updatedAt":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedAt"))
+			data, err := ec.unmarshalOTimeFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐTimeFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UpdatedAt = data
+		case "jobID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobID"))
+			data, err := ec.unmarshalOIntFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐIntFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobID = data
+		case "employeeID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("employeeID"))
+			data, err := ec.unmarshalOIntFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐIntFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EmployeeID = data
+		case "educationLevel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("educationLevel"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EducationLevel = data
+		case "experience":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("experience"))
+			data, err := ec.unmarshalOIntFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐIntFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Experience = data
+		case "coverLetterUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coverLetterUrl"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CoverLetterURL = data
+		case "resumeeUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("resumeeUrl"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ResumeeURL = data
+		case "status":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			data, err := ec.unmarshalOStringFilterInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐStringFilterInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Status = data
+		case "and":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("and"))
+			data, err := ec.unmarshalOApplicationFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.And = data
+		case "or":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("or"))
+			data, err := ec.unmarshalOApplicationFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Or = data
+		case "not":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("not"))
+			data, err := ec.unmarshalOApplicationFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Not = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputApplicationInput(ctx context.Context, obj interface{}) (model.ApplicationInput, error) {
+	var it model.ApplicationInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"jobID", "employeeID", "educationLevel", "experience", "coverLetterUrl", "resumeeUrl", "status"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "jobID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobID"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobID = data
+		case "employeeID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("employeeID"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EmployeeID = data
+		case "educationLevel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("educationLevel"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EducationLevel = data
+		case "experience":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("experience"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Experience = data
+		case "coverLetterUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coverLetterUrl"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CoverLetterURL = data
+		case "resumeeUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("resumeeUrl"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ResumeeURL = data
+		case "status":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Status = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputApplicationOrder(ctx context.Context, obj interface{}) (model.ApplicationOrder, error) {
+	var it model.ApplicationOrder
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"asc", "desc"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "asc":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("asc"))
+			data, err := ec.unmarshalOApplicationOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationOrderable(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Asc = data
+		case "desc":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("desc"))
+			data, err := ec.unmarshalOApplicationOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationOrderable(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Desc = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputApplicationPatch(ctx context.Context, obj interface{}) (model.ApplicationPatch, error) {
+	var it model.ApplicationPatch
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"jobID", "employeeID", "educationLevel", "experience", "coverLetterUrl", "resumeeUrl", "status"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "jobID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobID"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobID = data
+		case "employeeID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("employeeID"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EmployeeID = data
+		case "educationLevel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("educationLevel"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EducationLevel = data
+		case "experience":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("experience"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Experience = data
+		case "coverLetterUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coverLetterUrl"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CoverLetterURL = data
+		case "resumeeUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("resumeeUrl"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ResumeeURL = data
+		case "status":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("status"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Status = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputBooleanFilterInput(ctx context.Context, obj interface{}) (model.BooleanFilterInput, error) {
 	var it model.BooleanFilterInput
 	asMap := map[string]interface{}{}
@@ -29617,6 +33493,61 @@ func (ec *executionContext) unmarshalInputNewAdmin(ctx context.Context, obj inte
 				return it, err
 			}
 			it.Password = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewApplication(ctx context.Context, obj interface{}) (model.NewApplication, error) {
+	var it model.NewApplication
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"educationLevel", "experience", "coverLetterUrl", "resumeeUrl", "jobID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "educationLevel":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("educationLevel"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EducationLevel = data
+		case "experience":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("experience"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Experience = data
+		case "coverLetterUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("coverLetterUrl"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CoverLetterURL = data
+		case "resumeeUrl":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("resumeeUrl"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ResumeeURL = data
+		case "jobID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("jobID"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.JobID = data
 		}
 	}
 
@@ -31485,6 +35416,40 @@ func (ec *executionContext) unmarshalInputUpdateAdminInput(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateApplicationInput(ctx context.Context, obj interface{}) (model.UpdateApplicationInput, error) {
+	var it model.UpdateApplicationInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"filter", "set"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "filter":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+			data, err := ec.unmarshalNApplicationFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Filter = data
+		case "set":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("set"))
+			data, err := ec.unmarshalNApplicationPatch2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationPatch(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Set = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateEmployeeInput(ctx context.Context, obj interface{}) (model.UpdateEmployeeInput, error) {
 	var it model.UpdateEmployeeInput
 	asMap := map[string]interface{}{}
@@ -31814,6 +35779,81 @@ func (ec *executionContext) _AddAdminPayload(ctx context.Context, sel ast.Select
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "affected":
 			out.Values[i] = ec._AddAdminPayload_affected(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var addApplicationPayloadImplementors = []string{"AddApplicationPayload"}
+
+func (ec *executionContext) _AddApplicationPayload(ctx context.Context, sel ast.SelectionSet, obj *model.AddApplicationPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addApplicationPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddApplicationPayload")
+		case "application":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AddApplicationPayload_application(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "affected":
+			out.Values[i] = ec._AddApplicationPayload_affected(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -32539,6 +36579,289 @@ func (ec *executionContext) _AdminQueryResult(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var applicationImplementors = []string{"Application"}
+
+func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionSet, obj *model.Application) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, applicationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Application")
+		case "id":
+			out.Values[i] = ec._Application_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._Application_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Application_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deletedAt":
+			out.Values[i] = ec._Application_deletedAt(ctx, field, obj)
+		case "jobID":
+			out.Values[i] = ec._Application_jobID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "employeeID":
+			out.Values[i] = ec._Application_employeeID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "educationLevel":
+			out.Values[i] = ec._Application_educationLevel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "experience":
+			out.Values[i] = ec._Application_experience(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "coverLetterUrl":
+			out.Values[i] = ec._Application_coverLetterUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resumeeUrl":
+			out.Values[i] = ec._Application_resumeeUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "status":
+			out.Values[i] = ec._Application_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var applicationProfileImplementors = []string{"ApplicationProfile"}
+
+func (ec *executionContext) _ApplicationProfile(ctx context.Context, sel ast.SelectionSet, obj *model.ApplicationProfile) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, applicationProfileImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ApplicationProfile")
+		case "id":
+			out.Values[i] = ec._ApplicationProfile_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "createdAt":
+			out.Values[i] = ec._ApplicationProfile_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "updatedAt":
+			out.Values[i] = ec._ApplicationProfile_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "deletedAt":
+			out.Values[i] = ec._ApplicationProfile_deletedAt(ctx, field, obj)
+		case "job":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ApplicationProfile_job(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "employee":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ApplicationProfile_employee(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "educationLevel":
+			out.Values[i] = ec._ApplicationProfile_educationLevel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "experience":
+			out.Values[i] = ec._ApplicationProfile_experience(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "coverLetterUrl":
+			out.Values[i] = ec._ApplicationProfile_coverLetterUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "resumeeUrl":
+			out.Values[i] = ec._ApplicationProfile_resumeeUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "status":
+			out.Values[i] = ec._ApplicationProfile_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var applicationQueryResultImplementors = []string{"ApplicationQueryResult"}
+
+func (ec *executionContext) _ApplicationQueryResult(ctx context.Context, sel ast.SelectionSet, obj *model.ApplicationQueryResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, applicationQueryResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ApplicationQueryResult")
+		case "data":
+			out.Values[i] = ec._ApplicationQueryResult_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._ApplicationQueryResult_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._ApplicationQueryResult_totalCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var deleteAdminPayloadImplementors = []string{"DeleteAdminPayload"}
 
 func (ec *executionContext) _DeleteAdminPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteAdminPayload) graphql.Marshaler {
@@ -32593,6 +36916,83 @@ func (ec *executionContext) _DeleteAdminPayload(ctx context.Context, sel ast.Sel
 			}
 		case "msg":
 			out.Values[i] = ec._DeleteAdminPayload_msg(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var deleteApplicationPayloadImplementors = []string{"DeleteApplicationPayload"}
+
+func (ec *executionContext) _DeleteApplicationPayload(ctx context.Context, sel ast.SelectionSet, obj *model.DeleteApplicationPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deleteApplicationPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeleteApplicationPayload")
+		case "application":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._DeleteApplicationPayload_application(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "count":
+			out.Values[i] = ec._DeleteApplicationPayload_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "msg":
+			out.Values[i] = ec._DeleteApplicationPayload_msg(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -33281,30 +37681,63 @@ func (ec *executionContext) _EmployeeProfile(ctx context.Context, sel ast.Select
 		case "id":
 			out.Values[i] = ec._EmployeeProfile_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "createdAt":
 			out.Values[i] = ec._EmployeeProfile_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "updatedAt":
 			out.Values[i] = ec._EmployeeProfile_updatedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._EmployeeProfile_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "phone_number":
 			out.Values[i] = ec._EmployeeProfile_phone_number(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "profilepicture":
 			out.Values[i] = ec._EmployeeProfile_profilepicture(ctx, field, obj)
+		case "applications":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EmployeeProfile_applications(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -33799,6 +38232,39 @@ func (ec *executionContext) _JobProfile(ctx context.Context, sel ast.SelectionSe
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "applications":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._JobProfile_applications(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -33918,6 +38384,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_resetAdminPassword(ctx, field)
 			})
+		case "createApplication":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createApplication(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "findApplication":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_findApplication(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "editApplication":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_editApplication(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createEmployee":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createEmployee(ctx, field)
@@ -34027,6 +38514,18 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteAdmin":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteAdmin(ctx, field)
+			})
+		case "addApplication":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addApplication(ctx, field)
+			})
+		case "updateApplication":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateApplication(ctx, field)
+			})
+		case "deleteApplication":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteApplication(ctx, field)
 			})
 		case "addEmployee":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -34514,6 +39013,44 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_queryAdmin(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getApplication":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getApplication(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "queryApplication":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_queryApplication(ctx, field)
 				return res
 			}
 
@@ -35515,6 +40052,86 @@ func (ec *executionContext) _UpdateAdminPayload(ctx context.Context, sel ast.Sel
 			}
 		case "affected":
 			out.Values[i] = ec._UpdateAdminPayload_affected(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var updateApplicationPayloadImplementors = []string{"UpdateApplicationPayload"}
+
+func (ec *executionContext) _UpdateApplicationPayload(ctx context.Context, sel ast.SelectionSet, obj *model.UpdateApplicationPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updateApplicationPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UpdateApplicationPayload")
+		case "application":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UpdateApplicationPayload_application(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "count":
+			out.Values[i] = ec._UpdateApplicationPayload_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "affected":
+			out.Values[i] = ec._UpdateApplicationPayload_affected(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
@@ -36547,6 +41164,145 @@ func (ec *executionContext) marshalNAdminQueryResult2ᚖgithubᚗcomᚋGigaDesk�
 	return ec._AdminQueryResult(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNApplication2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Application) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNApplication2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplication(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNApplication2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplication(ctx context.Context, sel ast.SelectionSet, v *model.Application) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Application(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNApplicationFiltersInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx context.Context, v interface{}) (model.ApplicationFiltersInput, error) {
+	res, err := ec.unmarshalInputApplicationFiltersInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNApplicationFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx context.Context, v interface{}) (*model.ApplicationFiltersInput, error) {
+	res, err := ec.unmarshalInputApplicationFiltersInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNApplicationGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationGroup(ctx context.Context, v interface{}) (model.ApplicationGroup, error) {
+	var res model.ApplicationGroup
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNApplicationGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationGroup(ctx context.Context, sel ast.SelectionSet, v model.ApplicationGroup) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNApplicationInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationInputᚄ(ctx context.Context, v interface{}) ([]*model.ApplicationInput, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.ApplicationInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNApplicationInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNApplicationInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationInput(ctx context.Context, v interface{}) (*model.ApplicationInput, error) {
+	res, err := ec.unmarshalInputApplicationInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNApplicationPatch2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationPatch(ctx context.Context, v interface{}) (*model.ApplicationPatch, error) {
+	res, err := ec.unmarshalInputApplicationPatch(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNApplicationProfile2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationProfile(ctx context.Context, sel ast.SelectionSet, v model.ApplicationProfile) graphql.Marshaler {
+	return ec._ApplicationProfile(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNApplicationProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationProfile(ctx context.Context, sel ast.SelectionSet, v *model.ApplicationProfile) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ApplicationProfile(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNApplicationQueryResult2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationQueryResult(ctx context.Context, sel ast.SelectionSet, v model.ApplicationQueryResult) graphql.Marshaler {
+	return ec._ApplicationQueryResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNApplicationQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationQueryResult(ctx context.Context, sel ast.SelectionSet, v *model.ApplicationQueryResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ApplicationQueryResult(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNApplicationStatus2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationStatus(ctx context.Context, v interface{}) (model.ApplicationStatus, error) {
+	var res model.ApplicationStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNApplicationStatus2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationStatus(ctx context.Context, sel ast.SelectionSet, v model.ApplicationStatus) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -36704,6 +41460,10 @@ func (ec *executionContext) unmarshalNEmployeeLogin2githubᚗcomᚋGigaDeskᚋea
 func (ec *executionContext) unmarshalNEmployeePatch2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐEmployeePatch(ctx context.Context, v interface{}) (*model.EmployeePatch, error) {
 	res, err := ec.unmarshalInputEmployeePatch(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNEmployeeProfile2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐEmployeeProfile(ctx context.Context, sel ast.SelectionSet, v model.EmployeeProfile) graphql.Marshaler {
+	return ec._EmployeeProfile(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNEmployeeProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐEmployeeProfile(ctx context.Context, sel ast.SelectionSet, v *model.EmployeeProfile) graphql.Marshaler {
@@ -37025,6 +41785,11 @@ func (ec *executionContext) marshalNJobQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋ
 
 func (ec *executionContext) unmarshalNNewAdmin2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewAdmin(ctx context.Context, v interface{}) (model.NewAdmin, error) {
 	res, err := ec.unmarshalInputNewAdmin(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNNewApplication2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewApplication(ctx context.Context, v interface{}) (model.NewApplication, error) {
+	res, err := ec.unmarshalInputNewApplication(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -37566,6 +42331,11 @@ func (ec *executionContext) unmarshalNUpdateAdminInput2githubᚗcomᚋGigaDesk�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNUpdateApplicationInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateApplicationInput(ctx context.Context, v interface{}) (model.UpdateApplicationInput, error) {
+	res, err := ec.unmarshalInputUpdateApplicationInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNUpdateEmployeeInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateEmployeeInput(ctx context.Context, v interface{}) (model.UpdateEmployeeInput, error) {
 	res, err := ec.unmarshalInputUpdateEmployeeInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -37866,6 +42636,13 @@ func (ec *executionContext) marshalOAddAdminPayload2ᚖgithubᚗcomᚋGigaDesk�
 	return ec._AddAdminPayload(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOAddApplicationPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddApplicationPayload(ctx context.Context, sel ast.SelectionSet, v *model.AddApplicationPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AddApplicationPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOAddEmployeePayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAddEmployeePayload(ctx context.Context, sel ast.SelectionSet, v *model.AddEmployeePayload) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -38048,6 +42825,202 @@ func (ec *executionContext) marshalOAdminQueryResult2ᚖgithubᚗcomᚋGigaDesk�
 	return ec._AdminQueryResult(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOApplication2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplication(ctx context.Context, sel ast.SelectionSet, v *model.Application) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Application(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOApplicationFiltersInput2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx context.Context, v interface{}) ([]*model.ApplicationFiltersInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.ApplicationFiltersInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOApplicationFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOApplicationFiltersInput2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationFiltersInput(ctx context.Context, v interface{}) (*model.ApplicationFiltersInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputApplicationFiltersInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOApplicationGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationGroupᚄ(ctx context.Context, v interface{}) ([]model.ApplicationGroup, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]model.ApplicationGroup, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNApplicationGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationGroup(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOApplicationGroup2ᚕgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []model.ApplicationGroup) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNApplicationGroup2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationGroup(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOApplicationOrder2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationOrder(ctx context.Context, v interface{}) (*model.ApplicationOrder, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputApplicationOrder(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOApplicationOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationOrderable(ctx context.Context, v interface{}) (*model.ApplicationOrderable, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.ApplicationOrderable)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOApplicationOrderable2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationOrderable(ctx context.Context, sel ast.SelectionSet, v *model.ApplicationOrderable) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) marshalOApplicationProfile2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationProfileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ApplicationProfile) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNApplicationProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationProfile(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalOApplicationQueryResult2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationQueryResult(ctx context.Context, sel ast.SelectionSet, v *model.ApplicationQueryResult) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ApplicationQueryResult(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOApplicationStatus2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationStatus(ctx context.Context, v interface{}) (*model.ApplicationStatus, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.ApplicationStatus)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOApplicationStatus2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationStatus(ctx context.Context, sel ast.SelectionSet, v *model.ApplicationStatus) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -38119,6 +43092,13 @@ func (ec *executionContext) marshalODeleteAdminPayload2ᚖgithubᚗcomᚋGigaDes
 		return graphql.Null
 	}
 	return ec._DeleteAdminPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODeleteApplicationPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteApplicationPayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteApplicationPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DeleteApplicationPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalODeleteEmployeePayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐDeleteEmployeePayload(ctx context.Context, sel ast.SelectionSet, v *model.DeleteEmployeePayload) graphql.Marshaler {
@@ -38968,6 +43948,14 @@ func (ec *executionContext) unmarshalOJobsFilterParameters2ᚖgithubᚗcomᚋGig
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputJobsFilterParameters(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalONewApplication2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewApplication(ctx context.Context, v interface{}) (*model.NewApplication, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputNewApplication(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -39824,6 +44812,13 @@ func (ec *executionContext) marshalOUpdateAdminPayload2ᚖgithubᚗcomᚋGigaDes
 		return graphql.Null
 	}
 	return ec._UpdateAdminPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOUpdateApplicationPayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateApplicationPayload(ctx context.Context, sel ast.SelectionSet, v *model.UpdateApplicationPayload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UpdateApplicationPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOUpdateEmployeePayload2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateEmployeePayload(ctx context.Context, sel ast.SelectionSet, v *model.UpdateEmployeePayload) graphql.Marshaler {

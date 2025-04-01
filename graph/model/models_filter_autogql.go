@@ -62,6 +62,68 @@ func (d *AdminFiltersInput) ExtendsDatabaseQuery(db *gorm.DB, alias string, deep
 	return res
 }
 
+// PrimaryKeyName return the name of primarykey for Table Application
+func (d *ApplicationFiltersInput) PrimaryKeyName() string {
+	return "id"
+}
+
+// ExtendsDatabaseQuery create condition from ApplicationFiltersInput values
+func (d *ApplicationFiltersInput) ExtendsDatabaseQuery(db *gorm.DB, alias string, deep bool, blackList map[string]struct{}) []runtimehelper.ConditionElement {
+	res := make([]runtimehelper.ConditionElement, 0)
+	if d.And != nil {
+		tmp := make([]runtimehelper.ConditionElement, 0)
+		for _, v := range d.And {
+			tmp = append(tmp, runtimehelper.Complex(runtimehelper.RelationAnd, v.ExtendsDatabaseQuery(db, alias, true, blackList)...))
+		}
+		res = append(res, runtimehelper.Complex(runtimehelper.RelationAnd, tmp...))
+	}
+
+	if d.Or != nil {
+		tmp := make([]runtimehelper.ConditionElement, 0)
+		for _, v := range d.Or {
+
+			tmp = append(tmp, runtimehelper.Complex(runtimehelper.RelationAnd, v.ExtendsDatabaseQuery(db, alias, true, blackList)...))
+		}
+		res = append(res, runtimehelper.Complex(runtimehelper.RelationOr, tmp...))
+	}
+
+	if d.Not != nil {
+		res = append(res, runtimehelper.Complex(runtimehelper.RelationNot, d.Not.ExtendsDatabaseQuery(db, alias, true, blackList)...))
+	}
+	if d.ID != nil {
+		res = append(res, d.ID.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "id"), true, blackList)...)
+	}
+	if d.CreatedAt != nil {
+		res = append(res, d.CreatedAt.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "created_at"), true, blackList)...)
+	}
+	if d.UpdatedAt != nil {
+		res = append(res, d.UpdatedAt.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "updated_at"), true, blackList)...)
+	}
+	if d.JobID != nil {
+		res = append(res, d.JobID.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "job_id"), true, blackList)...)
+	}
+	if d.EmployeeID != nil {
+		res = append(res, d.EmployeeID.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "employee_id"), true, blackList)...)
+	}
+	if d.EducationLevel != nil {
+		res = append(res, d.EducationLevel.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "education_level"), true, blackList)...)
+	}
+	if d.Experience != nil {
+		res = append(res, d.Experience.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "experience"), true, blackList)...)
+	}
+	if d.CoverLetterURL != nil {
+		res = append(res, d.CoverLetterURL.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "cover_letter_url"), true, blackList)...)
+	}
+	if d.ResumeeURL != nil {
+		res = append(res, d.ResumeeURL.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "resumee_url"), true, blackList)...)
+	}
+	if d.Status != nil {
+		res = append(res, d.Status.ExtendsDatabaseQuery(db, fmt.Sprintf(extendsDatabaseFieldNameFormat, runtimehelper.GetQuoteChar(db), alias, "status"), true, blackList)...)
+	}
+
+	return res
+}
+
 // PrimaryKeyName return the name of primarykey for Table Employee
 func (d *EmployeeFiltersInput) PrimaryKeyName() string {
 	return "id"

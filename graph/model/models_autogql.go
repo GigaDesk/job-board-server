@@ -32,6 +32,8 @@ func GetInputStruct(name string, obj map[string]interface{}) (interface{}, error
 	switch name {
 	case "AdminInput":
 		return AdminInputFromMap(obj)
+	case "ApplicationInput":
+		return ApplicationInputFromMap(obj)
 	case "EmployeeInput":
 		return EmployeeInputFromMap(obj)
 	case "EmployerInput":
@@ -85,6 +87,68 @@ func (d *AdminInput) MergeToType() Admin {
 		Name:        tmpName,
 		PhoneNumber: tmpPhoneNumber,
 		Password:    tmpPassword,
+	}
+}
+
+// ApplicationInputFromMap return a ApplicationInput from data map
+// use github.com/mitchellh/mapstructure with reflaction
+func ApplicationInputFromMap(data map[string]interface{}) (ApplicationInput, error) {
+	model := ApplicationInput{}
+	err := mapstructure.Decode(data, &model)
+	return model, err
+}
+
+// MergeToType returns a map with all values set to ApplicationPatch
+func (d *ApplicationPatch) MergeToType() map[string]interface{} {
+	res := make(map[string]interface{})
+	if d.JobID != nil {
+		res["job_id"] = *d.JobID
+	}
+	if d.EmployeeID != nil {
+		res["employee_id"] = *d.EmployeeID
+	}
+	if d.EducationLevel != nil {
+		res["education_level"] = *d.EducationLevel
+	}
+	if d.Experience != nil {
+		res["experience"] = *d.Experience
+	}
+	if d.CoverLetterURL != nil {
+		res["cover_letter_url"] = *d.CoverLetterURL
+	}
+	if d.ResumeeURL != nil {
+		res["resumee_url"] = *d.ResumeeURL
+	}
+	if d.Status != nil {
+		res["status"] = *d.Status
+	}
+	return res
+}
+
+// MergeToType retuns a Application filled from ApplicationInput
+func (d *ApplicationInput) MergeToType() Application {
+
+	tmpJobID := d.JobID
+
+	tmpEmployeeID := d.EmployeeID
+
+	tmpEducationLevel := d.EducationLevel
+
+	tmpExperience := d.Experience
+
+	tmpCoverLetterURL := d.CoverLetterURL
+
+	tmpResumeeURL := d.ResumeeURL
+
+	tmpStatus := d.Status
+	return Application{
+		JobID:          tmpJobID,
+		EmployeeID:     tmpEmployeeID,
+		EducationLevel: tmpEducationLevel,
+		Experience:     tmpExperience,
+		CoverLetterURL: tmpCoverLetterURL,
+		ResumeeURL:     tmpResumeeURL,
+		Status:         tmpStatus,
 	}
 }
 
