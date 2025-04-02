@@ -19,44 +19,43 @@ import (
 
 // Job is the resolver for the job field.
 func (r *applicationProfileResolver) Job(ctx context.Context, obj *model.ApplicationProfile) (*model.JobProfile, error) {
-		// declare an application variable
-		var application *model.Application
+	// declare an application variable
+	var application *model.Application
 
-		// Find the first application that matches the id from the application profile
-		if err := r.Sql.Db.Where("id = ?", obj.ID).First(&application).Error; err != nil {
-			log.Info().Int("id", obj.ID).Str("object", "ApplicationProfile").Msg("application with id does not exist")
-			return nil, errors.New("error finding application with id: " + strconv.Itoa(obj.ID))
-		}
-	
-		//declare an job variable
-		var job *model.Job
-	
-		if err := r.Sql.Db.Where("id = ?", application.JobID).First(&job).Error; err != nil {
-			log.Info().Int("id", application.JobID).Str("object", "ApplicationProfile").Msg("job with id does not exist")
-			return nil, errors.New("error finding job with id: " + strconv.Itoa(application.JobID))
-		}
-	
-		jobprofile := &model.JobProfile{
-			ID:             job.ID,
-			CreatedAt:      job.CreatedAt,
-			UpdatedAt:      job.UpdatedAt,
-			DeletedAt:      job.DeletedAt,
-			Title:          job.Title,
-			Industry:       job.Industry,
-			Description:    job.Description,
-			Level:          job.Level,
-			Location:       job.Location,
-			Deadline:       job.Deadline,
-			EducationLevel: job.EducationLevel,
-			MinSalary:      job.MinSalary,
-			MaxSalary:      job.MaxSalary,
-			Experience:     job.Experience,
-			JobURL:         job.JobURL,
-			Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
-			
-		}
-	
-		return jobprofile, nil
+	// Find the first application that matches the id from the application profile
+	if err := r.Sql.Db.Where("id = ?", obj.ID).First(&application).Error; err != nil {
+		log.Info().Int("id", obj.ID).Str("object", "ApplicationProfile").Msg("application with id does not exist")
+		return nil, errors.New("error finding application with id: " + strconv.Itoa(obj.ID))
+	}
+
+	//declare an job variable
+	var job *model.Job
+
+	if err := r.Sql.Db.Where("id = ?", application.JobID).First(&job).Error; err != nil {
+		log.Info().Int("id", application.JobID).Str("object", "ApplicationProfile").Msg("job with id does not exist")
+		return nil, errors.New("error finding job with id: " + strconv.Itoa(application.JobID))
+	}
+
+	jobprofile := &model.JobProfile{
+		ID:             job.ID,
+		CreatedAt:      job.CreatedAt,
+		UpdatedAt:      job.UpdatedAt,
+		DeletedAt:      job.DeletedAt,
+		Title:          job.Title,
+		Industry:       job.Industry,
+		Description:    job.Description,
+		Level:          job.Level,
+		Location:       job.Location,
+		Deadline:       job.Deadline,
+		EducationLevel: job.EducationLevel,
+		MinSalary:      job.MinSalary,
+		MaxSalary:      job.MaxSalary,
+		Experience:     job.Experience,
+		JobURL:         job.JobURL,
+		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
+	}
+
+	return jobprofile, nil
 }
 
 // Employee is the resolver for the employee field.
@@ -149,37 +148,6 @@ func (r *mutationResolver) CreateApplication(ctx context.Context, input model.Ne
 	return applicationprofile, nil
 }
 
-// FindApplication is the resolver for the findApplication field.
-func (r *mutationResolver) FindApplication(ctx context.Context, id int) (*model.ApplicationProfile, error) {
-	//check if system is in shutdown mode
-	if *shutdown.IsShutdown {
-		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
-	}
-
-	//declare an application variable
-	var application *model.Application
-
-	// Find the first application that matches the input id from the application table
-	if err := r.Sql.Db.Where("id = ?", id).First(&application).Error; err != nil {
-		log.Info().Int("id", id).Str("path", "FindApplication").Msg("id does not exist")
-		return nil, errors.New("error finding application with id: " + strconv.Itoa(id))
-	}
-
-	applicationprofile := &model.ApplicationProfile{
-		ID:             application.ID,
-		CreatedAt:      application.CreatedAt,
-		UpdatedAt:      application.UpdatedAt,
-		DeletedAt:      application.DeletedAt,
-		EducationLevel: application.EducationLevel,
-		Experience:     application.Experience,
-		CoverLetterURL: application.CoverLetterURL,
-		ResumeeURL:     application.ResumeeURL,
-		Status:         model.ApplicationStatus(strings.ToUpper(application.Status)),
-	}
-
-	return applicationprofile, nil
-}
-
 // EditApplication is the resolver for the editApplication field.
 func (r *mutationResolver) EditApplication(ctx context.Context, id int, input *model.NewApplication, status *model.ApplicationStatus) (*model.ApplicationProfile, error) {
 	//check if system is in shutdown mode
@@ -209,6 +177,37 @@ func (r *mutationResolver) EditApplication(ctx context.Context, id int, input *m
 	// Find the first application that matches the input id again
 	if err := r.Sql.Db.Where("id = ?", id).First(&application).Error; err != nil {
 		log.Info().Int("id", id).Str("path", "EditApplication").Msg("id does not exist")
+		return nil, errors.New("error finding application with id: " + strconv.Itoa(id))
+	}
+
+	applicationprofile := &model.ApplicationProfile{
+		ID:             application.ID,
+		CreatedAt:      application.CreatedAt,
+		UpdatedAt:      application.UpdatedAt,
+		DeletedAt:      application.DeletedAt,
+		EducationLevel: application.EducationLevel,
+		Experience:     application.Experience,
+		CoverLetterURL: application.CoverLetterURL,
+		ResumeeURL:     application.ResumeeURL,
+		Status:         model.ApplicationStatus(strings.ToUpper(application.Status)),
+	}
+
+	return applicationprofile, nil
+}
+
+// FindApplication is the resolver for the findApplication field.
+func (r *queryResolver) FindApplication(ctx context.Context, id int) (*model.ApplicationProfile, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+
+	//declare an application variable
+	var application *model.Application
+
+	// Find the first application that matches the input id from the application table
+	if err := r.Sql.Db.Where("id = ?", id).First(&application).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "FindApplication").Msg("id does not exist")
 		return nil, errors.New("error finding application with id: " + strconv.Itoa(id))
 	}
 

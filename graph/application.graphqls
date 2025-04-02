@@ -40,8 +40,15 @@ input NewApplication {
   jobID: Int!
 }
 
+extend type Query {
+  findApplication(id: Int!): ApplicationProfile!
+}
+
 extend type Mutation {
   createApplication(input: NewApplication!): ApplicationProfile!
-  findApplication(id: Int!): ApplicationProfile!
-  editApplication(id: Int!, input: NewApplication, status: ApplicationStatus): ApplicationProfile!
+  editApplication(
+    id: Int!
+    input: NewApplication
+    status: ApplicationStatus
+  ): ApplicationProfile!
 }
