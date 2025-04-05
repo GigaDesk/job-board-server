@@ -377,6 +377,7 @@ type ComplexityRoot struct {
 		DeleteUnverifiedEmployer     func(childComplexity int, filter model.UnverifiedEmployerFiltersInput) int
 		EditApplication              func(childComplexity int, id int, input *model.NewApplication, status *model.ApplicationStatus) int
 		EditJob                      func(childComplexity int, id int, input model.NewJob) int
+		EditUnapprovedJob            func(childComplexity int, id int, input *model.NewJob) int
 		EmployeeLogin                func(childComplexity int, input model.EmployeeLogin) int
 		EmployerLogin                func(childComplexity int, input model.EmployerLogin) int
 		ForgotAdminPassword          func(childComplexity int, phoneNumber string) int
@@ -703,6 +704,7 @@ type MutationResolver interface {
 	EditJob(ctx context.Context, id int, input model.NewJob) (*model.JobProfile, error)
 	RemoveJob(ctx context.Context, id int) (*model.JobProfile, error)
 	RemoveUnapprovedJob(ctx context.Context, id int) (*model.UnapprovedJobProfile, error)
+	EditUnapprovedJob(ctx context.Context, id int, input *model.NewJob) (*model.UnapprovedJobProfile, error)
 	AddAdmin(ctx context.Context, input []*model.AdminInput) (*model.AddAdminPayload, error)
 	UpdateAdmin(ctx context.Context, input model.UpdateAdminInput) (*model.UpdateAdminPayload, error)
 	DeleteAdmin(ctx context.Context, filter model.AdminFiltersInput) (*model.DeleteAdminPayload, error)
@@ -2411,6 +2413,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.EditJob(childComplexity, args["id"].(int), args["input"].(model.NewJob)), true
+
+	case "Mutation.editUnapprovedJob":
+		if e.complexity.Mutation.EditUnapprovedJob == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_editUnapprovedJob_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.EditUnapprovedJob(childComplexity, args["id"].(int), args["input"].(*model.NewJob)), true
 
 	case "Mutation.employeeLogin":
 		if e.complexity.Mutation.EmployeeLogin == nil {
@@ -8122,6 +8136,47 @@ func (ec *executionContext) field_Mutation_editJob_argsInput(
 	}
 
 	var zeroVal model.NewJob
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_editUnapprovedJob_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_editUnapprovedJob_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	arg1, err := ec.field_Mutation_editUnapprovedJob_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_editUnapprovedJob_argsID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_editUnapprovedJob_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*model.NewJob, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalONewJob2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewJob(ctx, tmp)
+	}
+
+	var zeroVal *model.NewJob
 	return zeroVal, nil
 }
 
@@ -20910,6 +20965,97 @@ func (ec *executionContext) fieldContext_Mutation_removeUnapprovedJob(ctx contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_removeUnapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_editUnapprovedJob(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_editUnapprovedJob(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().EditUnapprovedJob(rctx, fc.Args["id"].(int), fc.Args["input"].(*model.NewJob))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.UnapprovedJobProfile)
+	fc.Result = res
+	return ec.marshalNUnapprovedJobProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUnapprovedJobProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_editUnapprovedJob(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UnapprovedJobProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UnapprovedJobProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_UnapprovedJobProfile_updatedAt(ctx, field)
+			case "deletedAt":
+				return ec.fieldContext_UnapprovedJobProfile_deletedAt(ctx, field)
+			case "title":
+				return ec.fieldContext_UnapprovedJobProfile_title(ctx, field)
+			case "industry":
+				return ec.fieldContext_UnapprovedJobProfile_industry(ctx, field)
+			case "description":
+				return ec.fieldContext_UnapprovedJobProfile_description(ctx, field)
+			case "level":
+				return ec.fieldContext_UnapprovedJobProfile_level(ctx, field)
+			case "location":
+				return ec.fieldContext_UnapprovedJobProfile_location(ctx, field)
+			case "deadline":
+				return ec.fieldContext_UnapprovedJobProfile_deadline(ctx, field)
+			case "educationLevel":
+				return ec.fieldContext_UnapprovedJobProfile_educationLevel(ctx, field)
+			case "experience":
+				return ec.fieldContext_UnapprovedJobProfile_experience(ctx, field)
+			case "minSalary":
+				return ec.fieldContext_UnapprovedJobProfile_minSalary(ctx, field)
+			case "maxSalary":
+				return ec.fieldContext_UnapprovedJobProfile_maxSalary(ctx, field)
+			case "requirements":
+				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
+			case "jobUrl":
+				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
+			case "employer":
+				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UnapprovedJobProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_editUnapprovedJob_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -38496,6 +38642,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "editUnapprovedJob":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_editUnapprovedJob(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "addAdmin":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addAdmin(ctx, field)
@@ -43971,6 +44124,14 @@ func (ec *executionContext) unmarshalONewApplication2ᚖgithubᚗcomᚋGigaDesk�
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputNewApplication(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalONewJob2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐNewJob(ctx context.Context, v interface{}) (*model.NewJob, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputNewJob(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

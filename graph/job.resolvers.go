@@ -477,6 +477,72 @@ func (r *mutationResolver) RemoveUnapprovedJob(ctx context.Context, id int) (*mo
 	return unapprovedjobprofile, nil
 }
 
+// EditUnapprovedJob is the resolver for the editUnapprovedJob field.
+func (r *mutationResolver) EditUnapprovedJob(ctx context.Context, id int, input *model.NewJob) (*model.UnapprovedJobProfile, error) {
+	//check if system is in shutdown mode
+	if *shutdown.IsShutdown {
+		return nil, errors.New("System is shut down for maintainance. We are sorry for any incoveniences caused")
+	}
+
+	//declare an unapproved job variable
+	var unapprovedjob *model.UnapprovedJob
+
+	//Find the first unapproved job that matches the input id
+	if err := r.Sql.Db.Where("id = ?", id).First(&unapprovedjob).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "EditUnapprovedJob").Msg("id does not exist")
+		return nil, errors.New("error finding unapproved job with id: " + strconv.Itoa(id))
+	}
+
+	//Join input.Requiremets with "||" separator
+	requirements := strings.Join(input.Requirements, "||")
+
+	unapprovedjob.Title = input.Title
+	unapprovedjob.Industry = input.Industry
+	unapprovedjob.Description = input.Description
+	unapprovedjob.Level = input.Level
+	unapprovedjob.Location = input.Location
+	unapprovedjob.Deadline = input.Deadline
+	unapprovedjob.EducationLevel = input.EducationLevel
+	unapprovedjob.MinSalary = input.MinSalary
+	unapprovedjob.MaxSalary = input.MaxSalary
+	unapprovedjob.Experience = input.Experience
+	unapprovedjob.JobURL = input.JobURL
+	unapprovedjob.Requirements = &requirements
+
+	// Update unapproved job record
+	if err := r.Sql.Db.Save(&unapprovedjob).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "EditUnapprovedJob").Msg("failed to update job")
+		return nil, errors.New("error updating unapproved job with id: " + strconv.Itoa(id))
+	}
+
+	// Find the first unapprovedjob that matches the input id again
+	if err := r.Sql.Db.Where("id = ?", id).First(&unapprovedjob).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "EditJob").Msg("id does not exist")
+		return nil, errors.New("error finding job with id: " + strconv.Itoa(id))
+	}
+
+	jobprofile := &model.UnapprovedJobProfile{
+		ID:             unapprovedjob.ID,
+		CreatedAt:      unapprovedjob.CreatedAt,
+		UpdatedAt:      unapprovedjob.UpdatedAt,
+		DeletedAt:      unapprovedjob.DeletedAt,
+		Title:          unapprovedjob.Title,
+		Industry:       unapprovedjob.Industry,
+		Description:    unapprovedjob.Description,
+		Level:          unapprovedjob.Level,
+		Location:       unapprovedjob.Location,
+		Deadline:       unapprovedjob.Deadline,
+		EducationLevel: unapprovedjob.EducationLevel,
+		MinSalary:      unapprovedjob.MinSalary,
+		MaxSalary:      unapprovedjob.MaxSalary,
+		JobURL:         unapprovedjob.JobURL,
+		Experience:     unapprovedjob.Experience,
+		Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
+	}
+
+	return jobprofile, nil
+}
+
 // GetJobs is the resolver for the getJobs field.
 func (r *queryResolver) GetJobs(ctx context.Context, filterparameters *model.JobsFilterParameters) ([]*model.JobProfile, error) {
 	//check if system is in shutdown mode
