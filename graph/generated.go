@@ -336,6 +336,7 @@ type ComplexityRoot struct {
 		Location       func(childComplexity int) int
 		MaxSalary      func(childComplexity int) int
 		MinSalary      func(childComplexity int) int
+		Posted         func(childComplexity int) int
 		Requirements   func(childComplexity int) int
 		Title          func(childComplexity int) int
 		UpdatedAt      func(childComplexity int) int
@@ -490,6 +491,7 @@ type ComplexityRoot struct {
 		Location       func(childComplexity int) int
 		MaxSalary      func(childComplexity int) int
 		MinSalary      func(childComplexity int) int
+		Posted         func(childComplexity int) int
 		Requirements   func(childComplexity int) int
 		Title          func(childComplexity int) int
 		UpdatedAt      func(childComplexity int) int
@@ -2028,6 +2030,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.JobProfile.MinSalary(childComplexity), true
 
+	case "JobProfile.posted":
+		if e.complexity.JobProfile.Posted == nil {
+			break
+		}
+
+		return e.complexity.JobProfile.Posted(childComplexity), true
+
 	case "JobProfile.requirements":
 		if e.complexity.JobProfile.Requirements == nil {
 			break
@@ -3393,6 +3402,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UnapprovedJobProfile.MinSalary(childComplexity), true
+
+	case "UnapprovedJobProfile.posted":
+		if e.complexity.UnapprovedJobProfile.Posted == nil {
+			break
+		}
+
+		return e.complexity.UnapprovedJobProfile.Posted(childComplexity), true
 
 	case "UnapprovedJobProfile.requirements":
 		if e.complexity.UnapprovedJobProfile.Requirements == nil {
@@ -13666,6 +13682,8 @@ func (ec *executionContext) fieldContext_ApplicationProfile_job(_ context.Contex
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_JobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			case "applications":
@@ -17123,6 +17141,8 @@ func (ec *executionContext) fieldContext_EmployerProfile_jobs(_ context.Context,
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_JobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			case "applications":
@@ -17202,6 +17222,8 @@ func (ec *executionContext) fieldContext_EmployerProfile_unapprovedJobs(_ contex
 				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_UnapprovedJobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
 			}
@@ -18734,6 +18756,50 @@ func (ec *executionContext) _JobProfile_jobUrl(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext_JobProfile_jobUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _JobProfile_posted(ctx context.Context, field graphql.CollectedField, obj *model.JobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_JobProfile_posted(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Posted, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_JobProfile_posted(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "JobProfile",
 		Field:      field,
@@ -20704,6 +20770,8 @@ func (ec *executionContext) fieldContext_Mutation_createJob(ctx context.Context,
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_JobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			case "applications":
@@ -20797,6 +20865,8 @@ func (ec *executionContext) fieldContext_Mutation_createUnapprovedJob(ctx contex
 				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_UnapprovedJobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
 			}
@@ -20888,6 +20958,8 @@ func (ec *executionContext) fieldContext_Mutation_approveJob(ctx context.Context
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_JobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			case "applications":
@@ -20981,6 +21053,8 @@ func (ec *executionContext) fieldContext_Mutation_editJob(ctx context.Context, f
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_JobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			case "applications":
@@ -21074,6 +21148,8 @@ func (ec *executionContext) fieldContext_Mutation_removeJob(ctx context.Context,
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_JobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			case "applications":
@@ -21167,6 +21243,8 @@ func (ec *executionContext) fieldContext_Mutation_removeUnapprovedJob(ctx contex
 				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_UnapprovedJobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
 			}
@@ -21258,6 +21336,8 @@ func (ec *executionContext) fieldContext_Mutation_editUnapprovedJob(ctx context.
 				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_UnapprovedJobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
 			}
@@ -23717,6 +23797,8 @@ func (ec *executionContext) fieldContext_Query_getJobs(ctx context.Context, fiel
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_JobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			case "applications":
@@ -23810,6 +23892,8 @@ func (ec *executionContext) fieldContext_Query_findJob(ctx context.Context, fiel
 				return ec.fieldContext_JobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_JobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_JobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_JobProfile_employer(ctx, field)
 			case "applications":
@@ -23900,6 +23984,8 @@ func (ec *executionContext) fieldContext_Query_getUnapprovedJobs(ctx context.Con
 				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_UnapprovedJobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
 			}
@@ -23991,6 +24077,8 @@ func (ec *executionContext) fieldContext_Query_findUnapprovedJob(ctx context.Con
 				return ec.fieldContext_UnapprovedJobProfile_requirements(ctx, field)
 			case "jobUrl":
 				return ec.fieldContext_UnapprovedJobProfile_jobUrl(ctx, field)
+			case "posted":
+				return ec.fieldContext_UnapprovedJobProfile_posted(ctx, field)
 			case "employer":
 				return ec.fieldContext_UnapprovedJobProfile_employer(ctx, field)
 			}
@@ -26811,6 +26899,50 @@ func (ec *executionContext) _UnapprovedJobProfile_jobUrl(ctx context.Context, fi
 }
 
 func (ec *executionContext) fieldContext_UnapprovedJobProfile_jobUrl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UnapprovedJobProfile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UnapprovedJobProfile_posted(ctx context.Context, field graphql.CollectedField, obj *model.UnapprovedJobProfile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UnapprovedJobProfile_posted(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Posted, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UnapprovedJobProfile_posted(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UnapprovedJobProfile",
 		Field:      field,
@@ -38650,6 +38782,11 @@ func (ec *executionContext) _JobProfile(ctx context.Context, sel ast.SelectionSe
 			out.Values[i] = ec._JobProfile_requirements(ctx, field, obj)
 		case "jobUrl":
 			out.Values[i] = ec._JobProfile_jobUrl(ctx, field, obj)
+		case "posted":
+			out.Values[i] = ec._JobProfile_posted(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "employer":
 			field := field
 
@@ -40023,6 +40160,11 @@ func (ec *executionContext) _UnapprovedJobProfile(ctx context.Context, sel ast.S
 			out.Values[i] = ec._UnapprovedJobProfile_requirements(ctx, field, obj)
 		case "jobUrl":
 			out.Values[i] = ec._UnapprovedJobProfile_jobUrl(ctx, field, obj)
+		case "posted":
+			out.Values[i] = ec._UnapprovedJobProfile_posted(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "employer":
 			field := field
 
