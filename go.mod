@@ -17,6 +17,7 @@ require (
 
 require (
 	github.com/GigaDesk/eardrum-prefix v1.0.2
+	github.com/joho/godotenv v1.5.1
 	github.com/rs/cors v1.11.1
 )
 
