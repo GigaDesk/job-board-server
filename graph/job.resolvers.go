@@ -405,6 +405,10 @@ func (r *mutationResolver) RemoveJob(ctx context.Context, id int) (*model.JobPro
 		return nil, errors.New("error finding job with id: " + strconv.Itoa(id))
 	}
 
+
+	//then delete all the job applications that were made for this job
+	r.Sql.Db.Where("job_id = ?", id).Delete(&model.Application{})
+
 	// delete the job from the job table
 	if err := r.Sql.Db.Delete(job).Error; err != nil {
 		log.Error().Str("path", "RemoveJob").Int("record_id", job.ID).Msg(err.Error())
