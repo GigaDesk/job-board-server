@@ -53,6 +53,13 @@ input NewEmployee {
   profilepicture: String
 }
 
+#fields required during an employee update
+input UpdateEmployee {
+  name: String!
+  phone_number: String!
+  profilepicture: String
+}
+
 extend type Query {
   employeePhoneNumberExists(phone_number: String!): PhoneNumberExists!
   getEmployeeProfile: EmployeeProfile
@@ -66,4 +73,5 @@ extend type Mutation {
   forgotEmployeePassword(phone_number: String!): SendCodeStatus
   requestEmployeePasswordReset(input: verificationinfo): String
   resetEmployeePassword(new_password: String!): Employee
+  editEmployeeProfile(input: UpdateEmployee!): EmployeeProfile
 }

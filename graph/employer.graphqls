@@ -65,6 +65,15 @@ input NewEmployer {
   badge: String
   Website: String
 }
+
+#fields required during an employer update
+input UpdatedEmployer {
+  name: String!
+  phone_number: String!
+  badge: String
+  Website: String
+}
+
 #fiels required when sending an OTP code
 input verificationinfo {
   phone_number: String!
@@ -91,4 +100,5 @@ extend type Mutation {
   requestEmployerPasswordReset(input: verificationinfo): String
   resetEmployerPassword(new_password: String!): Employer
   refreshToken(input: RefreshTokenInput): String
+  editEmployerProfile(input: UpdatedEmployer!): EmployerProfile
 }
