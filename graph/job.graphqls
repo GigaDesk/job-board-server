@@ -114,4 +114,5 @@ extend type Mutation {
   editJob(id: Int!, input: NewJob!): JobProfile!
   removeJob(id: Int!): JobProfile!
   removeUnapprovedJob(id: Int!): UnapprovedJobProfile!
+  editUnapprovedJob(id: Int!, input: NewJob): UnapprovedJobProfile!
 }

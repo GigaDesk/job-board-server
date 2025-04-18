@@ -42,9 +42,8 @@ func (r *employeeProfileResolver) Applications(ctx context.Context, obj *model.E
 			EducationLevel: application.EducationLevel,
 			Experience:     application.Experience,
 			CoverLetterURL: application.CoverLetterURL,
-			ResumeeURL: application.ResumeeURL,
-			Status: model.ApplicationStatus(strings.ToUpper(application.Status)),
-			
+			ResumeeURL:     application.ResumeeURL,
+			Status:         model.ApplicationStatus(strings.ToUpper(application.Status)),
 		}
 		applicationprofiles = append(applicationprofiles, applicationprofile)
 	}
