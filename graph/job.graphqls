@@ -55,6 +55,7 @@ type JobProfile {
   maxSalary: Int
   requirements: [String!]
   jobUrl: String
+  posted: String!
   employer: EmployerProfile
   applications(status: ApplicationStatus): [ApplicationProfile!]
 }
@@ -76,6 +77,7 @@ type UnapprovedJobProfile {
   maxSalary: Int
   requirements: [String!]
   jobUrl: String
+  posted: String!
   employer: EmployerProfile
 }
 
