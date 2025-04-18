@@ -605,6 +605,7 @@ type JobProfile struct {
 	MaxSalary      *int                      `json:"maxSalary,omitempty"`
 	Requirements   []string                  `json:"requirements,omitempty"`
 	JobURL         *string                   `json:"jobUrl,omitempty"`
+	Posted         string                    `json:"posted"`
 	Employer       *EmployerProfile          `json:"employer,omitempty"`
 	Applications   []*ApplicationProfile     `json:"applications,omitempty"`
 }
@@ -867,6 +868,7 @@ type UnapprovedJobProfile struct {
 	MaxSalary      *int                      `json:"maxSalary,omitempty"`
 	Requirements   []string                  `json:"requirements,omitempty"`
 	JobURL         *string                   `json:"jobUrl,omitempty"`
+	Posted         string                    `json:"posted"`
 	Employer       *EmployerProfile          `json:"employer,omitempty"`
 }
 
