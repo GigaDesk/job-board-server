@@ -1070,6 +1070,12 @@ type UpdateApplicationPayload struct {
 	Affected []*Application `json:"affected"`
 }
 
+type UpdateEmployee struct {
+	Name           string  `json:"name"`
+	PhoneNumber    string  `json:"phone_number"`
+	Profilepicture *string `json:"profilepicture,omitempty"`
+}
+
 // Update rules for Employee multiupdates simple possible by global filtervalue
 type UpdateEmployeeInput struct {
 	Filter *EmployeeFiltersInput `json:"filter"`
@@ -1166,6 +1172,13 @@ type UpdateUnverifiedEmployerPayload struct {
 	// Count of affected updates
 	Count    int                   `json:"count"`
 	Affected []*UnverifiedEmployer `json:"affected"`
+}
+
+type UpdatedEmployer struct {
+	Name        string  `json:"name"`
+	PhoneNumber string  `json:"phone_number"`
+	Badge       *string `json:"badge,omitempty"`
+	Website     *string `json:"Website,omitempty"`
 }
 
 type Verificationinfo struct {

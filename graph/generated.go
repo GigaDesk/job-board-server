@@ -376,6 +376,8 @@ type ComplexityRoot struct {
 		DeleteUnverifiedEmployee     func(childComplexity int, filter model.UnverifiedEmployeeFiltersInput) int
 		DeleteUnverifiedEmployer     func(childComplexity int, filter model.UnverifiedEmployerFiltersInput) int
 		EditApplication              func(childComplexity int, id int, input *model.NewApplication, status *model.ApplicationStatus) int
+		EditEmployeeProfile          func(childComplexity int, input model.UpdateEmployee) int
+		EditEmployerProfile          func(childComplexity int, input model.UpdatedEmployer) int
 		EditJob                      func(childComplexity int, id int, input model.NewJob) int
 		EditUnapprovedJob            func(childComplexity int, id int, input *model.NewJob) int
 		EmployeeLogin                func(childComplexity int, input model.EmployeeLogin) int
@@ -690,6 +692,7 @@ type MutationResolver interface {
 	ForgotEmployeePassword(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error)
 	RequestEmployeePasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error)
 	ResetEmployeePassword(ctx context.Context, newPassword string) (*model.Employee, error)
+	EditEmployeeProfile(ctx context.Context, input model.UpdateEmployee) (*model.EmployeeProfile, error)
 	CreateEmployer(ctx context.Context, input model.NewEmployer) (*model.UnverifiedEmployer, error)
 	VerifyEmployer(ctx context.Context, input model.Verificationinfo) (*model.Employer, error)
 	SendCode(ctx context.Context, phoneNumber string) (*model.SendCodeStatus, error)
@@ -698,6 +701,7 @@ type MutationResolver interface {
 	RequestEmployerPasswordReset(ctx context.Context, input *model.Verificationinfo) (*string, error)
 	ResetEmployerPassword(ctx context.Context, newPassword string) (*model.Employer, error)
 	RefreshToken(ctx context.Context, input *model.RefreshTokenInput) (*string, error)
+	EditEmployerProfile(ctx context.Context, input model.UpdatedEmployer) (*model.EmployerProfile, error)
 	CreateJob(ctx context.Context, input model.NewJob) (*model.JobProfile, error)
 	CreateUnapprovedJob(ctx context.Context, input model.NewJob) (*model.UnapprovedJobProfile, error)
 	ApproveJob(ctx context.Context, id int) (*model.JobProfile, error)
@@ -2402,6 +2406,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.EditApplication(childComplexity, args["id"].(int), args["input"].(*model.NewApplication), args["status"].(*model.ApplicationStatus)), true
 
+	case "Mutation.editEmployeeProfile":
+		if e.complexity.Mutation.EditEmployeeProfile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_editEmployeeProfile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.EditEmployeeProfile(childComplexity, args["input"].(model.UpdateEmployee)), true
+
+	case "Mutation.editEmployerProfile":
+		if e.complexity.Mutation.EditEmployerProfile == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_editEmployerProfile_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.EditEmployerProfile(childComplexity, args["input"].(model.UpdatedEmployer)), true
+
 	case "Mutation.editJob":
 		if e.complexity.Mutation.EditJob == nil {
 			break
@@ -3942,6 +3970,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUnverifiedEmployerPatch,
 		ec.unmarshalInputUpdateAdminInput,
 		ec.unmarshalInputUpdateApplicationInput,
+		ec.unmarshalInputUpdateEmployee,
 		ec.unmarshalInputUpdateEmployeeInput,
 		ec.unmarshalInputUpdateEmployerInput,
 		ec.unmarshalInputUpdateJobInput,
@@ -3949,6 +3978,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUpdateUnverifiedAdminInput,
 		ec.unmarshalInputUpdateUnverifiedEmployeeInput,
 		ec.unmarshalInputUpdateUnverifiedEmployerInput,
+		ec.unmarshalInputUpdatedEmployer,
 		ec.unmarshalInputverificationinfo,
 	)
 	first := true
@@ -8095,6 +8125,52 @@ func (ec *executionContext) field_Mutation_editApplication_argsStatus(
 	}
 
 	var zeroVal *model.ApplicationStatus
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_editEmployeeProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_editEmployeeProfile_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_editEmployeeProfile_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.UpdateEmployee, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNUpdateEmployee2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateEmployee(ctx, tmp)
+	}
+
+	var zeroVal model.UpdateEmployee
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_editEmployerProfile_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_editEmployerProfile_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_editEmployerProfile_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.UpdatedEmployer, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNUpdatedEmployer2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdatedEmployer(ctx, tmp)
+	}
+
+	var zeroVal model.UpdatedEmployer
 	return zeroVal, nil
 }
 
@@ -19929,6 +20005,74 @@ func (ec *executionContext) fieldContext_Mutation_resetEmployeePassword(ctx cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_editEmployeeProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_editEmployeeProfile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().EditEmployeeProfile(rctx, fc.Args["input"].(model.UpdateEmployee))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.EmployeeProfile)
+	fc.Result = res
+	return ec.marshalOEmployeeProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐEmployeeProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_editEmployeeProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EmployeeProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EmployeeProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_EmployeeProfile_updatedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_EmployeeProfile_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_EmployeeProfile_phone_number(ctx, field)
+			case "profilepicture":
+				return ec.fieldContext_EmployeeProfile_profilepicture(ctx, field)
+			case "applications":
+				return ec.fieldContext_EmployeeProfile_applications(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EmployeeProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_editEmployeeProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createEmployer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createEmployer(ctx, field)
 	if err != nil {
@@ -20411,6 +20555,78 @@ func (ec *executionContext) fieldContext_Mutation_refreshToken(ctx context.Conte
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_refreshToken_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_editEmployerProfile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_editEmployerProfile(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().EditEmployerProfile(rctx, fc.Args["input"].(model.UpdatedEmployer))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.EmployerProfile)
+	fc.Result = res
+	return ec.marshalOEmployerProfile2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐEmployerProfile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_editEmployerProfile(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_EmployerProfile_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_EmployerProfile_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_EmployerProfile_updatedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_EmployerProfile_name(ctx, field)
+			case "phone_number":
+				return ec.fieldContext_EmployerProfile_phone_number(ctx, field)
+			case "badge":
+				return ec.fieldContext_EmployerProfile_badge(ctx, field)
+			case "Website":
+				return ec.fieldContext_EmployerProfile_Website(ctx, field)
+			case "jobs":
+				return ec.fieldContext_EmployerProfile_jobs(ctx, field)
+			case "unapprovedJobs":
+				return ec.fieldContext_EmployerProfile_unapprovedJobs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EmployerProfile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_editEmployerProfile_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -35596,6 +35812,47 @@ func (ec *executionContext) unmarshalInputUpdateApplicationInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateEmployee(ctx context.Context, obj interface{}) (model.UpdateEmployee, error) {
+	var it model.UpdateEmployee
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "phone_number", "profilepicture"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "phone_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PhoneNumber = data
+		case "profilepicture":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profilepicture"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Profilepicture = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputUpdateEmployeeInput(ctx context.Context, obj interface{}) (model.UpdateEmployeeInput, error) {
 	var it model.UpdateEmployeeInput
 	asMap := map[string]interface{}{}
@@ -35828,6 +36085,54 @@ func (ec *executionContext) unmarshalInputUpdateUnverifiedEmployerInput(ctx cont
 				return it, err
 			}
 			it.Set = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUpdatedEmployer(ctx context.Context, obj interface{}) (model.UpdatedEmployer, error) {
+	var it model.UpdatedEmployer
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "phone_number", "badge", "Website"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "phone_number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone_number"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PhoneNumber = data
+		case "badge":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("badge"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Badge = data
+		case "Website":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Website"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Website = data
 		}
 	}
 
@@ -38568,6 +38873,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_resetEmployeePassword(ctx, field)
 			})
+		case "editEmployeeProfile":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_editEmployeeProfile(ctx, field)
+			})
 		case "createEmployer":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createEmployer(ctx, field)
@@ -38599,6 +38908,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "refreshToken":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_refreshToken(ctx, field)
+			})
+		case "editEmployerProfile":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_editEmployerProfile(ctx, field)
 			})
 		case "createJob":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -42504,6 +42817,11 @@ func (ec *executionContext) unmarshalNUpdateApplicationInput2githubᚗcomᚋGiga
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNUpdateEmployee2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateEmployee(ctx context.Context, v interface{}) (model.UpdateEmployee, error) {
+	res, err := ec.unmarshalInputUpdateEmployee(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNUpdateEmployeeInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateEmployeeInput(ctx context.Context, v interface{}) (model.UpdateEmployeeInput, error) {
 	res, err := ec.unmarshalInputUpdateEmployeeInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -42536,6 +42854,11 @@ func (ec *executionContext) unmarshalNUpdateUnverifiedEmployeeInput2githubᚗcom
 
 func (ec *executionContext) unmarshalNUpdateUnverifiedEmployerInput2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdateUnverifiedEmployerInput(ctx context.Context, v interface{}) (model.UpdateUnverifiedEmployerInput, error) {
 	res, err := ec.unmarshalInputUpdateUnverifiedEmployerInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNUpdatedEmployer2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐUpdatedEmployer(ctx context.Context, v interface{}) (model.UpdatedEmployer, error) {
+	res, err := ec.unmarshalInputUpdatedEmployer(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
