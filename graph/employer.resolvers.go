@@ -421,6 +421,53 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input *model.Refres
 	return &token, nil
 }
 
+// EditEmployerProfile is the resolver for the editEmployerProfile field.
+func (r *mutationResolver) EditEmployerProfile(ctx context.Context, input model.UpdatedEmployer) (*model.EmployerProfile, error) {
+	user, err := auth.ForContext(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access employer's id!")
+	}
+
+	//declare an employer variable
+	var employer *model.Employer
+
+	//Find the first employer that matches the input id
+	if err := r.Sql.Db.Where("id = ?", id).First(&employer).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "EditEmployerProfile").Msg("id does not exist")
+		return nil, errors.New("error finding employer with id: " + strconv.Itoa(id))
+	}
+
+	employer.Name = input.Name
+	employer.PhoneNumber = input.PhoneNumber
+	employer.Badge = input.Badge
+	employer.Website = input.Website
+
+	// Update employer record
+	if err := r.Sql.Db.Save(&employer).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "EditEmployerProfile").Msg("failed to update employer")
+		return nil, errors.New("error updating employer with id: " + strconv.Itoa(id))
+	}
+
+	employerprofile := &model.EmployerProfile{
+		ID:          employer.ID,
+		CreatedAt:   employer.CreatedAt,
+		UpdatedAt:   employer.UpdatedAt,
+		Name:        employer.Name,
+		PhoneNumber: employer.PhoneNumber,
+		Badge:       employer.Badge,
+		Website:     employer.Website,
+	}
+
+	return employerprofile, nil
+}
+
 // EmployerPhoneNumberExists is the resolver for the employerPhoneNumberExists field, checks if an employer's phone number already exists in both the unverified_employers and employers tables
 func (r *queryResolver) EmployerPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error) {
 	//check if system is in shutdown mode

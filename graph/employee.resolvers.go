@@ -341,6 +341,51 @@ func (r *mutationResolver) ResetEmployeePassword(ctx context.Context, newPasswor
 	return employee, nil
 }
 
+// EditEmployeeProfile is the resolver for the editEmployeeProfile field.
+func (r *mutationResolver) EditEmployeeProfile(ctx context.Context, input model.UpdateEmployee) (*model.EmployeeProfile, error) {
+	user, err := auth.ForContext(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := user.GetID()
+
+	if err != nil {
+		errors.New("could not access employee's id!")
+	}
+
+	//declare an employee variable
+	var employee *model.Employee
+
+	//Find the first employee that matches the input id
+	if err := r.Sql.Db.Where("id = ?", id).First(&employee).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "EditEmployeeProfile").Msg("id does not exist")
+		return nil, errors.New("error finding employee with id: " + strconv.Itoa(id))
+	}
+
+	employee.Name = input.Name
+	employee.PhoneNumber = input.PhoneNumber
+	employee.Profilepicture = input.Profilepicture
+
+	// Update employee record
+	if err := r.Sql.Db.Save(&employee).Error; err != nil {
+		log.Info().Int("id", id).Str("path", "EditEmployeeProfile").Msg("failed to update employee")
+		return nil, errors.New("error updating employee with id: " + strconv.Itoa(id))
+	}
+
+	employeeprofile := &model.EmployeeProfile{
+		ID:             employee.ID,
+		CreatedAt:      employee.CreatedAt,
+		UpdatedAt:      employee.UpdatedAt,
+		Name:           employee.Name,
+		PhoneNumber:    employee.PhoneNumber,
+		Profilepicture: employee.Profilepicture,
+	}
+
+	return employeeprofile, nil
+}
+
 // EmployeePhoneNumberExists is the resolver for the employeePhoneNumberExists field.
 func (r *queryResolver) EmployeePhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error) {
 	//check if system is in shutdown mode
