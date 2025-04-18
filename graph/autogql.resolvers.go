@@ -287,6 +287,279 @@ func (r *mutationResolver) DeleteAdmin(ctx context.Context, filter model.AdminFi
 	return res, db.Error
 }
 
+// GetApplication is the resolver for the getApplication field.
+func (r *queryResolver) GetApplication(ctx context.Context, id int) (*model.Application, error) {
+	v, okHook := r.Sql.Hooks[string(db.GetApplication)].(db.AutoGqlHookGet[model.Application, int])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, err = v.Received(ctx, r.Sql, id)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = runtimehelper.GetPreloadSelection(ctx, db, runtimehelper.GetPreloadsMap(ctx, "Application"))
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res model.Application
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Application")
+	db = db.First(&res, tableName+".id = ?", id)
+	if okHook {
+		r, err := v.AfterCallDb(ctx, &res)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+		r, err = v.BeforeReturn(ctx, &res, db)
+		if err != nil {
+			return nil, err
+		}
+		res = *r
+	}
+	return &res, db.Error
+}
+
+// QueryApplication is the resolver for the queryApplication field.
+func (r *queryResolver) QueryApplication(ctx context.Context, filter *model.ApplicationFiltersInput, order *model.ApplicationOrder, first *int, offset *int, group []model.ApplicationGroup) (*model.ApplicationQueryResult, error) {
+	v, okHook := r.Sql.Hooks[string(db.QueryApplication)].(db.AutoGqlHookQuery[model.Application, model.ApplicationFiltersInput, model.ApplicationOrder])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, order, first, offset, err = v.Received(ctx, r.Sql, filter, order, first, offset)
+		if err != nil {
+			return nil, err
+		}
+	}
+	var res []*model.Application
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Application")
+	preloadSubTables := runtimehelper.GetPreloadsMap(ctx, "data").SubTables
+	if len(preloadSubTables) > 0 {
+		db = runtimehelper.GetPreloadSelection(ctx, db, preloadSubTables[0])
+	}
+	if filter != nil {
+		blackList := make(map[string]struct{})
+		sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(db, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+		db.Where(sql, arguments...)
+	}
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if order != nil {
+		if order.Asc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s asc", runtimehelper.GetQuoteChar(db), tableName, order.Asc))
+		}
+		if order.Desc != nil {
+			db = db.Order(fmt.Sprintf("%[1]s%[2]s%[1]s.%[1]s%[3]s%[1]s desc", runtimehelper.GetQuoteChar(db), tableName, order.Desc))
+		}
+	}
+	var total int64
+	db.Model(res).Count(&total)
+	if first != nil {
+		db = db.Limit(*first)
+	}
+	if offset != nil {
+		db = db.Offset(*offset)
+	}
+	if len(group) > 0 {
+		garr := make([]string, len(group))
+		for i, g := range group {
+			garr[i] = fmt.Sprintf("%s.%s", tableName, xstrings.ToSnakeCase(string(g)))
+		}
+		db = db.Group(strings.Join(garr, ","))
+	}
+	db = db.Find(&res)
+	if okHook {
+		var err error
+		res, err = v.AfterCallDb(ctx, res)
+		if err != nil {
+			return nil, err
+		}
+		res, err = v.BeforeReturn(ctx, res, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &model.ApplicationQueryResult{
+		Data:       res,
+		Count:      len(res),
+		TotalCount: int(total),
+	}, db.Error
+}
+func (r *Resolver) AddApplicationPayload() AddApplicationPayloadResolver {
+	return &applicationPayloadResolver[*model.AddApplicationPayload]{r}
+}
+func (r *Resolver) DeleteApplicationPayload() DeleteApplicationPayloadResolver {
+	return &applicationPayloadResolver[*model.DeleteApplicationPayload]{r}
+}
+func (r *Resolver) UpdateApplicationPayload() UpdateApplicationPayloadResolver {
+	return &applicationPayloadResolver[*model.UpdateApplicationPayload]{r}
+}
+
+type applicationPayload interface {
+	*model.AddApplicationPayload | *model.DeleteApplicationPayload | *model.UpdateApplicationPayload
+}
+
+type applicationPayloadResolver[T applicationPayload] struct {
+	*Resolver
+}
+
+func (r *applicationPayloadResolver[T]) Application(ctx context.Context, obj T, filter *model.ApplicationFiltersInput, order *model.ApplicationOrder, first *int, offset *int, group []model.ApplicationGroup) (*model.ApplicationQueryResult, error) {
+	q := r.Query().(*queryResolver)
+	return q.QueryApplication(ctx, filter, order, first, offset, group)
+}
+
+// AddApplication is the resolver for the addApplication field.
+func (r *mutationResolver) AddApplication(ctx context.Context, input []*model.ApplicationInput) (*model.AddApplicationPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.AddApplication)].(db.AutoGqlHookAdd[model.Application, model.ApplicationInput, model.AddApplicationPayload])
+	res := &model.AddApplicationPayload{}
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	obj := make([]model.Application, len(input))
+	for i, v := range input {
+		obj[i] = v.MergeToType()
+	}
+	db = db.Omit(clause.Associations)
+	if okHook {
+		var err error
+		db, obj, err = v.BeforeCallDb(ctx, db, obj)
+		if err != nil {
+			return nil, err
+		}
+	}
+	db = db.Create(&obj)
+	affectedRes := make([]*model.Application, len(obj))
+	for i, v := range obj {
+		tmp := v
+		affectedRes[i] = &tmp
+	}
+	res.Affected = affectedRes
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, obj, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// UpdateApplication is the resolver for the updateApplication field.
+func (r *mutationResolver) UpdateApplication(ctx context.Context, input model.UpdateApplicationInput) (*model.UpdateApplicationPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.UpdateApplication)].(db.AutoGqlHookUpdate[model.UpdateApplicationInput, model.UpdateApplicationPayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, input, err = v.Received(ctx, r.Sql, &input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Application")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(input.Filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.Application{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.Application
+	queryDb.Find(&toChange)
+	update := input.Set.MergeToType()
+	if okHook {
+		var err error
+		db, update, err = v.BeforeCallDb(ctx, db, update)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Updates(update)
+	affectedRes := make([]*model.Application, 0)
+	subTables := runtimehelper.GetPreloadsMap(ctx, "affected").SubTables
+	if len(subTables) > 0 {
+		if preloadMap := subTables[0]; len(preloadMap.Fields) > 0 {
+			affectedDb := runtimehelper.GetPreloadSelection(ctx, db, preloadMap)
+			affectedDb = affectedDb.Model(&obj)
+			affectedDb.Find(&affectedRes)
+		}
+	}
+
+	res := &model.UpdateApplicationPayload{
+		Count:    int(db.RowsAffected),
+		Affected: affectedRes,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
+// DeleteApplication is the resolver for the deleteApplication field.
+func (r *mutationResolver) DeleteApplication(ctx context.Context, filter model.ApplicationFiltersInput) (*model.DeleteApplicationPayload, error) {
+	v, okHook := r.Sql.Hooks[string(db.DeleteApplication)].(db.AutoGqlHookDelete[model.ApplicationFiltersInput, model.DeleteApplicationPayload])
+	db := r.Sql.Db
+	if okHook {
+		var err error
+		db, filter, err = v.Received(ctx, r.Sql, &filter)
+		if err != nil {
+			return nil, err
+		}
+	}
+	tableName := r.Sql.Db.Config.NamingStrategy.TableName("Application")
+	blackList := make(map[string]struct{})
+	queryDb := db.Select(tableName + ".id")
+	sql, arguments := runtimehelper.CombineSimpleQuery(filter.ExtendsDatabaseQuery(queryDb, fmt.Sprintf("%[1]s%[2]s%[1]s", runtimehelper.GetQuoteChar(db), tableName), false, blackList), "AND")
+	obj := model.Application{}
+	queryDb = queryDb.Model(&obj).Where(sql, arguments...)
+	var toChange []model.Application
+	queryDb.Find(&toChange)
+	if okHook {
+		var err error
+		db, err = v.BeforeCallDb(ctx, db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	ids := make([]int, len(toChange))
+	for i, one := range toChange {
+		ids[i] = one.ID
+	}
+	db = db.Model(&obj).Where("id IN ?", ids).Delete(&obj)
+	msg := fmt.Sprintf("%d rows deleted", db.RowsAffected)
+	res := &model.DeleteApplicationPayload{
+		Count: int(db.RowsAffected),
+		Msg:   &msg,
+	}
+	if okHook {
+		var err error
+		res, err = v.BeforeReturn(ctx, db, res)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, db.Error
+}
+
 // GetEmployee is the resolver for the getEmployee field.
 func (r *queryResolver) GetEmployee(ctx context.Context, id int) (*model.Employee, error) {
 	v, okHook := r.Sql.Hooks[string(db.GetEmployee)].(db.AutoGqlHookGet[model.Employee, int])

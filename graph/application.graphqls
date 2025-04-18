@@ -1,0 +1,54 @@
+type Application @SQL {
+  id: Int! @SQL_PRIMARY @SQL_GORM(value: "autoIncrement")
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  jobID: Int!
+  employeeID: Int!
+  educationLevel: String!
+  experience: Int!
+  coverLetterUrl: String!
+  resumeeUrl: String!
+  status: String!
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+type ApplicationProfile {
+  id: Int!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: SoftDelete #activate softdelete
+  job: JobProfile!
+  employee: EmployeeProfile!
+  educationLevel: String!
+  experience: Int!
+  coverLetterUrl: String!
+  resumeeUrl: String!
+  status: ApplicationStatus!
+}
+
+input NewApplication {
+  educationLevel: String!
+  experience: Int!
+  coverLetterUrl: String!
+  resumeeUrl: String!
+  jobID: Int!
+}
+
+extend type Query {
+  findApplication(id: Int!): ApplicationProfile!
+}
+
+extend type Mutation {
+  createApplication(input: NewApplication!): ApplicationProfile!
+  editApplication(
+    id: Int!
+    input: NewApplication
+    status: ApplicationStatus
+  ): ApplicationProfile!
+}

@@ -17,6 +17,12 @@ type AddAdminPayload struct {
 	Affected []*Admin          `json:"affected"`
 }
 
+// AddApplication result with filterable data and affected rows
+type AddApplicationPayload struct {
+	Application *ApplicationQueryResult `json:"application"`
+	Affected    []*Application          `json:"affected"`
+}
+
 // AddEmployee result with filterable data and affected rows
 type AddEmployeePayload struct {
 	Employee *EmployeeQueryResult `json:"employee"`
@@ -123,6 +129,87 @@ type AdminQueryResult struct {
 	TotalCount int      `json:"totalCount"`
 }
 
+type Application struct {
+	ID             int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
+	CreatedAt      time.Time                 `json:"createdAt"`
+	UpdatedAt      time.Time                 `json:"updatedAt"`
+	DeletedAt      *runtimehelper.SoftDelete `json:"deletedAt,omitempty" gorm:"index;"`
+	JobID          int                       `json:"jobID"`
+	EmployeeID     int                       `json:"employeeID"`
+	EducationLevel string                    `json:"educationLevel"`
+	Experience     int                       `json:"experience"`
+	CoverLetterURL string                    `json:"coverLetterUrl"`
+	ResumeeURL     string                    `json:"resumeeUrl"`
+	Status         string                    `json:"status"`
+}
+
+// Filter input selection for Application
+// Can be used f.e.: by queryApplication
+type ApplicationFiltersInput struct {
+	ID             *IntFilterInput            `json:"id,omitempty"`
+	CreatedAt      *TimeFilterInput           `json:"createdAt,omitempty"`
+	UpdatedAt      *TimeFilterInput           `json:"updatedAt,omitempty"`
+	JobID          *IntFilterInput            `json:"jobID,omitempty"`
+	EmployeeID     *IntFilterInput            `json:"employeeID,omitempty"`
+	EducationLevel *StringFilterInput         `json:"educationLevel,omitempty"`
+	Experience     *IntFilterInput            `json:"experience,omitempty"`
+	CoverLetterURL *StringFilterInput         `json:"coverLetterUrl,omitempty"`
+	ResumeeURL     *StringFilterInput         `json:"resumeeUrl,omitempty"`
+	Status         *StringFilterInput         `json:"status,omitempty"`
+	And            []*ApplicationFiltersInput `json:"and,omitempty"`
+	Or             []*ApplicationFiltersInput `json:"or,omitempty"`
+	Not            *ApplicationFiltersInput   `json:"not,omitempty"`
+}
+
+// Application Input value to add new Application
+type ApplicationInput struct {
+	JobID          int    `json:"jobID"`
+	EmployeeID     int    `json:"employeeID"`
+	EducationLevel string `json:"educationLevel"`
+	Experience     int    `json:"experience"`
+	CoverLetterURL string `json:"coverLetterUrl"`
+	ResumeeURL     string `json:"resumeeUrl"`
+	Status         string `json:"status"`
+}
+
+// Order Application by asc or desc
+type ApplicationOrder struct {
+	Asc  *ApplicationOrderable `json:"asc,omitempty"`
+	Desc *ApplicationOrderable `json:"desc,omitempty"`
+}
+
+// Application Patch value all values are optional to update Application entities
+type ApplicationPatch struct {
+	JobID          *int    `json:"jobID,omitempty"`
+	EmployeeID     *int    `json:"employeeID,omitempty"`
+	EducationLevel *string `json:"educationLevel,omitempty"`
+	Experience     *int    `json:"experience,omitempty"`
+	CoverLetterURL *string `json:"coverLetterUrl,omitempty"`
+	ResumeeURL     *string `json:"resumeeUrl,omitempty"`
+	Status         *string `json:"status,omitempty"`
+}
+
+type ApplicationProfile struct {
+	ID             int                       `json:"id"`
+	CreatedAt      time.Time                 `json:"createdAt"`
+	UpdatedAt      time.Time                 `json:"updatedAt"`
+	DeletedAt      *runtimehelper.SoftDelete `json:"deletedAt,omitempty"`
+	Job            *JobProfile               `json:"job"`
+	Employee       *EmployeeProfile          `json:"employee"`
+	EducationLevel string                    `json:"educationLevel"`
+	Experience     int                       `json:"experience"`
+	CoverLetterURL string                    `json:"coverLetterUrl"`
+	ResumeeURL     string                    `json:"resumeeUrl"`
+	Status         ApplicationStatus         `json:"status"`
+}
+
+// Application result
+type ApplicationQueryResult struct {
+	Data       []*Application `json:"data"`
+	Count      int            `json:"count"`
+	TotalCount int            `json:"totalCount"`
+}
+
 // Boolean Filter simple datatypes
 type BooleanFilterInput struct {
 	And     []*bool             `json:"and,omitempty"`
@@ -137,6 +224,14 @@ type BooleanFilterInput struct {
 type DeleteAdminPayload struct {
 	Admin *AdminQueryResult `json:"admin"`
 	// Count of deleted Admin entities
+	Count int     `json:"count"`
+	Msg   *string `json:"msg,omitempty"`
+}
+
+// DeleteApplication result with filterable data and count of affected entries
+type DeleteApplicationPayload struct {
+	Application *ApplicationQueryResult `json:"application"`
+	// Count of deleted Application entities
 	Count int     `json:"count"`
 	Msg   *string `json:"msg,omitempty"`
 }
@@ -256,12 +351,13 @@ type EmployeePatch struct {
 }
 
 type EmployeeProfile struct {
-	ID             int       `json:"id"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
-	Name           string    `json:"name"`
-	PhoneNumber    string    `json:"phone_number"`
-	Profilepicture *string   `json:"profilepicture,omitempty"`
+	ID             int                   `json:"id"`
+	CreatedAt      time.Time             `json:"createdAt"`
+	UpdatedAt      time.Time             `json:"updatedAt"`
+	Name           string                `json:"name"`
+	PhoneNumber    string                `json:"phone_number"`
+	Profilepicture *string               `json:"profilepicture,omitempty"`
+	Applications   []*ApplicationProfile `json:"applications,omitempty"`
 }
 
 // Employee result
@@ -510,6 +606,7 @@ type JobProfile struct {
 	Requirements   []string                  `json:"requirements,omitempty"`
 	JobURL         *string                   `json:"jobUrl,omitempty"`
 	Employer       *EmployerProfile          `json:"employer,omitempty"`
+	Applications   []*ApplicationProfile     `json:"applications,omitempty"`
 }
 
 // Job result
@@ -532,6 +629,14 @@ type NewAdmin struct {
 	Name        string `json:"name"`
 	PhoneNumber string `json:"phone_number"`
 	Password    string `json:"password"`
+}
+
+type NewApplication struct {
+	EducationLevel string `json:"educationLevel"`
+	Experience     int    `json:"experience"`
+	CoverLetterURL string `json:"coverLetterUrl"`
+	ResumeeURL     string `json:"resumeeUrl"`
+	JobID          int    `json:"jobID"`
 }
 
 type NewEmployee struct {
@@ -951,6 +1056,20 @@ type UpdateAdminPayload struct {
 	Affected []*Admin `json:"affected"`
 }
 
+// Update rules for Application multiupdates simple possible by global filtervalue
+type UpdateApplicationInput struct {
+	Filter *ApplicationFiltersInput `json:"filter"`
+	Set    *ApplicationPatch        `json:"set"`
+}
+
+// UpdateApplication result with filterable data and affected rows
+type UpdateApplicationPayload struct {
+	Application *ApplicationQueryResult `json:"application"`
+	// Count of affected updates
+	Count    int            `json:"count"`
+	Affected []*Application `json:"affected"`
+}
+
 // Update rules for Employee multiupdates simple possible by global filtervalue
 type UpdateEmployeeInput struct {
 	Filter *EmployeeFiltersInput `json:"filter"`
@@ -1149,6 +1268,163 @@ func (e *AdminOrderable) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AdminOrderable) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Groupable data for  Application
+// Can be used f.e.: by queryApplication
+type ApplicationGroup string
+
+const (
+	ApplicationGroupID             ApplicationGroup = "id"
+	ApplicationGroupCreatedAt      ApplicationGroup = "createdAt"
+	ApplicationGroupUpdatedAt      ApplicationGroup = "updatedAt"
+	ApplicationGroupJobID          ApplicationGroup = "jobID"
+	ApplicationGroupEmployeeID     ApplicationGroup = "employeeID"
+	ApplicationGroupEducationLevel ApplicationGroup = "educationLevel"
+	ApplicationGroupExperience     ApplicationGroup = "experience"
+	ApplicationGroupCoverLetterURL ApplicationGroup = "coverLetterUrl"
+	ApplicationGroupResumeeURL     ApplicationGroup = "resumeeUrl"
+	ApplicationGroupStatus         ApplicationGroup = "status"
+)
+
+var AllApplicationGroup = []ApplicationGroup{
+	ApplicationGroupID,
+	ApplicationGroupCreatedAt,
+	ApplicationGroupUpdatedAt,
+	ApplicationGroupJobID,
+	ApplicationGroupEmployeeID,
+	ApplicationGroupEducationLevel,
+	ApplicationGroupExperience,
+	ApplicationGroupCoverLetterURL,
+	ApplicationGroupResumeeURL,
+	ApplicationGroupStatus,
+}
+
+func (e ApplicationGroup) IsValid() bool {
+	switch e {
+	case ApplicationGroupID, ApplicationGroupCreatedAt, ApplicationGroupUpdatedAt, ApplicationGroupJobID, ApplicationGroupEmployeeID, ApplicationGroupEducationLevel, ApplicationGroupExperience, ApplicationGroupCoverLetterURL, ApplicationGroupResumeeURL, ApplicationGroupStatus:
+		return true
+	}
+	return false
+}
+
+func (e ApplicationGroup) String() string {
+	return string(e)
+}
+
+func (e *ApplicationGroup) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApplicationGroup(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApplicationGroup", str)
+	}
+	return nil
+}
+
+func (e ApplicationGroup) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// for Application a enum of all orderable entities
+// can be used f.e.: queryApplication
+type ApplicationOrderable string
+
+const (
+	ApplicationOrderableID             ApplicationOrderable = "id"
+	ApplicationOrderableJobID          ApplicationOrderable = "jobID"
+	ApplicationOrderableEmployeeID     ApplicationOrderable = "employeeID"
+	ApplicationOrderableEducationLevel ApplicationOrderable = "educationLevel"
+	ApplicationOrderableExperience     ApplicationOrderable = "experience"
+	ApplicationOrderableCoverLetterURL ApplicationOrderable = "coverLetterUrl"
+	ApplicationOrderableResumeeURL     ApplicationOrderable = "resumeeUrl"
+	ApplicationOrderableStatus         ApplicationOrderable = "status"
+)
+
+var AllApplicationOrderable = []ApplicationOrderable{
+	ApplicationOrderableID,
+	ApplicationOrderableJobID,
+	ApplicationOrderableEmployeeID,
+	ApplicationOrderableEducationLevel,
+	ApplicationOrderableExperience,
+	ApplicationOrderableCoverLetterURL,
+	ApplicationOrderableResumeeURL,
+	ApplicationOrderableStatus,
+}
+
+func (e ApplicationOrderable) IsValid() bool {
+	switch e {
+	case ApplicationOrderableID, ApplicationOrderableJobID, ApplicationOrderableEmployeeID, ApplicationOrderableEducationLevel, ApplicationOrderableExperience, ApplicationOrderableCoverLetterURL, ApplicationOrderableResumeeURL, ApplicationOrderableStatus:
+		return true
+	}
+	return false
+}
+
+func (e ApplicationOrderable) String() string {
+	return string(e)
+}
+
+func (e *ApplicationOrderable) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApplicationOrderable(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApplicationOrderable", str)
+	}
+	return nil
+}
+
+func (e ApplicationOrderable) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ApplicationStatus string
+
+const (
+	ApplicationStatusPending  ApplicationStatus = "PENDING"
+	ApplicationStatusAccepted ApplicationStatus = "ACCEPTED"
+	ApplicationStatusRejected ApplicationStatus = "REJECTED"
+)
+
+var AllApplicationStatus = []ApplicationStatus{
+	ApplicationStatusPending,
+	ApplicationStatusAccepted,
+	ApplicationStatusRejected,
+}
+
+func (e ApplicationStatus) IsValid() bool {
+	switch e {
+	case ApplicationStatusPending, ApplicationStatusAccepted, ApplicationStatusRejected:
+		return true
+	}
+	return false
+}
+
+func (e ApplicationStatus) String() string {
+	return string(e)
+}
+
+func (e *ApplicationStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ApplicationStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ApplicationStatus", str)
+	}
+	return nil
+}
+
+func (e ApplicationStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

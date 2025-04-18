@@ -27,10 +27,12 @@ var (
 func main() {
 
 	// Find .env file
-	//err := godotenv.Load(".env")
-	//if err != nil {
-	//	log.Fatal().Msg(fmt.Sprintf("Error loading .env file: %s", err))
-	//}
+	/*
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal().Msg(fmt.Sprintf("Error loading .env file: %s", err))
+	}
+	*/
 
 	/*
 	go phoneutils.InitializeTwilio()

@@ -55,11 +55,15 @@ func (r *mutationResolver) CreateAdmin(ctx context.Context, input model.NewAdmin
 		PhoneNumber: input.PhoneNumber,
 		Password:    encryptedpassword,
 	}
-	//send an OTP code to the phone number associated with the unverified admin record, return error if there is any
-	if err := phoneutils.SendOtp(unverifiedadmin.PhoneNumber); err != nil {
-		log.Error().Str("phone_number", input.PhoneNumber).Str("path", "CreateAdmin").Msg(err.Error())
-		return nil, err
-	}
+
+	/*send an OTP code to the phone number associated with the unverified admin record, return error if there is any
+		if err := phoneutils.SendOtp(unverifiedadmin.PhoneNumber); err != nil {
+			log.Error().Str("phone_number", input.PhoneNumber).Str("path", "CreateAdmin").Msg(err.Error())
+			return nil, err
+		}
+	OTP defaulted to: 777777 for testing purposes
+	*/
+
 	//create an unverified admin record in the database and return if operation succeeds
 	if err := r.Sql.Db.Create(unverifiedadmin).Error; err != nil {
 		log.Error().Str("name", input.Name).Str("path", "CreateAdmin").Msg(err.Error())
@@ -79,9 +83,14 @@ func (r *mutationResolver) VerifyAdmin(ctx context.Context, input model.Verifica
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
-	//Check the validity of an OTP code
+	/*Check the validity of an OTP code
 	if err := phoneutils.CheckOtp(input.PhoneNumber, input.Otp); err != nil {
 		return nil, err
+	}
+	OTP defaulted to: 777777 for testing purposes
+	*/
+	if input.Otp != "777777" {
+		return nil, errors.New("incorrect OTP code")
 	}
 	//declare an unverifiedadmin variable
 	var unverifiedadmin *model.UnverifiedAdmin

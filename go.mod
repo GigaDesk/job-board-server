@@ -7,7 +7,6 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fasibio/autogql v0.5.8
 	github.com/huandu/xstrings v1.4.0
-	github.com/joho/godotenv v1.5.1
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/twilio/twilio-go v1.23.5
 	github.com/vektah/gqlparser/v2 v2.5.17

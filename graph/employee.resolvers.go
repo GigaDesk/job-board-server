@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/GigaDesk/eardrum-prefix/validate"
 	"github.com/GigaDesk/eardrum-server/auth"
@@ -19,6 +20,36 @@ import (
 	"github.com/GigaDesk/eardrum-server/shutdown"
 	"github.com/rs/zerolog/log"
 )
+
+// Applications is the resolver for the applications field.
+func (r *employeeProfileResolver) Applications(ctx context.Context, obj *model.EmployeeProfile, status *model.ApplicationStatus) ([]*model.ApplicationProfile, error) {
+	var applications []model.Application
+
+	query := status.Query(r.Sql.Db.Model(&model.Application{}))
+
+	if err := query.Where("employee_id = ?", obj.ID).Find(&applications).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("could not access applications!")
+	}
+	var applicationprofiles []*model.ApplicationProfile
+
+	for _, application := range applications {
+		applicationprofile := &model.ApplicationProfile{
+			ID:             application.ID,
+			CreatedAt:      application.CreatedAt,
+			UpdatedAt:      application.UpdatedAt,
+			DeletedAt:      application.DeletedAt,
+			EducationLevel: application.EducationLevel,
+			Experience:     application.Experience,
+			CoverLetterURL: application.CoverLetterURL,
+			ResumeeURL:     application.ResumeeURL,
+			Status:         model.ApplicationStatus(strings.ToUpper(application.Status)),
+		}
+		applicationprofiles = append(applicationprofiles, applicationprofile)
+	}
+
+	return applicationprofiles, nil
+}
 
 // CreateEmployee is the resolver for the createEmployee field.
 func (r *mutationResolver) CreateEmployee(ctx context.Context, input model.NewEmployee) (*model.UnverifiedEmployee, error) {
@@ -399,3 +430,8 @@ func (r *queryResolver) GetEmployeesProfile(ctx context.Context) ([]*model.Emplo
 
 	return employeesprofile, nil
 }
+
+// EmployeeProfile returns EmployeeProfileResolver implementation.
+func (r *Resolver) EmployeeProfile() EmployeeProfileResolver { return &employeeProfileResolver{r} }
+
+type employeeProfileResolver struct{ *Resolver }

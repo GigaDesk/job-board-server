@@ -99,6 +99,8 @@ models:
     fields:
       employer:
         resolver: true
+      applications:
+        resolver: true
   UnapprovedJobProfile:
     fields:
       employer:
@@ -108,4 +110,14 @@ models:
       jobs:
         resolver: true
       unapprovedJobs:
+        resolver: true
+  ApplicationProfile:
+    fields:
+      job:
+        resolver: true
+      employee:
+        resolver: true
+  EmployeeProfile:
+    fields:
+      applications:
         resolver: true
