@@ -27,6 +27,13 @@ type UnverifiedEmployee @SQL {
   profilepicture: String
 }
 
+#returns an analysis of an employee's activity
+type EmployeeAnalytics {
+  job_application_status: ApplicationAnalytics!
+  applied_jobs_education_level: JobEducationLevelAnalytics!
+  applied_jobs_experience: JobExperienceAnalytics!
+  applied_jobs_seniority: JobSeniorityLevelAnalytics!
+}
 
 #returns the an employee's profile data
 type EmployeeProfile {
@@ -37,6 +44,7 @@ type EmployeeProfile {
   phone_number: String!
   profilepicture: String
   applications(status: ApplicationStatus): [ApplicationProfile!]
+  analytics:EmployeeAnalytics!
 }
 
 #fields required by an employee to log into the system

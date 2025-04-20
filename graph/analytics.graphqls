@@ -1,0 +1,34 @@
+#returns an analysis of job applications associated with a certain group i.e employee, employer
+type ApplicationAnalytics {
+  total: Int!
+  accepted: Int!
+  rejected: Int!
+  pending: Int!
+}
+
+#returns an analysis of the education level of jobs associated with a certain group i.e employee, employer
+type JobEducationLevelAnalytics {
+  diploma: Int!
+  bachelors_degree: Int!
+  masters_degree: Int!
+  phd: Int!
+  unspecified: Int!
+}
+
+#returns an analysis of the experience requirements of jobs associated with a certain group i.e employee, employer
+type JobExperienceAnalytics {
+  below_one: Int!
+  one_to_three: Int!
+  three_to_five: Int!
+  five_to_seven: Int!
+  seven_to_nine: Int!
+  nine_and_above: Int!
+}
+
+#returns an analysis of the seniority level of jobs associated with a certain group i.e employee, employer
+type JobSeniorityLevelAnalytics {
+  beginner: Int!
+  intermediate: Int!
+  senior: Int!
+  unspecified: Int!
+}

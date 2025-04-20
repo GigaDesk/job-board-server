@@ -143,6 +143,13 @@ type Application struct {
 	Status         string                    `json:"status"`
 }
 
+type ApplicationAnalytics struct {
+	Total    int `json:"total"`
+	Accepted int `json:"accepted"`
+	Rejected int `json:"rejected"`
+	Pending  int `json:"pending"`
+}
+
 // Filter input selection for Application
 // Can be used f.e.: by queryApplication
 type ApplicationFiltersInput struct {
@@ -308,6 +315,13 @@ type Employee struct {
 	Profilepicture *string                   `json:"profilepicture,omitempty"`
 }
 
+type EmployeeAnalytics struct {
+	JobApplicationStatus      *ApplicationAnalytics       `json:"job_application_status"`
+	AppliedJobsEducationLevel *JobEducationLevelAnalytics `json:"applied_jobs_education_level"`
+	AppliedJobsExperience     *JobExperienceAnalytics     `json:"applied_jobs_experience"`
+	AppliedJobsSeniority      *JobSeniorityLevelAnalytics `json:"applied_jobs_seniority"`
+}
+
 // Filter input selection for Employee
 // Can be used f.e.: by queryEmployee
 type EmployeeFiltersInput struct {
@@ -358,6 +372,7 @@ type EmployeeProfile struct {
 	PhoneNumber    string                `json:"phone_number"`
 	Profilepicture *string               `json:"profilepicture,omitempty"`
 	Applications   []*ApplicationProfile `json:"applications,omitempty"`
+	Analytics      *EmployeeAnalytics    `json:"analytics"`
 }
 
 // Employee result
@@ -524,6 +539,23 @@ type Job struct {
 	JobURL         *string                   `json:"jobUrl,omitempty"`
 }
 
+type JobEducationLevelAnalytics struct {
+	Diploma         int `json:"diploma"`
+	BachelorsDegree int `json:"bachelors_degree"`
+	MastersDegree   int `json:"masters_degree"`
+	Phd             int `json:"phd"`
+	Unspecified     int `json:"unspecified"`
+}
+
+type JobExperienceAnalytics struct {
+	BelowOne     int `json:"below_one"`
+	OneToThree   int `json:"one_to_three"`
+	ThreeToFive  int `json:"three_to_five"`
+	FiveToSeven  int `json:"five_to_seven"`
+	SevenToNine  int `json:"seven_to_nine"`
+	NineAndAbove int `json:"nine_and_above"`
+}
+
 // Filter input selection for Job
 // Can be used f.e.: by queryJob
 type JobFiltersInput struct {
@@ -615,6 +647,13 @@ type JobQueryResult struct {
 	Data       []*Job `json:"data"`
 	Count      int    `json:"count"`
 	TotalCount int    `json:"totalCount"`
+}
+
+type JobSeniorityLevelAnalytics struct {
+	Beginner     int `json:"beginner"`
+	Intermediate int `json:"intermediate"`
+	Senior       int `json:"senior"`
+	Unspecified  int `json:"unspecified"`
 }
 
 type JobsFilterParameters struct {
