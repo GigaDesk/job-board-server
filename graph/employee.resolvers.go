@@ -51,6 +51,173 @@ func (r *employeeProfileResolver) Applications(ctx context.Context, obj *model.E
 	return applicationprofiles, nil
 }
 
+// Analytics is the resolver for the analytics field.
+func (r *employeeProfileResolver) Analytics(ctx context.Context, obj *model.EmployeeProfile) (*model.EmployeeAnalytics, error) {
+	var total_applications int64
+
+	if err := r.Sql.Db.Model(&model.Application{}).Where("employee_id = ?", obj.ID).Count(&total_applications).Error; err != nil {
+		log.Error().Int("employee_id", obj.ID).Msg(err.Error())
+		return nil, errors.New("error counting total applications")
+	}
+	var accepted_applications int64
+
+	if err := r.Sql.Db.Model(&model.Application{}).Where("employee_id = ?", obj.ID).Where("status = ?", "accepted").Count(&accepted_applications).Error; err != nil {
+		log.Error().Int("employee_id", obj.ID).Msg(err.Error())
+		return nil, errors.New("error counting accepted applications")
+	}
+
+	var rejected_applications int64
+
+	if err := r.Sql.Db.Model(&model.Application{}).Where("employee_id = ?", obj.ID).Where("status = ?", "rejected").Count(&rejected_applications).Error; err != nil {
+		log.Error().Int("employee_id", obj.ID).Msg(err.Error())
+		return nil, errors.New("error counting rejected applications")
+	}
+
+	var pending_applications int64
+
+	if err := r.Sql.Db.Model(&model.Application{}).Where("employee_id = ?", obj.ID).Where("status = ?", "pending").Count(&pending_applications).Error; err != nil {
+		log.Error().Int("employee_id", obj.ID).Msg(err.Error())
+		return nil, errors.New("error counting pending applications")
+	}
+
+	applications_analytics := model.ApplicationAnalytics{
+		Total:    int(total_applications),
+		Accepted: int(accepted_applications),
+		Rejected: int(rejected_applications),
+		Pending:  int(pending_applications),
+	}
+
+	var applications []model.Application
+
+	if err := r.Sql.Db.Where("employee_id = ?", obj.ID).Find(&applications).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("could not access applications!")
+	}
+
+	var jobIds []int
+
+	for _, application := range applications {
+		jobIds = append(jobIds, application.JobID)
+	}
+
+	var diploma_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("education_level = ?", "Diploma").Count(&diploma_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting diploma jobs!")
+	}
+
+	var bachelors_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("education_level = ?", "Bachelor's Degree").Count(&bachelors_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting bachelors jobs!")
+	}
+
+	var masters_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("education_level = ?", "Master's Degree").Count(&masters_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting masters jobs!")
+	}
+
+	var phd_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("education_level = ?", "PhD").Count(&phd_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting phd jobs!")
+	}
+
+	job_education_level_analytics := model.JobEducationLevelAnalytics{
+		Diploma:         int(diploma_jobs),
+		BachelorsDegree: int(bachelors_jobs),
+		MastersDegree:   int(masters_jobs),
+		Phd:             int(phd_jobs),
+		Unspecified:     len(jobIds) - int(diploma_jobs) - int(bachelors_jobs) - int(masters_jobs) - int(phd_jobs),
+	}
+
+	var beginner_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("level = ?", "Beginner").Count(&beginner_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting beginner jobs!")
+	}
+
+	var intermediate_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("level = ?", "Intermediate").Count(&intermediate_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting intermediate jobs!")
+	}
+
+	var senior_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("level = ?", "Senior").Count(&senior_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting senior jobs!")
+	}
+
+	job_seniority_level_analytics := model.JobSeniorityLevelAnalytics{
+		Beginner:     int(beginner_jobs),
+		Intermediate: int(intermediate_jobs),
+		Senior:       int(senior_jobs),
+		Unspecified:  len(jobIds) - int(beginner_jobs) - int(intermediate_jobs) - int(senior_jobs),
+	}
+
+	var one_to_three_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("experience < ? AND experience >= ?", "3", "1").Count(&one_to_three_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting one to three years of experience jobs!")
+	}
+
+	var three_to_five_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("experience < ? AND experience >= ?", "5", "3").Count(&three_to_five_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting three to five years of experience jobs!")
+	}
+
+	var five_to_seven_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("experience < ? AND experience >= ?", "7", "5").Count(&five_to_seven_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting five to seven years of experience jobs!")
+	}
+
+	var seven_to_nine_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("experience < ? AND experience >= ?", "9", "7").Count(&seven_to_nine_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting seven to nine years of experience jobs!")
+	}
+
+	var nine_and_above_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("id IN ?", jobIds).Where("experience >= ?", "9").Count(&nine_and_above_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployeeProfile").Msg(err.Error())
+		return nil, errors.New("error counting nine and above years of experience jobs!")
+	}
+
+	job_experience_analytics := model.JobExperienceAnalytics{
+		BelowOne:     len(jobIds) - int(one_to_three_jobs) - int(three_to_five_jobs) - int(five_to_seven_jobs) - int(seven_to_nine_jobs) - int(nine_and_above_jobs),
+		OneToThree:   int(one_to_three_jobs),
+		ThreeToFive:  int(three_to_five_jobs),
+		FiveToSeven:  int(five_to_seven_jobs),
+		SevenToNine:  int(seven_to_nine_jobs),
+		NineAndAbove: int(nine_and_above_jobs),
+	}
+
+	analytics := &model.EmployeeAnalytics{
+		JobApplicationStatus:      &applications_analytics,
+		AppliedJobsEducationLevel: &job_education_level_analytics,
+		AppliedJobsExperience:     &job_experience_analytics,
+		AppliedJobsSeniority:      &job_seniority_level_analytics,
+	}
+
+	return analytics, nil
+}
+
 // CreateEmployee is the resolver for the createEmployee field.
 func (r *mutationResolver) CreateEmployee(ctx context.Context, input model.NewEmployee) (*model.UnverifiedEmployee, error) {
 	//check if system is in shutdown mode
