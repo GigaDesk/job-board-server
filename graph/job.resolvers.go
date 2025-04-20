@@ -151,7 +151,7 @@ func (r *mutationResolver) CreateJob(ctx context.Context, input model.NewJob) (*
 		MinSalary:      n.MinSalary,
 		MaxSalary:      n.MaxSalary,
 		Experience:     n.Experience,
-		Posted: timeutils.TimeSince(n.CreatedAt),
+		Posted:         timeutils.TimeSince(n.CreatedAt),
 		JobURL:         n.JobURL,
 		Requirements:   strings.Split(pointer.GetString(n.Requirements), "||"),
 	}
@@ -224,7 +224,7 @@ func (r *mutationResolver) CreateUnapprovedJob(ctx context.Context, input model.
 		MinSalary:      n.MinSalary,
 		MaxSalary:      n.MaxSalary,
 		Experience:     n.Experience,
-		Posted: timeutils.TimeSince(n.CreatedAt),
+		Posted:         timeutils.TimeSince(n.CreatedAt),
 		JobURL:         n.JobURL,
 		Requirements:   strings.Split(pointer.GetString(n.Requirements), "||"),
 	}
@@ -314,7 +314,7 @@ func (r *mutationResolver) ApproveJob(ctx context.Context, id int) (*model.JobPr
 		MinSalary:      job.MinSalary,
 		MaxSalary:      job.MaxSalary,
 		Experience:     job.Experience,
-		Posted: timeutils.TimeSince(job.CreatedAt),
+		Posted:         timeutils.TimeSince(job.CreatedAt),
 		JobURL:         job.JobURL,
 		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 	}
@@ -380,7 +380,7 @@ func (r *mutationResolver) EditJob(ctx context.Context, id int, input model.NewJ
 		EducationLevel: job.EducationLevel,
 		MinSalary:      job.MinSalary,
 		MaxSalary:      job.MaxSalary,
-		Posted: timeutils.TimeSince(job.CreatedAt),
+		Posted:         timeutils.TimeSince(job.CreatedAt),
 		JobURL:         job.JobURL,
 		Experience:     job.Experience,
 		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
@@ -434,7 +434,7 @@ func (r *mutationResolver) RemoveJob(ctx context.Context, id int) (*model.JobPro
 		MinSalary:      job.MinSalary,
 		MaxSalary:      job.MaxSalary,
 		Experience:     job.Experience,
-		Posted: timeutils.TimeSince(job.CreatedAt),
+		Posted:         timeutils.TimeSince(job.CreatedAt),
 		JobURL:         job.JobURL,
 		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 	}
@@ -479,7 +479,7 @@ func (r *mutationResolver) RemoveUnapprovedJob(ctx context.Context, id int) (*mo
 		MinSalary:      unapprovedjob.MinSalary,
 		MaxSalary:      unapprovedjob.MaxSalary,
 		Experience:     unapprovedjob.Experience,
-		Posted: timeutils.TimeSince(unapprovedjob.CreatedAt),
+		Posted:         timeutils.TimeSince(unapprovedjob.CreatedAt),
 		JobURL:         unapprovedjob.JobURL,
 		Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
 	}
@@ -545,7 +545,7 @@ func (r *mutationResolver) EditUnapprovedJob(ctx context.Context, id int, input 
 		EducationLevel: unapprovedjob.EducationLevel,
 		MinSalary:      unapprovedjob.MinSalary,
 		MaxSalary:      unapprovedjob.MaxSalary,
-		Posted: timeutils.TimeSince(unapprovedjob.CreatedAt),
+		Posted:         timeutils.TimeSince(unapprovedjob.CreatedAt),
 		JobURL:         unapprovedjob.JobURL,
 		Experience:     unapprovedjob.Experience,
 		Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
@@ -596,7 +596,7 @@ func (r *queryResolver) GetJobs(ctx context.Context, filterparameters *model.Job
 			MinSalary:      job.MinSalary,
 			MaxSalary:      job.MaxSalary,
 			Experience:     job.Experience,
-			Posted: timeutils.TimeSince(job.CreatedAt),
+			Posted:         timeutils.TimeSince(job.CreatedAt),
 			JobURL:         job.JobURL,
 			Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 		}
@@ -637,7 +637,7 @@ func (r *queryResolver) FindJob(ctx context.Context, id int) (*model.JobProfile,
 		MinSalary:      job.MinSalary,
 		MaxSalary:      job.MaxSalary,
 		Experience:     job.Experience,
-		Posted: timeutils.TimeSince(job.CreatedAt),
+		Posted:         timeutils.TimeSince(job.CreatedAt),
 		JobURL:         job.JobURL,
 		Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 	}
@@ -686,7 +686,7 @@ func (r *queryResolver) GetUnapprovedJobs(ctx context.Context, filterparameters 
 			MinSalary:      job.MinSalary,
 			MaxSalary:      job.MaxSalary,
 			Experience:     job.Experience,
-			Posted: timeutils.TimeSince(job.CreatedAt),
+			Posted:         timeutils.TimeSince(job.CreatedAt),
 			JobURL:         job.JobURL,
 			Requirements:   strings.Split(pointer.GetString(job.Requirements), "||"),
 		}
@@ -727,7 +727,7 @@ func (r *queryResolver) FindUnapprovedJob(ctx context.Context, id int) (*model.U
 		MinSalary:      unapprovedjob.MinSalary,
 		MaxSalary:      unapprovedjob.MaxSalary,
 		Experience:     unapprovedjob.Experience,
-		Posted: timeutils.TimeSince(unapprovedjob.CreatedAt),
+		Posted:         timeutils.TimeSince(unapprovedjob.CreatedAt),
 		JobURL:         unapprovedjob.JobURL,
 		Requirements:   strings.Split(pointer.GetString(unapprovedjob.Requirements), "||"),
 	}
