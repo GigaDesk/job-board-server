@@ -90,6 +90,316 @@ func (r *employerProfileResolver) UnapprovedJobs(ctx context.Context, obj *model
 	return unapprovedjobprofiles, nil
 }
 
+// Analytics is the resolver for the analytics field.
+func (r *employerProfileResolver) Analytics(ctx context.Context, obj *model.EmployerProfile) (*model.EmployerAnalytics, error) {
+
+	//for approved jobs
+	var total_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Count(&total_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting total employer jobs!")
+	}
+
+	var diploma_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("education_level = ?", "Diploma").Count(&diploma_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting diploma jobs!")
+	}
+
+	var bachelors_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("education_level = ?", "Bachelor's Degree").Count(&bachelors_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting bachelors jobs!")
+	}
+
+	var masters_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("education_level = ?", "Master's Degree").Count(&masters_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting masters jobs!")
+	}
+
+	var phd_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("education_level = ?", "PhD").Count(&phd_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting phd jobs!")
+	}
+
+	job_education_level_analytics := model.JobEducationLevelAnalytics{
+		Diploma:         int(diploma_jobs),
+		BachelorsDegree: int(bachelors_jobs),
+		MastersDegree:   int(masters_jobs),
+		Phd:             int(phd_jobs),
+		Unspecified:     int(total_jobs) - int(diploma_jobs) - int(bachelors_jobs) - int(masters_jobs) - int(phd_jobs),
+	}
+
+	//for unapproved jobs
+
+	var total_unapproved_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Count(&total_unapproved_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting total employer unapproved jobs!")
+	}
+
+	var unapproved_diploma_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("education_level = ?", "Diploma").Count(&unapproved_diploma_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting unapproved diploma jobs!")
+	}
+
+	var unapproved_bachelors_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("education_level = ?", "Bachelor's Degree").Count(&unapproved_bachelors_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting unapproved bachelors jobs!")
+	}
+
+	var unapproved_masters_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("education_level = ?", "Master's Degree").Count(&unapproved_masters_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting unapproved masters jobs!")
+	}
+
+	var unapproved_phd_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("education_level = ?", "PhD").Count(&unapproved_phd_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting phd jobs!")
+	}
+
+	unapprovedjob_education_level_analytics := model.JobEducationLevelAnalytics{
+		Diploma:         int(unapproved_diploma_jobs),
+		BachelorsDegree: int(unapproved_bachelors_jobs),
+		MastersDegree:   int(unapproved_masters_jobs),
+		Phd:             int(unapproved_phd_jobs),
+		Unspecified:     int(total_unapproved_jobs) - int(unapproved_diploma_jobs) - int(unapproved_bachelors_jobs) - int(unapproved_masters_jobs) - int(unapproved_phd_jobs),
+	}
+
+	//for approved jobs
+	var beginner_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("level = ?", "Beginner").Count(&beginner_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting beginner jobs!")
+	}
+
+	var intermediate_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("level = ?", "Intermediate").Count(&intermediate_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting intermediate jobs!")
+	}
+
+	var senior_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("level = ?", "Senior").Count(&senior_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting senior jobs!")
+	}
+
+	job_seniority_level_analytics := model.JobSeniorityLevelAnalytics{
+		Beginner:     int(beginner_jobs),
+		Intermediate: int(intermediate_jobs),
+		Senior:       int(senior_jobs),
+		Unspecified:  int(total_jobs) - int(beginner_jobs) - int(intermediate_jobs) - int(senior_jobs),
+	}
+
+	//for unapproved jobs
+	var unapproved_beginner_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("level = ?", "Beginner").Count(&unapproved_beginner_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting unapproved beginner jobs!")
+	}
+
+	var unapproved_intermediate_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("level = ?", "Intermediate").Count(&unapproved_intermediate_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting unapproved intermediate jobs!")
+	}
+
+	var unapproved_senior_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("level = ?", "Senior").Count(&unapproved_senior_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting unapproved senior jobs!")
+	}
+
+	unapproved_job_seniority_level_analytics := model.JobSeniorityLevelAnalytics{
+		Beginner:     int(unapproved_beginner_jobs),
+		Intermediate: int(unapproved_intermediate_jobs),
+		Senior:       int(unapproved_senior_jobs),
+		Unspecified:  int(total_unapproved_jobs) - int(unapproved_beginner_jobs) - int(unapproved_intermediate_jobs) - int(unapproved_senior_jobs),
+	}
+
+	//for approved jobs
+	var one_to_three_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("experience < ? AND experience >= ?", "3", "1").Count(&one_to_three_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting one to three years of experience jobs!")
+	}
+
+	var three_to_five_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("experience < ? AND experience >= ?", "5", "3").Count(&three_to_five_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting three to five years of experience jobs!")
+	}
+
+	var five_to_seven_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("experience < ? AND experience >= ?", "7", "5").Count(&five_to_seven_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting five to seven years of experience jobs!")
+	}
+
+	var seven_to_nine_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("experience < ? AND experience >= ?", "9", "7").Count(&seven_to_nine_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting seven to nine years of experience jobs!")
+	}
+
+	var nine_and_above_jobs int64
+
+	if err := r.Sql.Db.Model(&model.Job{}).Where("employer_id = ?", obj.ID).Where("experience >= ?", "9").Count(&nine_and_above_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting nine and above years of experience jobs!")
+	}
+
+	job_experience_analytics := model.JobExperienceAnalytics{
+		BelowOne:     int(total_jobs) - int(one_to_three_jobs) - int(three_to_five_jobs) - int(five_to_seven_jobs) - int(seven_to_nine_jobs) - int(nine_and_above_jobs),
+		OneToThree:   int(one_to_three_jobs),
+		ThreeToFive:  int(three_to_five_jobs),
+		FiveToSeven:  int(five_to_seven_jobs),
+		SevenToNine:  int(seven_to_nine_jobs),
+		NineAndAbove: int(nine_and_above_jobs),
+	}
+
+	//for unapproved jobs
+	var unapproved_one_to_three_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("experience < ? AND experience >= ?", "3", "1").Count(&unapproved_one_to_three_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting one to three years of experience unapproved jobs!")
+	}
+
+	var unapproved_three_to_five_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("experience < ? AND experience >= ?", "5", "3").Count(&unapproved_three_to_five_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting three to five years of experience unapproved jobs!")
+	}
+
+	var unapproved_five_to_seven_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("experience < ? AND experience >= ?", "7", "5").Count(&unapproved_five_to_seven_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting five to seven years of experience unapproved jobs!")
+	}
+
+	var unapproved_seven_to_nine_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("experience < ? AND experience >= ?", "9", "7").Count(&unapproved_seven_to_nine_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting seven to nine years of experience unapproved jobs!")
+	}
+
+	var unapproved_nine_and_above_jobs int64
+
+	if err := r.Sql.Db.Model(&model.UnapprovedJob{}).Where("employer_id = ?", obj.ID).Where("experience >= ?", "9").Count(&unapproved_nine_and_above_jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting nine and above years of experience unapproved jobs!")
+	}
+
+	unapproved_job_experience_analytics := model.JobExperienceAnalytics{
+		BelowOne:     int(total_unapproved_jobs) - int(unapproved_one_to_three_jobs) - int(unapproved_three_to_five_jobs) - int(unapproved_five_to_seven_jobs) - int(unapproved_seven_to_nine_jobs) - int(unapproved_nine_and_above_jobs),
+		OneToThree:   int(unapproved_one_to_three_jobs),
+		ThreeToFive:  int(unapproved_three_to_five_jobs),
+		FiveToSeven:  int(unapproved_five_to_seven_jobs),
+		SevenToNine:  int(unapproved_seven_to_nine_jobs),
+		NineAndAbove: int(unapproved_nine_and_above_jobs),
+	}
+
+	//count all applications to employer's jobs
+
+	var jobs []model.Job
+
+	if err := r.Sql.Db.Where("employer_id = ?", obj.ID).Find(&jobs).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("could not access jobs!")
+	}
+
+	var jobIds []int
+
+	for _, job := range jobs {
+		jobIds = append(jobIds, job.ID)
+	}
+
+	var total_applications int64
+
+	if err := r.Sql.Db.Model(&model.Application{}).Where("job_id IN ?", jobIds).Count(&total_applications).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting total applications!")
+	}
+
+	var pending_applications int64
+
+	if err := r.Sql.Db.Model(&model.Application{}).Where("job_id IN ?", jobIds).Where("status = ?", "pending").Count(&pending_applications).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting pending applications!")
+	}
+
+	var accepted_applications int64
+
+	if err := r.Sql.Db.Model(&model.Application{}).Where("job_id IN ?", jobIds).Where("status = ?", "accepted").Count(&accepted_applications).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting accepted applications!")
+	}
+
+	var rejected_applications int64
+
+	if err := r.Sql.Db.Model(&model.Application{}).Where("job_id IN ?", jobIds).Where("status = ?", "rejected").Count(&rejected_applications).Error; err != nil {
+		log.Error().Str("object", "EmployerProfile").Msg(err.Error())
+		return nil, errors.New("error counting rejected applications!")
+	}
+
+	applications_analytics := model.ApplicationAnalytics{
+		Total:    int(total_applications),
+		Pending:  int(pending_applications),
+		Accepted: int(accepted_applications),
+		Rejected: int(rejected_applications),
+	}
+
+	job_approval_analytics := model.JobApprovalAnalytics{
+		UnapprovedJobs: int(total_unapproved_jobs),
+		Approvedjobs:   int(total_jobs),
+	}
+
+	analytics := &model.EmployerAnalytics{
+		ApplicationsStatus:           &applications_analytics,
+		JobsEducationLevel:           &job_education_level_analytics,
+		UnapprovedjobsEducationLevel: &unapprovedjob_education_level_analytics,
+		JobsExperience:               &job_experience_analytics,
+		UnapprovedjobsExperience:     &unapproved_job_experience_analytics,
+		JobsSeniority:                &job_seniority_level_analytics,
+		UnapprovedjobsSeniority:      &unapproved_job_seniority_level_analytics,
+		JobsApproval:                 &job_approval_analytics,
+	}
+
+	return analytics, nil
+
+}
+
 // CreateEmployer is the resolver for the createEmployer field, signs up an employer to the system
 func (r *mutationResolver) CreateEmployer(ctx context.Context, input model.NewEmployer) (*model.UnverifiedEmployer, error) {
 	//check if system is in shutdown mode
