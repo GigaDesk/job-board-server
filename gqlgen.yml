@@ -111,6 +111,8 @@ models:
         resolver: true
       unapprovedJobs:
         resolver: true
+      analytics:
+        resolver: true
   ApplicationProfile:
     fields:
       job:

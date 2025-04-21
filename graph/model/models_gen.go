@@ -394,6 +394,17 @@ type Employer struct {
 	Website     *string                   `json:"Website,omitempty"`
 }
 
+type EmployerAnalytics struct {
+	ApplicationsStatus           *ApplicationAnalytics       `json:"applications_status"`
+	JobsEducationLevel           *JobEducationLevelAnalytics `json:"jobs_education_level"`
+	UnapprovedjobsEducationLevel *JobEducationLevelAnalytics `json:"unapprovedjobs_education_level"`
+	JobsExperience               *JobExperienceAnalytics     `json:"jobs_experience"`
+	UnapprovedjobsExperience     *JobExperienceAnalytics     `json:"unapprovedjobs_experience"`
+	JobsSeniority                *JobSeniorityLevelAnalytics `json:"jobs_seniority"`
+	UnapprovedjobsSeniority      *JobSeniorityLevelAnalytics `json:"unapprovedjobs_seniority"`
+	JobsApproval                 *JobApprovalAnalytics       `json:"jobs_approval"`
+}
+
 // Filter input selection for Employer
 // Can be used f.e.: by queryEmployer
 type EmployerFiltersInput struct {
@@ -449,6 +460,7 @@ type EmployerProfile struct {
 	Website        *string                 `json:"Website,omitempty"`
 	Jobs           []*JobProfile           `json:"jobs,omitempty"`
 	UnapprovedJobs []*UnapprovedJobProfile `json:"unapprovedJobs,omitempty"`
+	Analytics      *EmployerAnalytics      `json:"analytics"`
 }
 
 // Employer result
@@ -537,6 +549,11 @@ type Job struct {
 	Requirements   *string                   `json:"requirements,omitempty"`
 	EmployerID     *int                      `json:"employerID,omitempty"`
 	JobURL         *string                   `json:"jobUrl,omitempty"`
+}
+
+type JobApprovalAnalytics struct {
+	UnapprovedJobs int `json:"unapprovedJobs"`
+	Approvedjobs   int `json:"approvedjobs"`
 }
 
 type JobEducationLevelAnalytics struct {

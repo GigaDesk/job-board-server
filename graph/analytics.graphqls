@@ -32,3 +32,9 @@ type JobSeniorityLevelAnalytics {
   senior: Int!
   unspecified: Int!
 }
+
+#returns an analysis of the approval status of jobs associated with a certain group i.e employer
+type JobApprovalAnalytics {
+  unapprovedJobs: Int!
+  approvedjobs: Int!
+}
