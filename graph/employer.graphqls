@@ -40,6 +40,19 @@ type SendCodeStatus {
   phone_number: String!
   success: Boolean!
 }
+
+#returns an analysis of an employer's activity
+type EmployerAnalytics {
+  applications_status: ApplicationAnalytics!
+  jobs_education_level: JobEducationLevelAnalytics!
+  unapprovedjobs_education_level: JobEducationLevelAnalytics!
+  jobs_experience: JobExperienceAnalytics!
+  unapprovedjobs_experience: JobExperienceAnalytics!
+  jobs_seniority: JobSeniorityLevelAnalytics!
+  unapprovedjobs_seniority: JobSeniorityLevelAnalytics!
+  jobs_approval: JobApprovalAnalytics!
+}
+
 #returns the an employer's profile data
 type EmployerProfile {
   id: Int!
@@ -51,6 +64,7 @@ type EmployerProfile {
   Website: String
   jobs: [JobProfile]
   unapprovedJobs: [UnapprovedJobProfile]
+  analytics: EmployerAnalytics!
 }
 #fields required by an employer to log into the system
 input EmployerLogin {
