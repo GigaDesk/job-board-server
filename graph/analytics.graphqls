@@ -38,3 +38,19 @@ type JobApprovalAnalytics {
   unapprovedJobs: Int!
   approvedjobs: Int!
 }
+
+#returns an analysis of the overall data in the application
+type Analytics {
+  applications_status: ApplicationAnalytics!
+  jobs_education_level: JobEducationLevelAnalytics!
+  unapprovedjobs_education_level: JobEducationLevelAnalytics!
+  jobs_experience: JobExperienceAnalytics!
+  unapprovedjobs_experience: JobExperienceAnalytics!
+  jobs_seniority: JobSeniorityLevelAnalytics!
+  unapprovedjobs_seniority: JobSeniorityLevelAnalytics!
+  jobs_approval: JobApprovalAnalytics!
+}
+
+extend type Query {
+  getAnalytics: Analytics!
+}
