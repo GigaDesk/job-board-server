@@ -129,6 +129,17 @@ type AdminQueryResult struct {
 	TotalCount int      `json:"totalCount"`
 }
 
+type Analytics struct {
+	ApplicationsStatus           *ApplicationAnalytics       `json:"applications_status"`
+	JobsEducationLevel           *JobEducationLevelAnalytics `json:"jobs_education_level"`
+	UnapprovedjobsEducationLevel *JobEducationLevelAnalytics `json:"unapprovedjobs_education_level"`
+	JobsExperience               *JobExperienceAnalytics     `json:"jobs_experience"`
+	UnapprovedjobsExperience     *JobExperienceAnalytics     `json:"unapprovedjobs_experience"`
+	JobsSeniority                *JobSeniorityLevelAnalytics `json:"jobs_seniority"`
+	UnapprovedjobsSeniority      *JobSeniorityLevelAnalytics `json:"unapprovedjobs_seniority"`
+	JobsApproval                 *JobApprovalAnalytics       `json:"jobs_approval"`
+}
+
 type Application struct {
 	ID             int                       `json:"id" gorm:"primaryKey;autoIncrement;"`
 	CreatedAt      time.Time                 `json:"createdAt"`

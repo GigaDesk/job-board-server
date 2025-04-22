@@ -150,6 +150,17 @@ type ComplexityRoot struct {
 		TotalCount func(childComplexity int) int
 	}
 
+	Analytics struct {
+		ApplicationsStatus           func(childComplexity int) int
+		JobsApproval                 func(childComplexity int) int
+		JobsEducationLevel           func(childComplexity int) int
+		JobsExperience               func(childComplexity int) int
+		JobsSeniority                func(childComplexity int) int
+		UnapprovedjobsEducationLevel func(childComplexity int) int
+		UnapprovedjobsExperience     func(childComplexity int) int
+		UnapprovedjobsSeniority      func(childComplexity int) int
+	}
+
 	Application struct {
 		CoverLetterURL func(childComplexity int) int
 		CreatedAt      func(childComplexity int) int
@@ -480,6 +491,7 @@ type ComplexityRoot struct {
 		FindJob                   func(childComplexity int, id int) int
 		FindUnapprovedJob         func(childComplexity int, id int) int
 		GetAdmin                  func(childComplexity int, id int) int
+		GetAnalytics              func(childComplexity int) int
 		GetApplication            func(childComplexity int, id int) int
 		GetDummy                  func(childComplexity int, id *int) int
 		GetDummys                 func(childComplexity int) int
@@ -801,6 +813,7 @@ type QueryResolver interface {
 	GetDummys(ctx context.Context) ([]*model.Dummy, error)
 	GetDummy(ctx context.Context, id *int) (*model.Dummy, error)
 	AdminPhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error)
+	GetAnalytics(ctx context.Context) (*model.Analytics, error)
 	FindApplication(ctx context.Context, id int) (*model.ApplicationProfile, error)
 	EmployeePhoneNumberExists(ctx context.Context, phoneNumber string) (*model.PhoneNumberExists, error)
 	GetEmployeeProfile(ctx context.Context) (*model.EmployeeProfile, error)
@@ -1157,6 +1170,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AdminQueryResult.TotalCount(childComplexity), true
+
+	case "Analytics.applications_status":
+		if e.complexity.Analytics.ApplicationsStatus == nil {
+			break
+		}
+
+		return e.complexity.Analytics.ApplicationsStatus(childComplexity), true
+
+	case "Analytics.jobs_approval":
+		if e.complexity.Analytics.JobsApproval == nil {
+			break
+		}
+
+		return e.complexity.Analytics.JobsApproval(childComplexity), true
+
+	case "Analytics.jobs_education_level":
+		if e.complexity.Analytics.JobsEducationLevel == nil {
+			break
+		}
+
+		return e.complexity.Analytics.JobsEducationLevel(childComplexity), true
+
+	case "Analytics.jobs_experience":
+		if e.complexity.Analytics.JobsExperience == nil {
+			break
+		}
+
+		return e.complexity.Analytics.JobsExperience(childComplexity), true
+
+	case "Analytics.jobs_seniority":
+		if e.complexity.Analytics.JobsSeniority == nil {
+			break
+		}
+
+		return e.complexity.Analytics.JobsSeniority(childComplexity), true
+
+	case "Analytics.unapprovedjobs_education_level":
+		if e.complexity.Analytics.UnapprovedjobsEducationLevel == nil {
+			break
+		}
+
+		return e.complexity.Analytics.UnapprovedjobsEducationLevel(childComplexity), true
+
+	case "Analytics.unapprovedjobs_experience":
+		if e.complexity.Analytics.UnapprovedjobsExperience == nil {
+			break
+		}
+
+		return e.complexity.Analytics.UnapprovedjobsExperience(childComplexity), true
+
+	case "Analytics.unapprovedjobs_seniority":
+		if e.complexity.Analytics.UnapprovedjobsSeniority == nil {
+			break
+		}
+
+		return e.complexity.Analytics.UnapprovedjobsSeniority(childComplexity), true
 
 	case "Application.coverLetterUrl":
 		if e.complexity.Application.CoverLetterURL == nil {
@@ -3199,6 +3268,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetAdmin(childComplexity, args["id"].(int)), true
+
+	case "Query.getAnalytics":
+		if e.complexity.Query.GetAnalytics == nil {
+			break
+		}
+
+		return e.complexity.Query.GetAnalytics(childComplexity), true
 
 	case "Query.getApplication":
 		if e.complexity.Query.GetApplication == nil {
@@ -13256,6 +13332,446 @@ func (ec *executionContext) fieldContext_AdminQueryResult_totalCount(_ context.C
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Analytics_applications_status(ctx context.Context, field graphql.CollectedField, obj *model.Analytics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Analytics_applications_status(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ApplicationsStatus, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.ApplicationAnalytics)
+	fc.Result = res
+	return ec.marshalNApplicationAnalytics2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationAnalytics(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Analytics_applications_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Analytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "total":
+				return ec.fieldContext_ApplicationAnalytics_total(ctx, field)
+			case "accepted":
+				return ec.fieldContext_ApplicationAnalytics_accepted(ctx, field)
+			case "rejected":
+				return ec.fieldContext_ApplicationAnalytics_rejected(ctx, field)
+			case "pending":
+				return ec.fieldContext_ApplicationAnalytics_pending(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ApplicationAnalytics", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Analytics_jobs_education_level(ctx context.Context, field graphql.CollectedField, obj *model.Analytics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Analytics_jobs_education_level(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JobsEducationLevel, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobEducationLevelAnalytics)
+	fc.Result = res
+	return ec.marshalNJobEducationLevelAnalytics2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobEducationLevelAnalytics(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Analytics_jobs_education_level(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Analytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "diploma":
+				return ec.fieldContext_JobEducationLevelAnalytics_diploma(ctx, field)
+			case "bachelors_degree":
+				return ec.fieldContext_JobEducationLevelAnalytics_bachelors_degree(ctx, field)
+			case "masters_degree":
+				return ec.fieldContext_JobEducationLevelAnalytics_masters_degree(ctx, field)
+			case "phd":
+				return ec.fieldContext_JobEducationLevelAnalytics_phd(ctx, field)
+			case "unspecified":
+				return ec.fieldContext_JobEducationLevelAnalytics_unspecified(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobEducationLevelAnalytics", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Analytics_unapprovedjobs_education_level(ctx context.Context, field graphql.CollectedField, obj *model.Analytics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Analytics_unapprovedjobs_education_level(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UnapprovedjobsEducationLevel, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobEducationLevelAnalytics)
+	fc.Result = res
+	return ec.marshalNJobEducationLevelAnalytics2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobEducationLevelAnalytics(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Analytics_unapprovedjobs_education_level(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Analytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "diploma":
+				return ec.fieldContext_JobEducationLevelAnalytics_diploma(ctx, field)
+			case "bachelors_degree":
+				return ec.fieldContext_JobEducationLevelAnalytics_bachelors_degree(ctx, field)
+			case "masters_degree":
+				return ec.fieldContext_JobEducationLevelAnalytics_masters_degree(ctx, field)
+			case "phd":
+				return ec.fieldContext_JobEducationLevelAnalytics_phd(ctx, field)
+			case "unspecified":
+				return ec.fieldContext_JobEducationLevelAnalytics_unspecified(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobEducationLevelAnalytics", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Analytics_jobs_experience(ctx context.Context, field graphql.CollectedField, obj *model.Analytics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Analytics_jobs_experience(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JobsExperience, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobExperienceAnalytics)
+	fc.Result = res
+	return ec.marshalNJobExperienceAnalytics2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobExperienceAnalytics(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Analytics_jobs_experience(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Analytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "below_one":
+				return ec.fieldContext_JobExperienceAnalytics_below_one(ctx, field)
+			case "one_to_three":
+				return ec.fieldContext_JobExperienceAnalytics_one_to_three(ctx, field)
+			case "three_to_five":
+				return ec.fieldContext_JobExperienceAnalytics_three_to_five(ctx, field)
+			case "five_to_seven":
+				return ec.fieldContext_JobExperienceAnalytics_five_to_seven(ctx, field)
+			case "seven_to_nine":
+				return ec.fieldContext_JobExperienceAnalytics_seven_to_nine(ctx, field)
+			case "nine_and_above":
+				return ec.fieldContext_JobExperienceAnalytics_nine_and_above(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobExperienceAnalytics", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Analytics_unapprovedjobs_experience(ctx context.Context, field graphql.CollectedField, obj *model.Analytics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Analytics_unapprovedjobs_experience(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UnapprovedjobsExperience, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobExperienceAnalytics)
+	fc.Result = res
+	return ec.marshalNJobExperienceAnalytics2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobExperienceAnalytics(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Analytics_unapprovedjobs_experience(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Analytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "below_one":
+				return ec.fieldContext_JobExperienceAnalytics_below_one(ctx, field)
+			case "one_to_three":
+				return ec.fieldContext_JobExperienceAnalytics_one_to_three(ctx, field)
+			case "three_to_five":
+				return ec.fieldContext_JobExperienceAnalytics_three_to_five(ctx, field)
+			case "five_to_seven":
+				return ec.fieldContext_JobExperienceAnalytics_five_to_seven(ctx, field)
+			case "seven_to_nine":
+				return ec.fieldContext_JobExperienceAnalytics_seven_to_nine(ctx, field)
+			case "nine_and_above":
+				return ec.fieldContext_JobExperienceAnalytics_nine_and_above(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobExperienceAnalytics", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Analytics_jobs_seniority(ctx context.Context, field graphql.CollectedField, obj *model.Analytics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Analytics_jobs_seniority(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JobsSeniority, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobSeniorityLevelAnalytics)
+	fc.Result = res
+	return ec.marshalNJobSeniorityLevelAnalytics2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobSeniorityLevelAnalytics(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Analytics_jobs_seniority(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Analytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "beginner":
+				return ec.fieldContext_JobSeniorityLevelAnalytics_beginner(ctx, field)
+			case "intermediate":
+				return ec.fieldContext_JobSeniorityLevelAnalytics_intermediate(ctx, field)
+			case "senior":
+				return ec.fieldContext_JobSeniorityLevelAnalytics_senior(ctx, field)
+			case "unspecified":
+				return ec.fieldContext_JobSeniorityLevelAnalytics_unspecified(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobSeniorityLevelAnalytics", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Analytics_unapprovedjobs_seniority(ctx context.Context, field graphql.CollectedField, obj *model.Analytics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Analytics_unapprovedjobs_seniority(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UnapprovedjobsSeniority, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobSeniorityLevelAnalytics)
+	fc.Result = res
+	return ec.marshalNJobSeniorityLevelAnalytics2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobSeniorityLevelAnalytics(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Analytics_unapprovedjobs_seniority(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Analytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "beginner":
+				return ec.fieldContext_JobSeniorityLevelAnalytics_beginner(ctx, field)
+			case "intermediate":
+				return ec.fieldContext_JobSeniorityLevelAnalytics_intermediate(ctx, field)
+			case "senior":
+				return ec.fieldContext_JobSeniorityLevelAnalytics_senior(ctx, field)
+			case "unspecified":
+				return ec.fieldContext_JobSeniorityLevelAnalytics_unspecified(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobSeniorityLevelAnalytics", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Analytics_jobs_approval(ctx context.Context, field graphql.CollectedField, obj *model.Analytics) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Analytics_jobs_approval(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JobsApproval, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.JobApprovalAnalytics)
+	fc.Result = res
+	return ec.marshalNJobApprovalAnalytics2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐJobApprovalAnalytics(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Analytics_jobs_approval(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Analytics",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "unapprovedJobs":
+				return ec.fieldContext_JobApprovalAnalytics_unapprovedJobs(ctx, field)
+			case "approvedjobs":
+				return ec.fieldContext_JobApprovalAnalytics_approvedjobs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JobApprovalAnalytics", field.Name)
 		},
 	}
 	return fc, nil
@@ -25227,6 +25743,68 @@ func (ec *executionContext) fieldContext_Query_adminPhoneNumberExists(ctx contex
 	if fc.Args, err = ec.field_Query_adminPhoneNumberExists_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getAnalytics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getAnalytics(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAnalytics(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Analytics)
+	fc.Result = res
+	return ec.marshalNAnalytics2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAnalytics(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getAnalytics(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "applications_status":
+				return ec.fieldContext_Analytics_applications_status(ctx, field)
+			case "jobs_education_level":
+				return ec.fieldContext_Analytics_jobs_education_level(ctx, field)
+			case "unapprovedjobs_education_level":
+				return ec.fieldContext_Analytics_unapprovedjobs_education_level(ctx, field)
+			case "jobs_experience":
+				return ec.fieldContext_Analytics_jobs_experience(ctx, field)
+			case "unapprovedjobs_experience":
+				return ec.fieldContext_Analytics_unapprovedjobs_experience(ctx, field)
+			case "jobs_seniority":
+				return ec.fieldContext_Analytics_jobs_seniority(ctx, field)
+			case "unapprovedjobs_seniority":
+				return ec.fieldContext_Analytics_unapprovedjobs_seniority(ctx, field)
+			case "jobs_approval":
+				return ec.fieldContext_Analytics_jobs_approval(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Analytics", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -39188,6 +39766,80 @@ func (ec *executionContext) _AdminQueryResult(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var analyticsImplementors = []string{"Analytics"}
+
+func (ec *executionContext) _Analytics(ctx context.Context, sel ast.SelectionSet, obj *model.Analytics) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, analyticsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Analytics")
+		case "applications_status":
+			out.Values[i] = ec._Analytics_applications_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "jobs_education_level":
+			out.Values[i] = ec._Analytics_jobs_education_level(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "unapprovedjobs_education_level":
+			out.Values[i] = ec._Analytics_unapprovedjobs_education_level(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "jobs_experience":
+			out.Values[i] = ec._Analytics_jobs_experience(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "unapprovedjobs_experience":
+			out.Values[i] = ec._Analytics_unapprovedjobs_experience(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "jobs_seniority":
+			out.Values[i] = ec._Analytics_jobs_seniority(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "unapprovedjobs_seniority":
+			out.Values[i] = ec._Analytics_unapprovedjobs_seniority(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "jobs_approval":
+			out.Values[i] = ec._Analytics_jobs_approval(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var applicationImplementors = []string{"Application"}
 
 func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionSet, obj *model.Application) graphql.Marshaler {
@@ -41857,6 +42509,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getAnalytics":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAnalytics(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "findApplication":
 			field := field
 
@@ -44286,6 +44960,20 @@ func (ec *executionContext) marshalNAdminQueryResult2ᚖgithubᚗcomᚋGigaDesk�
 		return graphql.Null
 	}
 	return ec._AdminQueryResult(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNAnalytics2githubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAnalytics(ctx context.Context, sel ast.SelectionSet, v model.Analytics) graphql.Marshaler {
+	return ec._Analytics(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAnalytics2ᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐAnalytics(ctx context.Context, sel ast.SelectionSet, v *model.Analytics) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Analytics(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNApplication2ᚕᚖgithubᚗcomᚋGigaDeskᚋeardrumᚑserverᚋgraphᚋmodelᚐApplicationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Application) graphql.Marshaler {
