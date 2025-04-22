@@ -92,7 +92,6 @@ func (r *employerProfileResolver) UnapprovedJobs(ctx context.Context, obj *model
 
 // Analytics is the resolver for the analytics field.
 func (r *employerProfileResolver) Analytics(ctx context.Context, obj *model.EmployerProfile) (*model.EmployerAnalytics, error) {
-
 	//for approved jobs
 	var total_jobs int64
 
@@ -397,7 +396,6 @@ func (r *employerProfileResolver) Analytics(ctx context.Context, obj *model.Empl
 	}
 
 	return analytics, nil
-
 }
 
 // CreateEmployer is the resolver for the createEmployer field, signs up an employer to the system
